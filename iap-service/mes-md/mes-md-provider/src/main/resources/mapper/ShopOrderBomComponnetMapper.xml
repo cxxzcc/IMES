@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ShopOrderBomComponnetMapper">
+
+    <select id="findListByBomBo" resultType="com.itl.mes.core.api.vo.ShopOrderBomComponnetVo">
+
+    SELECT
+	 mbc.ITEM_ORDER as itemOrder,
+     mi.ITEM as component,
+     mi.BO as componentBo,
+     mo.OPERATION as operation,
+     mo.BO as operationBo,
+	 mbc.QTY as qty,
+	 mbc.COMPONENT_POSITION as componentPosition,
+	 mbc.ITEM_TYPE as itemType,
+	 mbc.VIRTUAL_ITEM as virtualItem,
+	 mbc.ZS_TYPE as zsType
+    FROM
+        m_bom_componnet mbc
+        LEFT JOIN m_item mi on mbc.COMPONENT_BO = mi.BO
+        LEFT JOIN m_operation mo on mbc.OPERATION_BO = mo.BO
+    WHERE
+        mbc.BOM_BO = #{shopOrderBomComponnetQueryDto.bomBo}
+        AND mbc.SITE = #{shopOrderBomComponnetQueryDto.site}
+
+    </select>
+
+    <select id="findListByShopOrderBo" resultType="com.itl.mes.core.api.vo.ShopOrderBomComponnetVo">
+
+        SELECT
+             msobc.BO as bo,
+             msobc.ITEM_ORDER as itemOrder,
+             mi.ITEM as component,
+             mi.BO as componentBo,
+             mo.OPERATION as operation,
+             mo.BO as operationBo,
+             msobc.QTY as qty,
+             msobc.COMPONENT_POSITION as componentPosition,
+             msobc.ITEM_TYPE as itemType,
+             msobc.VIRTUAL_ITEM as virtualItem,
+             msobc.ZS_TYPE as zsType
+        FROM
+            m_shop_order_bom_componnet msobc
+            LEFT JOIN m_item mi on msobc.COMPONENT_BO = mi.BO
+            LEFT JOIN m_operation mo on msobc.OPERATION_BO = mo.BO
+        WHERE
+            msobc.SHOP_ORDER_BO = #{shopOrderBomComponnetQueryDto.shopOrderBo}
+            AND msobc.TYPE = #{shopOrderBomComponnetQueryDto.type}
+            AND msobc.SITE = #{shopOrderBomComponnetQueryDto.site}
+        order by msobc.ITEM_ORDER asc
+    </select>
+    <select id="queryBomByShopOrderBo" resultType="com.itl.mes.core.api.vo.ShopOrderBomComponnetVo">
+        SELECT
+            msobc.BO as bo,
+            msobc.ITEM_ORDER as itemOrder,
+            mi.BO as itemBo,
+            mi.ITEM as component,
+            mi.BO as componentBo,
+            mo.OPERATION as operation,
+            mo.BO as operationBo,
+            msobc.QTY as qty,
+            msobc.COMPONENT_POSITION as componentPosition,
+            msobc.ITEM_TYPE as itemType,
+            msobc.VIRTUAL_ITEM as virtualItem,
+            msobc.ZS_TYPE as zsType
+        FROM
+            m_shop_order_bom_componnet msobc
+                LEFT JOIN m_item mi on msobc.COMPONENT_BO = mi.BO
+                LEFT JOIN m_operation mo on msobc.OPERATION_BO = mo.BO
+        WHERE
+            msobc.SHOP_ORDER_BO = #{shopOrderBo}
+          AND msobc.TYPE = #{type}
+    </select>
+</mapper>

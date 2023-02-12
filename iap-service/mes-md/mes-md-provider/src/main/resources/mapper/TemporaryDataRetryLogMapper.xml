@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.TemporaryDataRetryLogMapper">
+
+    <!-- 分页查询   -->
+    <select id="getPage" resultType="com.itl.mes.core.api.dto.TemporaryDataRetryLogDTO">
+        SELECT
+            d.content,
+            CASE
+                WHEN d.update_time IS NOT NULL THEN
+                    d.update_time
+                ELSE
+                    d.create_time
+                END AS saveTime,
+            d.id AS temporaryDataId,
+            d.type,
+            d.sn,
+            l.retry_count,
+            l.last_result_msg,
+            l.update_user,
+            l.update_time
+        FROM
+            m_temporary_data d
+        INNER JOIN z_sn sn on sn.SN = d.sn
+        LEFT JOIN m_temporary_data_retry_log l ON d.id = l.temporary_data_id
+        <where>
+            sn.site = #{params.site}
+            <if test="params.isRetryFlag != null and params.isRetryFlag eq 'Y'.toString()">
+                and l.id IS NOT NULL
+            </if>
+            <if test="params.isRetryFlag != null and params.isRetryFlag eq 'N'.toString()">
+                and l.id IS NULL
+            </if>
+            <if test="params.sn != null and params.sn != ''">
+                and d.sn like #{params.sn}
+            </if>
+            <if test="params.shopOrder != null and params.shopOrder != ''">
+                and d.content like concat('%', #{params.shopOrder}, '%')
+            </if>
+
+        </where>
+        ORDER BY
+            l.update_time desc,
+            d.create_time desc
+    </select>
+</mapper>

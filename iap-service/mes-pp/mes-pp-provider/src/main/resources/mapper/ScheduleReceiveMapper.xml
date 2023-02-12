@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.pp.provider.mapper.ScheduleReceiveMapper">
+
+    <!--oracle没有isnull(A,B)函数,可以用NVL代替,-->
+    <select id="receiveList" resultType="com.itl.mes.pp.api.dto.schedule.ReceiveRespDTO" databaseId="ms-sql">
+        SELECT
+        a.BO AS bo,
+        c.SHOP_ORDER AS shopOrder,
+        b.SCHEDULE_NO AS scheduleNo,
+        b.PRIORITY AS priority,
+        d.PRODUCT_LINE_DESC AS productionLineName,
+        a.RECEIVE_QTY AS receiveQty,
+        a.SCHEDULE_QTY AS scheduleQty,
+        isnull(station.STATION_DESC, station.STATION_NAME) AS stationName
+        FROM
+        p_schedule_receive a
+        LEFT JOIN p_schedule b ON a.SCHEDULE_BO = b.BO
+        LEFT JOIN m_shop_order c ON a.SHOP_ORDER_BO = c.BO
+        LEFT JOIN m_product_line d ON a.PRODUCTION_LINE_BO = d.BO
+        LEFT JOIN m_station station ON station.BO = a.STATION_BO
+        WHERE
+        a.STATE = '1'
+        AND a.STATION_BO = '0'
+        AND b.SITE = #{site}
+        <if test="scheduleReceive.workShopBo != null and scheduleReceive.workShopBo!=''">
+            AND a.WORK_SHOP_BO = #{scheduleReceive.workShopBo}
+        </if>
+        <if test="scheduleReceive.productionLineBo != null and scheduleReceive.productionLineBo!=''">
+            AND a.PRODUCTION_LINE_BO = #{scheduleReceive.productionLineBo}
+        </if>
+        <if test="scheduleReceive.shopOrderBo != null and scheduleReceive.shopOrderBo!=''">
+            AND a.SHOP_ORDER_BO = #{scheduleReceive.shopOrderBo}
+        </if>
+        <if test="scheduleReceive.scheduleNo != null and scheduleReceive.scheduleNo!=''">
+            AND b.SCHEDULE_NO = #{scheduleReceive.scheduleNo}
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+    <!--oracle没有isnull(A,B)函数,可以用NVL代替,-->
+    <select id="receiveList" resultType="com.itl.mes.pp.api.dto.schedule.ReceiveRespDTO" databaseId="oracle">
+        SELECT
+        a.BO AS bo,
+        c.SHOP_ORDER AS shopOrder,
+        b.SCHEDULE_NO AS scheduleNo,
+        b.PRIORITY AS priority,
+        d.PRODUCT_LINE_DESC AS productionLineName,
+        a.RECEIVE_QTY AS receiveQty,
+        a.SCHEDULE_QTY AS scheduleQty,
+        NVL(station.STATION_DESC, station.STATION_NAME) AS stationName
+        FROM
+        p_schedule_receive a
+        LEFT JOIN p_schedule b ON a.SCHEDULE_BO = b.BO
+        LEFT JOIN m_shop_order c ON a.SHOP_ORDER_BO = c.BO
+        LEFT JOIN m_product_line d ON a.PRODUCTION_LINE_BO = d.BO
+        LEFT JOIN m_station station ON station.BO = a.STATION_BO
+        WHERE
+        a.STATE = '1'
+        AND a.STATION_BO = '0'
+        AND b.SITE = #{site}
+        <if test="scheduleReceive.workShopBo != null and scheduleReceive.workShopBo!=''">
+            AND a.WORK_SHOP_BO = #{scheduleReceive.workShopBo}
+        </if>
+        <if test="scheduleReceive.productionLineBo != null and scheduleReceive.productionLineBo!=''">
+            AND a.PRODUCTION_LINE_BO = #{scheduleReceive.productionLineBo}
+        </if>
+        <if test="scheduleReceive.shopOrderBo != null and scheduleReceive.shopOrderBo!=''">
+            AND a.SHOP_ORDER_BO = #{scheduleReceive.shopOrderBo}
+        </if>
+        <if test="scheduleReceive.scheduleNo != null and scheduleReceive.scheduleNo!=''">
+            AND b.SCHEDULE_NO = #{scheduleReceive.scheduleNo}
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+    <select id="scheduleReceiveList" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleReceiveRespDTO" databaseId="ms-sql">
+	SELECT
+		a.BO AS bo,
+		c.SHOP_ORDER AS shopOrder,
+        c.ORDER_QTY AS orderQty,
+        c.OVERFULFILL_QTY AS overfulfillQty,
+		b.SCHEDULE_NO AS scheduleNo,
+		b.PRIORITY AS priority,
+		d.PRODUCT_LINE_DESC AS productionLineName,
+		a.RECEIVE_QTY AS receiveQty,
+		a.SCHEDULE_QTY AS scheduleQty,
+        isnull(station.STATION_DESC, station.STATION_NAME) AS stationName,
+		e.BOM_DESC AS bom,
+		e.VERSION AS bomVersion,
+		f.ITEM_NAME AS item,
+		f.VERSION AS itemVersion,
+		g.ROUTER as router,
+		g.VERSION as routerVersion
+	FROM
+		p_schedule_receive a
+        LEFT JOIN p_schedule b ON a.SCHEDULE_BO = b.BO
+        LEFT JOIN m_shop_order c ON a.SHOP_ORDER_BO = c.BO
+        LEFT JOIN m_product_line d ON a.PRODUCTION_LINE_BO = d.BO
+	    LEFT JOIN m_station station ON station.PRODUCT_LINE_BO = d.BO
+        LEFT JOIN m_bom e ON b.BOM_BO = e.BO
+        LEFT JOIN m_item f ON b.ITEM_BO = f.BO
+        LEFT JOIN m_router g ON  b.ROUTER_BO = g.BO
+	WHERE
+	    a.STATION_BO = '0'
+        AND b.SITE = #{site}
+        <if test="scheduleReceive.workShopBo != null and scheduleReceive.workShopBo!=''">
+            AND a.WORK_SHOP_BO = #{scheduleReceive.workShopBo}
+        </if>
+        <if test="scheduleReceive.productionLineBo != null and scheduleReceive.productionLineBo!=''">
+            AND a.PRODUCT_LINE_BO = #{scheduleReceive.productionLineBo}
+        </if>
+        <if test="scheduleReceive.shopOrderBo != null and scheduleReceive.shopOrderBo!=''">
+            AND a.SHOP_ORDER_BO = #{scheduleReceive.shopOrderBo}
+        </if>
+        <if test="scheduleReceive.scheduleNo != null and scheduleReceive.scheduleNo!=''">
+            AND b.SCHEDULE_NO = {scheduleReceive.scheduleNo}
+        </if>
+        <if test="scheduleReceive.itemBo != null and scheduleReceive.itemBo!=''">
+            AND a.ITEM_BO = #{scheduleReceive.itemBo}
+        </if>
+        <if test="scheduleReceive.receiveStartDate != null and scheduleReceive.receiveStartDate != null">
+            AND a.RECEIVE_DATE BETWEEN #{scheduleReceive.receiveStartDate} AND #{scheduleReceive.receiveStartDate}
+        </if>
+        <if test="scheduleReceive.isComplete == true">
+            and a.state = '2'
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+    <select id="scheduleReceiveList" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleReceiveRespDTO" databaseId="oracle">
+        SELECT
+        a.BO AS bo,
+        c.SHOP_ORDER AS shopOrder,
+        c.ORDER_QTY AS orderQty,
+        c.OVERFULFILL_QTY AS overfulfillQty,
+        b.SCHEDULE_NO AS scheduleNo,
+        b.PRIORITY AS priority,
+        d.PRODUCT_LINE_DESC AS productionLineName,
+        a.RECEIVE_QTY AS receiveQty,
+        a.SCHEDULE_QTY AS scheduleQty,
+        NVL(station.STATION_DESC, station.STATION_NAME) AS stationName,
+        e.BOM_DESC AS bom,
+        e.VERSION AS bomVersion,
+        f.ITEM_NAME AS item,
+        f.VERSION AS itemVersion,
+        g.ROUTER as router,
+        g.VERSION as routerVersion
+        FROM
+        p_schedule_receive a
+        LEFT JOIN p_schedule b ON a.SCHEDULE_BO = b.BO
+        LEFT JOIN m_shop_order c ON a.SHOP_ORDER_BO = c.BO
+        LEFT JOIN m_product_line d ON a.PRODUCTION_LINE_BO = d.BO
+        LEFT JOIN m_station station ON station.PRODUCT_LINE_BO = d.BO
+        LEFT JOIN m_bom e ON b.BOM_BO = e.BO
+        LEFT JOIN m_item f ON b.ITEM_BO = f.BO
+        LEFT JOIN m_router g ON  b.ROUTER_BO = g.BO
+        WHERE
+        a.STATION_BO = '0'
+        AND b.SITE = #{site}
+        <if test="scheduleReceive.workShopBo != null and scheduleReceive.workShopBo!=''">
+            AND a.WORK_SHOP_BO = #{scheduleReceive.workShopBo}
+        </if>
+        <if test="scheduleReceive.productionLineBo != null and scheduleReceive.productionLineBo!=''">
+            AND a.PRODUCT_LINE_BO = #{scheduleReceive.productionLineBo}
+        </if>
+        <if test="scheduleReceive.shopOrderBo != null and scheduleReceive.shopOrderBo!=''">
+            AND a.SHOP_ORDER_BO = #{scheduleReceive.shopOrderBo}
+        </if>
+        <if test="scheduleReceive.scheduleNo != null and scheduleReceive.scheduleNo!=''">
+            AND b.SCHEDULE_NO = {scheduleReceive.scheduleNo}
+        </if>
+        <if test="scheduleReceive.itemBo != null and scheduleReceive.itemBo!=''">
+            AND a.ITEM_BO = #{scheduleReceive.itemBo}
+        </if>
+        <if test="scheduleReceive.receiveStartDate != null and scheduleReceive.receiveStartDate != null">
+            AND a.RECEIVE_DATE BETWEEN #{scheduleReceive.receiveStartDate} AND #{scheduleReceive.receiveStartDate}
+        </if>
+        <if test="scheduleReceive.isComplete == true">
+            and a.state = '2'
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+</mapper>

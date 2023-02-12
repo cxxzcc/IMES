@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.iap.system.provider.mapper.IapSysResourceHelpMapper">
+
+    <select id="findList" resultType="com.itl.iap.system.api.entity.IapSysResourceHelp" databaseId="ms-sql">
+        SELECT
+            h.ID as id,
+            h.TABLE_NAME as tableName,
+            h.REMARK as remark,
+            h.RESOURCE_ID as resourceId,
+            t.router_path as routerPath,
+            t.resources_name as resourcesName,
+            t.parent_id as parentId
+        FROM
+            iap_sys_resource_help h
+        left join iap_sys_resource_t t on h.RESOURCE_ID = t.id
+
+
+    </select>
+
+    <select id="selectByUrl" resultType="com.itl.iap.system.api.entity.IapSysResourceHelp" databaseId="ms-sql">
+        SELECT
+            h.ID as id,
+            h.TABLE_NAME as tableName,
+            h.REMARK as remark,
+            h.HELP_DOC as helpDoc,
+            h.RESOURCE_ID as resourceId,
+            h.ROUTER_PATH as routerPath
+        FROM
+            iap_sys_resource_help h
+        where
+             h.ROUTER_PATH = #{params.routerPath}
+
+
+
+    </select>
+
+
+
+
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ProcessRouteFitProductionLineMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.itl.mes.core.api.entity.ProcessRouteFitProductionLine">
+        <id column="id" property="id"/>
+        <result column="route_code" property="routeCode"/>
+        <result column="product_line" property="productLine"/>
+        <result column="order_type" property="orderType"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+
+    <select id="getProductLineRoute" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+        route.ROUTER as routeCode,
+        route.ROUTER_NAME as routerName,
+        pl.PRODUCT_LINE as productLine,
+        pl.PRODUCT_LINE_DESC as productLineDesc,
+        fit.id as id,
+        fit.order_type as orderType,
+        fit.create_by as createBy,
+        fit.create_date as createDate
+        from process_route_fit_production_line fit
+        join m_router route on route.ROUTER=fit.route_code
+        join m_product_line pl on pl.PRODUCT_LINE=fit.product_line
+        <where>
+            <if test="map.routeCode!=null and map.routeCode!=''">
+                and route.ROUTER like '%'+#{map.routeCode}+'%'
+            </if>
+            <if test="map.routerName!=null and map.routerName!=''">
+                and route.ROUTER_NAME like '%'+#{map.routerName}+'%'
+            </if>
+            <if test="map.site!=null and map.site!=''">
+                and route.SITE = #{map.site}
+            </if>
+            <if test="map.productLine!=null and map.productLine!=''">
+                and pl.PRODUCT_LINE like '%'+#{map.productLine}+'%'
+            </if>
+            <if test="map.productLineDesc!=null and map.productLineDesc!=''">
+                and pl.PRODUCT_LINE_DESC like '%'+#{map.productLineDesc}+'%'
+            </if>
+            <if test="map.site!=null and map.site!=''">
+                and pl.SITE = #{map.site}
+            </if>
+            <if test="map.orderType!=null and map.orderType!=''">
+                and fit.order_type = #{map.orderType}
+            </if>
+        </where>
+    </select>
+
+</mapper>

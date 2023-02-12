@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    active: dev
+generator:
+  tableExclude:
+    mysql: "AND table_name not like 'gaea_%' AND table_name not like 'ACT_%'"

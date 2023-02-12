@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mom.label.provider.mapper.label.SnTransRecordMapper">
+
+
+    <select id="page" resultType="com.itl.mom.label.api.entity.label.SnTransRecord">
+        SELECT
+            a.*, o.SHOP_ORDER AS currentOrderNo
+        FROM
+            z_sn_trans_record a
+        INNER JOIN z_sn s ON a.sn_bo = s.BO
+        LEFT JOIN label_label_print p ON p.BO = s.LABEL_PRINT_BO
+        LEFT JOIN m_shop_order o ON p.ELEMENT_BO = o.bo
+        <where>
+            a.site = #{params.site}
+            <if test="params.sn != null and params.sn != ''">
+                AND s.SN like #{params.sn}
+            </if>
+        </where>
+        order by trans_date desc
+    </select>
+</mapper>

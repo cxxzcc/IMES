@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.pp.provider.mapper.ScheduleMapper">
+
+    <select id="findList" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleRespDTO">
+        SELECT
+        a.BO as bo,
+        a.SCHEDULE_NO as scheduleNo,
+        a.SCHEDULE_TYPE as scheduleType,
+        a.STATE as state,
+        a.CONTROL_STATE as controlState,
+        a.PRIORITY as priority,
+        b.ITEM_NAME as item,
+        b.VERSION as itemVersion,
+        c.BOM_DESC as bom,
+        c.VERSION as bomVersion,
+        d.ROUTER as router,
+        d.VERSION as routerVersion,
+        g.SHOP_ORDER as shopOrder,
+        a.QUANTITY as quantity
+        FROM
+        p_schedule a
+        LEFT JOIN m_item b ON a.ITEM_BO= b.BO
+        LEFT JOIN m_bom c ON  a.BOM_BO = c.BO
+        LEFT JOIN m_router d ON a.ROUTER_BO = d.BO
+        LEFT JOIN p_schedule_shop_order e ON a.BO = e.SCHEDULE_BO
+        LEFT JOIN m_shop_order g ON e.SHOP_ORDER_BO = g.BO
+        WHERE
+        a.SITE = #{schedule.site}
+        <if test="schedule.scheduleNo != null and schedule.scheduleNo != ''">
+            AND a.SCHEDULE_NO = #{schedule.scheduleNo}
+        </if>
+        <if test="schedule.shopOrderBo != null and schedule.shopOrderBo != ''">
+            AND e.SHOP_ORDER_BO =#{schedule.shopOrderBo}
+        </if>
+        <if test="schedule.itemBo != null and schedule.itemBo != ''">
+            AND a.ITEM_BO = #{schedule.itemBo}
+        </if>
+        <if test="schedule.itemVersion != null and schedule.itemVersion != ''">
+            AND b.VERSION = #{schedule.itemVersion}
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <select id="findTwoList" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleRespTwoDTO">
+        SELECT
+        a.BO AS bo, -- 排程ID
+        a.SCHEDULE_NO AS scheduleNo, -- 排程编号
+        a.ORDER_ID AS orderId, -- 订单ID
+        a.ORDER_NO AS orderNo, -- 订单编号
+        a.ORDER_DESC as orderDesc, --订单描述
+        a.SCHEDULE_TYPE AS scheduleType, -- 排程类型（手动、自动）
+        a.STATE AS state, -- 排程状态(1新建 2下达 3接受)
+        a.CONTROL_STATE AS controlState, -- 控制状态（是否显示或是否删除）
+        a.PRIORITY AS priority, -- 优先级
+        a.QUANTITY AS quantityTotal , -- 总排程数量
+        a.code_rule_type as codeRuleType, -- 排程号编码规则
+        a.SITE as site, -- 工厂号
+        a.CREATE_DATE as createDate, -- 创建时间
+        a.CREATE_USER as createUser, -- 创建用户
+        b.bo as itemBo, -- 物料ID
+        b.item as itemCode, -- 物料编号
+        b.ITEM_NAME AS itemName, -- 物料名称
+        b.VERSION AS itemVersion, -- 物料版本
+        spl.BO as schedulePlineBo, -- 车间BO
+        spl.WORK_SHOP_BO as workShopBo, -- 车间BO
+        spl.WORK_SHOP as workShop, -- 车间编号或名称
+        pl.BO as productionLineBo, -- 产线ID
+        pl.PRODUCT_LINE as productionLineCode, -- 产线编号
+        pl.PRODUCT_LINE_DESC as productionLineDesc, -- 产线描述
+        cs.id as shiftBo, -- 班次ID
+        cs.code as shiftCode, -- 班次编号
+        cs.name as shiftName, -- 班次名称
+        spl.QUANTITY as quantity, -- 产线班次排程数量
+        spl.START_DATE as startDate, -- 产线排程开始时间
+        spl.END_DATE as endDate, -- 产线排程结束时间
+        spl.STATE as taskStateKey, -- 任务状态Key
+        spl.SHOP_ORDER AS shopOrder -- 工单号
+        FROM
+        p_schedule a -- 排程
+        LEFT JOIN p_schedule_production_line spl on a.bo = spl.SCHEDULE_BO -- 排程产线
+        LEFT JOIN m_product_line pl on pl.bo = spl.PRODUCTION_LINE_BO -- 产线信息
+        LEFT JOIN p_class_frequency cs on cs.id = spl.shift_bo -- 班次
+        LEFT JOIN m_item b ON a.ITEM_BO= b.BO -- 物料信息
+        LEFT JOIN p_schedule_shop_order e ON a.BO = e.SCHEDULE_BO -- 排程工单关联表
+        LEFT JOIN m_shop_order g ON e.SHOP_ORDER_BO = g.BO -- 工单信息（下达后）
+        WHERE
+        a.SITE = #{schedule.site}
+        <if test="schedule.bo != null and schedule.bo != ''">
+            AND a.BO = #{schedule.bo}
+        </if>
+        <if test="schedule.schedulePlineBo != null and schedule.schedulePlineBo != ''">
+            AND spl.BO = #{schedule.schedulePlineBo}
+        </if>
+        <if test="schedule.scheduleNo != null and schedule.scheduleNo != ''">
+            AND a.SCHEDULE_NO like #{schedule.scheduleNo}
+        </if>
+        <if test="schedule.orderId != null and schedule.orderId != ''">
+            AND a.ORDER_ID = #{schedule.orderId}
+        </if>
+        <if test="schedule.orderNo != null and schedule.orderNo != ''">
+            AND a.ORDER_NO like #{schedule.orderNo}
+        </if>
+        <if test="schedule.scheduleType != null and schedule.scheduleType != ''">
+            AND a.SCHEDULE_TYPE =#{schedule.scheduleType}
+        </if>
+        <if test="schedule.state != null and schedule.state != ''">
+            AND a.state =#{schedule.state}
+        </if>
+        <if test="schedule.controlState != null and schedule.controlState != ''">
+            AND a.CONTROL_STATE = #{schedule.controlState}
+        </if>
+        <if test="schedule.priority != null and schedule.priority != ''">
+            AND a.priority = #{schedule.priority}
+        </if>
+        <if test="schedule.quantityTotal != null and schedule.quantityTotal != ''">
+            AND a.QUANTITY = #{schedule.quantityTotal}
+        </if>
+        <if test="schedule.itemBo != null and schedule.itemBo != ''">
+            AND b.bo = #{schedule.itemBo}
+        </if>
+        <if test="schedule.itemCode != null and schedule.itemCode != ''">
+            AND b.item like #{schedule.itemCode}
+        </if>
+        <if test="schedule.itemName != null and schedule.itemName != ''">
+            -- AND b.item_name LIKE '${schedule.itemName}%'
+            AND b.item_name LIKE #{schedule.itemName}
+        </if>
+        <if test="schedule.itemVersion != null and schedule.itemVersion != ''">
+            AND b.VERSION = #{schedule.itemVersion}
+        </if>
+        <if test="schedule.workShopBo != null and schedule.workShopBo != ''">
+            AND spl.WORK_SHOP_BO = #{schedule.workShopBo}
+        </if>
+        <if test="schedule.workShop != null and schedule.workShop != ''">
+            AND spl.WORK_SHOP like #{schedule.workShop}
+        </if>
+        <if test="schedule.productionLineBo != null and schedule.productionLineBo != ''">
+            AND pl.bo = #{schedule.productionLineBo}
+        </if>
+        <if test="schedule.productionLineCode != null and schedule.productionLineCode != ''">
+            AND pl.PRODUCT_LINE like #{schedule.productionLineCode}
+        </if>
+        <if test="schedule.productionLineDesc != null and schedule.productionLineDesc != ''">
+            AND pl.PRODUCT_LINE_DESC LIKE #{schedule.productionLineDesc}
+        </if>
+        <if test="schedule.shiftBo != null and schedule.shiftBo != ''">
+            AND cs.id = #{schedule.shiftBo}
+        </if>
+        <if test="schedule.shiftCode != null and schedule.shiftCode != ''">
+            AND cs.code = #{schedule.shiftCode}
+        </if>
+        <if test="schedule.shiftName != null and schedule.shiftName != ''">
+            AND cs.name = #{schedule.shiftName}
+        </if>
+        <if test="schedule.quantity != null and schedule.quantity != ''">
+            AND spl.quantity = #{schedule.quantity}
+        </if>
+        <if test="schedule.taskStateKey != null and schedule.taskStateKey != ''">
+            AND spl.STATE  = #{schedule.taskStateKey}
+        </if>
+        <if test="schedule.shopOrder != null and schedule.shopOrder != ''">
+            AND spl.SHOP_ORDER like #{schedule.shopOrder}
+        </if>
+        <if test="schedule.startDateBegin != null  and schedule.startDateFinish != null ">
+            and  spl.START_DATE <![CDATA[   >=  ]]>  #{schedule.startDateBegin} and  spl.START_DATE  <![CDATA[   <=  ]]>  #{schedule.startDateFinish}
+        </if>
+        <if test="schedule.startDateBegin != null  and schedule.startDateFinish == null ">
+            and  spl.START_DATE <![CDATA[   >=  ]]>  #{schedule.startDateBegin}
+        </if>
+        <if test="schedule.startDateBegin == null  and schedule.startDateFinish != null ">
+            and  spl.START_DATE  <![CDATA[   <=  ]]>  #{schedule.startDateFinish}
+        </if>
+        <if test="schedule.endDateBegin != null  and schedule.endDateFinish != null ">
+            and  spl.END_DATE <![CDATA[   >=  ]]>  #{schedule.endDateBegin} and  spl.END_DATE  <![CDATA[   <=  ]]>  #{schedule.endDateFinish}
+        </if>
+        <if test="schedule.endDateBegin != null  and schedule.endDateFinish == null ">
+            and  spl.END_DATE <![CDATA[   >=  ]]>  #{schedule.endDateBegin}
+        </if>
+        <if test="schedule.endDateBegin == null  and schedule.endDateFinish != null ">
+            and  spl.END_DATE  <![CDATA[   <=  ]]>  #{schedule.endDateFinish}
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <select id="findTwoPage" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleRespTwoDTO">
+        SELECT
+        a.BO AS bo, -- 排程ID
+        a.SCHEDULE_NO AS scheduleNo, -- 排程编号
+        a.ORDER_ID AS orderId, -- 订单ID
+        a.ORDER_NO AS orderNo, -- 订单编号
+        a.ORDER_DESC as orderDesc, --订单描述
+        a.SCHEDULE_TYPE AS scheduleType, -- 排程类型（手动、自动）
+        a.STATE AS state, -- 排程状态(1新建 2下达 3接受)
+        a.CONTROL_STATE AS controlState, -- 控制状态（是否显示或是否删除）
+        a.PRIORITY AS priority, -- 优先级
+        a.QUANTITY AS quantityTotal , -- 总排程数量
+        a.code_rule_type as codeRuleType, -- 排程号编码规则
+        a.SITE as site, -- 工厂号
+        a.CREATE_DATE as createDate, -- 创建时间
+        a.CREATE_USER as createUser, -- 创建用户
+        b.bo as itemBo, -- 物料ID
+        b.item as itemCode, -- 物料编号
+        b.ITEM_NAME AS itemName, -- 物料名称
+        b.VERSION AS itemVersion, -- 物料版本
+        spl.BO as schedulePlineBo, -- 车间BO
+        spl.WORK_SHOP_BO as workShopBo, -- 车间BO
+        spl.WORK_SHOP as workShop, -- 车间编号或名称
+        pl.BO as productionLineBo, -- 产线ID
+        pl.PRODUCT_LINE as productionLineCode, -- 产线编号
+        pl.PRODUCT_LINE_DESC as productionLineDesc, -- 产线描述
+        cs.id as shiftBo, -- 班次ID
+        cs.code as shiftCode, -- 班次编号
+        cs.name as shiftName, -- 班次名称
+        spl.QUANTITY as quantity, -- 产线班次排程数量
+        spl.START_DATE as startDate, -- 产线排程开始时间
+        spl.END_DATE as endDate, -- 产线排程结束时间
+        spl.STATE as taskStateKey, -- 任务状态Key
+        spl.SHOP_ORDER AS shopOrder -- 工单号
+        FROM
+        p_schedule a -- 排程
+        LEFT JOIN p_schedule_production_line spl on a.bo = spl.SCHEDULE_BO -- 排程产线
+        LEFT JOIN m_product_line pl on pl.bo = spl.PRODUCTION_LINE_BO -- 产线信息
+        LEFT JOIN p_class_frequency cs on cs.id = spl.shift_bo -- 班次
+        LEFT JOIN m_item b ON a.ITEM_BO= b.BO -- 物料信息
+        LEFT JOIN p_schedule_shop_order e ON a.BO = e.SCHEDULE_BO -- 排程工单关联表
+        LEFT JOIN m_shop_order g ON e.SHOP_ORDER_BO = g.BO -- 工单信息（下达后）
+        WHERE
+        a.SITE = #{params.site}
+        <if test="params.bo != null and params.bo != ''">
+            AND a.BO = #{params.bo}
+        </if>
+        <if test="params.schedulePlineBo != null and params.schedulePlineBo != ''">
+            AND spl.BO = #{params.schedulePlineBo}
+        </if>
+        <if test="params.scheduleNo != null and params.scheduleNo != ''">
+            AND a.SCHEDULE_NO like #{params.scheduleNo}
+        </if>
+        <if test="params.orderId != null and params.orderId != ''">
+            AND a.ORDER_ID = #{params.orderId}
+        </if>
+        <if test="params.orderNo != null and params.orderNo != ''">
+            AND a.ORDER_NO like #{params.orderNo}
+        </if>
+        <if test="params.scheduleType != null and params.scheduleType != ''">
+            AND a.SCHEDULE_TYPE =#{params.scheduleType}
+        </if>
+        <if test="params.state != null and params.state != ''">
+            AND a.state =#{params.state}
+        </if>
+        <if test="params.controlState != null and params.controlState != ''">
+            AND a.CONTROL_STATE = #{params.controlState}
+        </if>
+        <if test="params.priority != null and params.priority != ''">
+            AND a.priority = #{params.priority}
+        </if>
+        <if test="params.quantityTotal != null and params.quantityTotal != ''">
+            AND a.QUANTITY = #{params.quantityTotal}
+        </if>
+        <if test="params.itemBo != null and params.itemBo != ''">
+            AND b.bo = #{params.itemBo}
+        </if>
+        <if test="params.itemCode != null and params.itemCode != ''">
+            AND b.item like #{params.itemCode}
+        </if>
+        <if test="params.itemName != null and params.itemName != ''">
+            -- AND b.item_name LIKE '${schedule.itemName}%'
+            AND b.item_name LIKE #{params.itemName}
+        </if>
+        <if test="params.itemVersion != null and params.itemVersion != ''">
+            AND b.VERSION = #{params.itemVersion}
+        </if>
+        <if test="params.workShopBo != null and params.workShopBo != ''">
+            AND spl.WORK_SHOP_BO = #{params.workShopBo}
+        </if>
+        <if test="params.workShop != null and params.workShop != ''">
+            AND spl.WORK_SHOP = #{params.workShop}
+        </if>
+        <if test="params.productionLineBo != null and params.productionLineBo != ''">
+            AND pl.bo = #{params.productionLineBo}
+        </if>
+        <if test="params.productionLineCode != null and params.productionLineCode != ''">
+            AND pl.PRODUCT_LINE = #{params.productionLineCode}
+        </if>
+        <if test="params.productionLineDesc != null and params.productionLineDesc != ''">
+            AND pl.PRODUCT_LINE_DESC LIKE '${params.productionLineDesc}%'
+        </if>
+        <if test="params.shiftBo != null and params.shiftBo != ''">
+            AND cs.id = #{params.shiftBo}
+        </if>
+        <if test="params.shiftCode != null and params.shiftCode != ''">
+            AND cs.code = #{params.shiftCode}
+        </if>
+        <if test="params.shiftName != null and params.shiftName != ''">
+            AND cs.name = #{params.shiftName}
+        </if>
+        <if test="params.quantity != null and params.quantity != ''">
+            AND spl.quantity = #{params.quantity}
+        </if>
+        <if test="params.taskStateKey != null and params.taskStateKey != ''">
+            AND spl.STATE  = #{params.taskStateKey}
+        </if>
+        <if test="params.shopOrder != null and params.shopOrder != ''">
+            AND spl.SHOP_ORDER like #{params.shopOrder}
+        </if>
+        <if test="params.startDateBegin != null  and params.startDateFinish != null ">
+            and  spl.START_DATE <![CDATA[   >=  ]]>  #{params.startDateBegin} and  spl.START_DATE  <![CDATA[   <=  ]]>  #{params.startDateFinish}
+        </if>
+        <if test="params.startDateBegin != null  and params.startDateFinish == null ">
+            and  spl.START_DATE <![CDATA[   >=  ]]>  #{params.startDateBegin}
+        </if>
+        <if test="params.startDateBegin == null  and params.startDateFinish != null ">
+            and  spl.START_DATE  <![CDATA[   <=  ]]>  #{schedule.startDateFinish}
+        </if>
+        <if test="params.endDateBegin != null  and params.endDateFinish != null ">
+            and  spl.END_DATE <![CDATA[   >=  ]]>  #{params.endDateBegin} and  spl.END_DATE  <![CDATA[   <=  ]]>  #{params.endDateFinish}
+        </if>
+        <if test="params.endDateBegin != null  and params.endDateFinish == null ">
+            and  spl.END_DATE <![CDATA[   >=  ]]>  #{params.endDateBegin}
+        </if>
+        <if test="params.endDateBegin == null  and params.endDateFinish != null ">
+            and  spl.END_DATE  <![CDATA[   <=  ]]>  #{params.endDateFinish}
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <select id="findTwoById" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleSaveTwoDTO">
+        SELECT
+            a.BO AS bo, -- 排程ID
+            a.SCHEDULE_NO AS scheduleNo, -- 排程编号
+            a.ORDER_ID AS orderId, -- 订单ID
+            a.ORDER_NO AS orderNo, -- 订单编号
+            a.ORDER_DESC as orderDesc, --订单描述
+            a.ITEM_BO as itemBo, -- 物料ID
+            a.SCHEDULE_TYPE AS scheduleType, -- 排程类型（手动、自动）
+            a.STATE AS state, -- 排程状态(1新建 2下达 3接受)
+            a.CONTROL_STATE AS controlState, -- 控制状态（是否显示或是否删除）
+            a.PRIORITY AS priority, -- 优先级
+            a.QUANTITY AS quantity , -- 排程数量
+            a.CODE_RULE_TYPE AS codeRuleType, -- 排程号编码规则
+            a.SITE as site, -- 工厂号
+            a.START_DATE as startDate, -- 排程开始时间
+            a.END_DATE as endDate, -- 排程结束时间
+            a.CREATE_DATE as createDate, -- 创建时间
+            a.CREATE_USER as createUser, -- 创建用户
+            b.item as itemCode, -- 物料编号
+            b.ITEM_NAME AS itemName, -- 物料名称
+            b.VERSION AS itemVersion, -- 物料版本
+            spl.BO as schedulePlineBo -- 排程产线BO
+        FROM
+            p_schedule a -- 排程
+                LEFT JOIN p_schedule_production_line spl on a.bo = spl.SCHEDULE_BO -- 排程产线
+                LEFT JOIN m_product_line pl on pl.bo = spl.PRODUCTION_LINE_BO -- 产线信息
+                LEFT JOIN m_item b ON a.ITEM_BO= b.BO -- 物料信息
+                LEFT JOIN p_schedule_shop_order e ON a.BO = e.SCHEDULE_BO -- 排程工单关联表
+                LEFT JOIN m_shop_order g ON e.SHOP_ORDER_BO = g.BO -- 工单信息（下达后）
+        WHERE
+            spl.bo = #{schedulePlineBo}
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <select id="queryTwoById" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleRespTwoDTO">
+        SELECT
+        a.BO AS bo, -- 排程ID
+        a.SCHEDULE_NO AS scheduleNo, -- 排程编号
+        a.ORDER_ID AS orderId, -- 订单ID
+        a.ORDER_NO AS orderNo, -- 订单编号
+        a.ITEM_BO as itemBo, -- 物料ID
+        a.SCHEDULE_TYPE AS scheduleType, -- 排程类型（手动、自动）
+        a.STATE AS state, -- 排程状态(1新建 2下达 3接受)
+        a.CONTROL_STATE AS controlState, -- 控制状态（是否显示或是否删除）
+        a.PRIORITY AS priority, -- 优先级
+        a.QUANTITY AS quantityTotal , -- 总排程数量
+        a.CODE_RULE_TYPE AS codeRuleType, -- 排程号编码规则
+        a.SITE as site, -- 工厂号
+        a.CREATE_DATE as createDate, -- 创建时间
+        a.CREATE_USER as createUser, -- 创建用户
+        b.item as itemCode, -- 物料编号
+        b.ITEM_NAME AS itemName, -- 物料名称
+        b.VERSION AS itemVersion, -- 物料版本
+        spl.WORK_SHOP_BO as workShopBo, -- 车间BO
+        spl.WORK_SHOP as workShop, -- 车间编号或名称
+        pl.BO as productionLineBo, -- 产线ID
+        pl.PRODUCT_LINE as productionLineCode, -- 产线编号
+        pl.PRODUCT_LINE_DESC as productionLineDesc, -- 产线描述
+        cs.id as shiftBo, -- 班次ID
+        cs.code as shiftCode, -- 班次编号
+        cs.name as shiftName, -- 班次名称
+        spl.QUANTITY as quantity, -- 产线班次排程数量
+        spl.START_DATE as startDate, -- 产线排程开始时间
+        spl.END_DATE as endDate, -- 产线排程结束时间
+        g.SHOP_ORDER AS shopOrder -- 工单号
+        FROM
+        p_schedule a -- 排程
+        LEFT JOIN p_schedule_production_line spl on a.bo = spl.SCHEDULE_BO -- 排程产线
+        LEFT JOIN m_product_line pl on pl.bo = spl.PRODUCTION_LINE_BO -- 产线信息
+        LEFT JOIN p_class_frequency cs on cs.id = spl.shift_bo -- 班次
+        LEFT JOIN m_item b ON a.ITEM_BO= b.BO -- 物料信息
+        LEFT JOIN p_schedule_shop_order e ON a.BO = e.SCHEDULE_BO -- 排程工单关联表
+        LEFT JOIN m_shop_order g ON e.SHOP_ORDER_BO = g.BO -- 工单信息（下达后）
+        WHERE
+              a.bo = #{bo}
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <select id="findProductionLine" resultType="com.itl.mes.pp.api.dto.schedule.ProductionLineResDTO">
+
+        SELECT
+            bo as productionLineBo,
+            PRODUCT_LINE_DESC as productionLineName,
+            PRODUCT_LINE as productionLine
+        FROM
+            m_product_line
+        WHERE
+            WORK_SHOP_BO = #{workShopBo}
+    </select>
+
+
+    <select id="findProductionLineStation" resultType="com.itl.mes.pp.api.dto.schedule.StationResDTO">
+        SELECT
+            BO as stationBo,
+            STATION as station,
+            STATION_DESC as stationName
+        FROM
+            m_station
+        WHERE
+            PRODUCT_LINE_BO = #{productionLineBo}
+    </select>
+
+    <select id="findById" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleDetailRespDTO">
+        SELECT a.BO            as bo,
+               a.SCHEDULE_NO   as scheduleNo,
+               a.SCHEDULE_TYPE as scheduleType,
+               a.STATE         as state,
+               a.CONTROL_STATE as controlState,
+               a.PRIORITY      as priority,
+               a.ITEM_BO       as itemBo,
+               a.BOM_BO        as bomBo,
+               a.WORKSHOP_BO   as workshopBo,
+               a.ROUTER_BO     as routerBo,
+               e.SHOP_ORDER_BO as shopOrderBo,
+               s.SHOP_ORDER    as shopOrder,
+               a.QUANTITY      as quantity,
+               a.START_DATE    as startDate,
+               a.END_DATE      as endDate
+        FROM p_schedule a
+             LEFT JOIN p_schedule_shop_order e ON a.BO = e.SCHEDULE_BO
+             LEFT JOIN m_shop_order s ON s.BO = e.SHOP_ORDER_BO
+        WHERE a.BO = #{bo}
+    </select>
+
+    <select id="findByIdWithCount" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleDetailRespDTO">
+        SELECT a.BO                         as bo,
+               a.SCHEDULE_NO                as scheduleNo,
+               a.SCHEDULE_TYPE              as scheduleType,
+               a.STATE                      as state,
+               a.CONTROL_STATE              as controlState,
+               a.PRIORITY                   as priority,
+               a.ITEM_BO                    as itemBo,
+               a.BOM_BO                     as bomBo,
+               a.WORKSHOP_BO                as workshopBo,
+               a.ROUTER_BO                  as routerBo,
+               e.SHOP_ORDER_BO              as shopOrderBo,
+               a.QUANTITY                   as quantity,
+               a.START_DATE                 as startDate,
+               a.END_DATE                   as endDate,
+               r.RECEIVE_QTY                as receiveQty
+        FROM p_schedule a
+             LEFT JOIN p_schedule_shop_order e ON a.BO = e.SCHEDULE_BO
+             LEFT JOIN m_shop_order o ON o.BO = e.SHOP_ORDER_BO
+             LEFT JOIN p_schedule_receive r ON a.BO = r.SCHEDULE_BO
+        WHERE
+          a.BO = #{bo}
+          AND r.RECEIVE_QTY is not null
+          AND r.PRODUCTION_LINE_BO = #{productLineBo}
+        ORDER BY receiveQty DESC
+    </select>
+
+
+
+    <select id="getByProductLine" resultType="java.util.Map">
+        SELECT s.BO AS bo, s.SCHEDULE_NO AS scheduleNo, i.ITEM AS item, i.VERSION AS itemVersion
+        FROM p_schedule s
+        LEFT JOIN p_schedule_production_line spl ON s.BO = spl.SCHEDULE_BO
+        LEFT JOIN m_item i ON s.ITEM_BO = i.BO
+        LEFT JOIN m_product_line pl ON pl.BO = spl.PRODUCTION_LINE_BO
+        LEFT JOIN p_schedule_receive sr ON s.BO = sr.SCHEDULE_BO
+        WHERE
+        sr.RECEIVE_QTY is not null
+        AND sr.RECEIVE_QTY != 0
+        AND pl.PRODUCT_LINE = #{query.productLine}
+        AND s.SITE = #{query.site}
+        <if test="query.scheduleNo!= null and query.scheduleNo != ''">
+            and  s.SCHEDULE_NO  LIKE '${query.scheduleNo}%'
+        </if>
+        <if test="query.item != null and query.item != ''">
+            and i.ITEM  LIKE '${query.item}%'
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.SparePartMapper">
+
+    <!-- 分页查询备件   -->
+    <select id="getPage" resultType="com.itl.iap.mes.api.dto.sparepart.SparePartDTO">
+        SELECT
+            spare.ID,
+            spare.SPARE_PART_NO,
+            spare.NAME,
+            spare.SPEC,
+            spare.TYPE,
+            spare.COVER_IMG,
+            spare.INVENTORY_MAX,
+            spare.INVENTORY_MIN,
+            COALESCE(inventory.CURRENT_INVENTORY,0) AS CURRENT_INVENTORY,
+            spare.SUPPLIER,
+            spare.UNIT
+        FROM m_spare_part spare
+        LEFT JOIN (
+                SELECT SPARE_PART_ID,SUM(INVENTORY) AS CURRENT_INVENTORY
+                FROM m_spare_part_inventory
+                WHERE 1=1
+                <if test="params.warehouseId != null and params.warehouseId != ''">
+                    AND WARE_HOUSE_ID = #{params.warehouseId}
+                </if>
+                <if test="params.wareHouseId != null and params.wareHouseId != ''">
+                    AND WARE_HOUSE_ID = #{params.warehouseId}
+                </if>
+                GROUP BY SPARE_PART_ID
+            ) inventory on spare.ID = inventory.SPARE_PART_ID
+        <if test="params.deviceIds != null and params.deviceIds != ''">
+            INNER JOIN m_spare_part_device_mapping mapping ON mapping.SPARE_PART_ID = spare.ID AND mapping.DEVICE_ID = #{params.deviceIds}
+        </if>
+        <where>
+            SITE = #{params.site}
+            <if test="params.warehouseId != null and params.warehouseId != ''">
+                AND inventory.CURRENT_INVENTORY > 0
+            </if>
+            <if test="params.wareHouseId != null and params.wareHouseId != ''">
+                AND inventory.CURRENT_INVENTORY > 0
+            </if>
+            <if test="params.sparePartNo != null and params.sparePartNo != ''">
+                AND spare.SPARE_PART_NO LIKE concat('%', #{params.sparePartNo}, '%')
+            </if>
+            <if test="params.name != null and params.name != ''">
+                AND spare.NAME LIKE concat('%', #{params.name}, '%')
+            </if>
+            <if test="params.type != null and params.type != ''">
+                AND spare.TYPE = #{params.type}
+            </if>
+            <if test="params.supplier != null and params.supplier != ''">
+                AND spare.SUPPLIER = #{params.supplier}
+            </if>
+            <if test="params.searchText != null and params.searchText != ''">
+                AND (spare.NAME LIKE concat('%', #{params.searchText}, '%') OR spare.SPARE_PART_NO LIKE concat('%', #{params.searchText}, '%')
+            </if>
+            <if test="params.storageType != null and params.storageType != ''">
+                <if test="params.storageType == 1">
+                    AND inventory.CURRENT_INVENTORY > spare.INVENTORY_MAX
+                </if>
+                <if test="params.storageType == 0">
+                    AND inventory.CURRENT_INVENTORY &lt; spare.INVENTORY_MIN
+                </if>
+            </if>
+        </where>
+        ORDER By spare.CREATE_TIME DESC
+    </select>
+    <select id="getPageByInventory" resultType="com.itl.iap.mes.api.dto.sparepart.SparePartDTO">
+        SELECT
+        spare.ID,
+        spare.SPARE_PART_NO,
+        spare.NAME,
+        spare.SPEC,
+        spare.TYPE,
+        spare.COVER_IMG,
+        spare.INVENTORY_MAX,
+        spare.INVENTORY_MIN,
+        COALESCE(inventory.INVENTORY,0) AS CURRENT_INVENTORY,
+        spare.SUPPLIER,
+        inventory.WARE_HOUSE_ID,
+        inventory.WARE_HOUSE_NAME,
+        spare.UNIT
+        FROM m_spare_part spare
+        INNER JOIN m_spare_part_inventory inventory on spare.ID = inventory.SPARE_PART_ID
+        <where>
+            SITE = #{params.site}
+            <if test="params.sparePartNo != null and params.sparePartNo != ''">
+                AND spare.SPARE_PART_NO LIKE concat('%', #{params.sparePartNo}, '%')
+            </if>
+            <if test="params.name != null and params.name != ''">
+                AND spare.NAME LIKE concat('%', #{params.name}, '%')
+            </if>
+            <if test="params.type != null and params.type != ''">
+                AND spare.TYPE = #{params.type}
+            </if>
+            <if test="params.searchText != null and params.searchText != ''">
+                AND (
+                    spare.NAME LIKE concat('%', #{params.searchText}, '%')
+                    OR spare.SPARE_PART_NO LIKE concat('%', #{params.searchText}, '%')
+                    OR inventory.WARE_HOUSE_NAME LIKE concat('%', #{params.wareHouseName}, '%')
+                )
+            </if>
+            <if test="params.warehouseId != null and params.warehouseId != ''">
+                AND inventory.WARE_HOUSE_ID = #{params.warehouseId}
+            </if>
+            <if test="params.wareHouseId != null and params.wareHouseId != ''">
+                AND inventory.WARE_HOUSE_ID = #{params.wareHouseId}
+            </if>
+            <if test="params.storageType != null and params.storageType != ''">
+                <if test="params.storageType == 1">
+                    AND inventory.CURRENT_INVENTORY > spare.INVENTORY_MAX
+                </if>
+                <if test="params.storageType == 0">
+                    AND inventory.CURRENT_INVENTORY &lt; spare.INVENTORY_MIN
+                </if>
+            </if>
+        </where>
+        ORDER By spare.CREATE_TIME DESC
+    </select>
+</mapper>

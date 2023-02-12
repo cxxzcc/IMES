@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.SparePartDeviceMappingMapper">
+
+
+    <select id="getDeviceList" resultType="com.itl.iap.mes.api.dto.sparepart.DeviceInfoDTO">
+        SELECT
+            M_DEVICE.BO AS id,
+            M_DEVICE.DEVICE AS device,
+            M_DEVICE.STATE AS statusCode,
+            M_DEVICE.DEVICE_NAME AS deviceName,
+            M_DEVICE.DEVICE_MODEL AS deviceModel,
+            M_PRODUCT_LINE.PRODUCT_LINE AS productLine,
+            dt.DEVICE_TYPE_NAME AS deviceTypeName
+
+        FROM M_DEVICE
+        LEFT JOIN M_PRODUCT_LINE on M_PRODUCT_LINE.BO = M_DEVICE.PRODUCT_LINE_BO
+        LEFT JOIN (
+            SELECT i.DEVICE_BO, STRING_AGG(t.DEVICE_TYPE_NAME, ',') as DEVICE_TYPE_NAME
+            FROM m_device_type_item i
+            INNER JOIN m_device_type t on i.DEVICE_TYPE_BO = t.BO
+            GROUP BY i.DEVICE_BO
+        ) dt on M_DEVICE.BO = dt.DEVICE_BO
+        INNER JOIN m_spare_part_device_mapping mapping on mapping.DEVICE_ID = M_DEVICE.BO
+        WHERE mapping.SPARE_PART_ID=#{sparePartId}
+        ORDER BY M_DEVICE.CREATE_DATE desc
+    </select>
+    <select id="changeRecord" resultType="com.itl.iap.mes.api.dto.sparepart.DeviceChangeRecordDTO">
+        SELECT
+            md.DEVICE AS device,
+            md.DEVICE_NAME AS deviceName,
+            md.DEVICE_MODEL AS deviceModel,
+            record.REFERENCE_ORDER_NO AS referenceOrderNo,
+            record.CREATE_TIME AS changeDate,
+            record.TYPE AS type,
+            detail.OUT_COUNT AS count
+        FROM
+            m_spare_part_storage_record record
+        INNER JOIN m_spare_part_storage_record_detail detail on record.ID = detail.RECORD_ID
+        INNER JOIN m_repair_corrective_maintenance maintenance on maintenance.repairNo = record.REFERENCE_ORDER_NO
+        INNER JOIN m_device md on maintenance.code = md.DEVICE and maintenance.siteId = md.SITE
+        WHERE
+            detail.SPARE_PART_ID = #{sparePartId}
+        ORDER BY
+            record.CREATE_TIME DESC
+    </select>
+</mapper>

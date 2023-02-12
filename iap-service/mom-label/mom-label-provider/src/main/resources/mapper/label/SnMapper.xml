@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mom.label.provider.mapper.label.SnMapper">
+
+
+
+    <select id="findList" resultType="com.itl.mom.label.api.vo.SnVo">
+
+        select
+        a.BO as bo,
+        c.${snQueryDto.queryColumn} as elementCode,
+        a.SN as detailCode,
+        a.LAST_PRINT_USER as lastPrintUser,
+        a.LAST_PRINT_DATE as lastPrintDate,
+        a.PRINT_COUNT as printCount,
+        a.PACKING_QUANTITY as packingQuantity,
+        a.PACKING_MAX_QUANTITY as packingMaxQuantity,
+        a.STATE as state
+        from z_sn a
+        left join label_label_print b on a.LABEL_PRINT_BO = b.BO
+        left join ${snQueryDto.tableName} c on b.ELEMENT_BO = c.BO
+        where
+        b.BO = #{snQueryDto.labelPrintBo}
+        and b.ELEMENT_TYPE = #{snQueryDto.elementType}
+        ORDER BY a.SN
+    </select>
+
+    <select id="findLog" resultType="com.itl.mom.label.api.vo.LabelPrintLogVo">
+        select a.SN as sn,
+        c.${snQueryDto.queryColumn} as elementCode,
+        z.STATE as state,
+        z.PRINT_COUNT as printCount,
+        z.PRINT_USER as printUser,
+        z.PRINT_DATE as printDate,
+        z.PRINTER as printer
+        from ${snQueryDto.tableName} c
+        left join label_label_print b on b.ELEMENT_BO = c.BO
+        left join label_label_print_log z on z.LABEL_PRINT_BO = b.BO
+        left join z_sn a on z.LABEL_PRINT_DETAIL_BO = a.BO
+        <where>
+            <if test="snQueryDto.element!=null and snQueryDto.element!=''">
+                and c.${snQueryDto.queryColumn} = #{snQueryDto.element}
+            </if>
+            <if test="snQueryDto.sn!=null and snQueryDto.sn !=''">
+                and a.SN like  concat(#{snQueryDto.sn},'%')
+            </if>
+            <if test="snQueryDto.state!=null and snQueryDto.state !=''">
+                and a.STATE = #{snQueryDto.state}
+            </if>
+            <if test="snQueryDto.printUser != null and snQueryDto.printUser !=''">
+                and z.PRINT_USER = #{snQueryDto.printUser}
+            </if>
+            <if test="snQueryDto.printDateStart != null and snQueryDto.printDateEnd != null">
+                and z.PRINT_DATE between #{snQueryDto.printDateStart} and #{snQueryDto.printDateEnd}
+            </if>
+            <if test="snQueryDto.printDateStart != null and snQueryDto.printDateEnd == null">
+                and z.PRINT_DATE &gt; #{snQueryDto.printDateStart}
+            </if>
+            <if test="snQueryDto.printDateStart == null and snQueryDto.printDateEnd != null">
+                and z.PRINT_DATE &lt; #{snQueryDto.printDateEnd}
+            </if>
+            <if test="snQueryDto.station != null and snQueryDto.station != ''">
+                and z.station = #{snQueryDto.station}
+            </if>
+            <if test="snQueryDto.typeList != null and snQueryDto.typeList.size() > 0">
+                and z.state in <foreach collection="snQueryDto.typeList" item="item" open="(" separator="," close=")">#{item}</foreach>
+            </if>
+        </where>
+        order by z.PRINT_DATE desc
+    </select>
+    <select id="findProductStatus" resultType="com.itl.mom.label.api.vo.MeProductStatusVo">
+        select * from (
+        select distinct a.SN as sn,
+        p.shop_order as elementCode,
+        a.STATE as state,
+        current_operation as currentOperation,
+        next_operation as nextOperation,
+        current_pl_station as currentPlStation,
+        product_name as productName,
+        current_person as currentPerson,
+        current_d as currentD,
+        done as done,
+        on_line as onLine,
+        hold as hold,
+        p.product_code as item,
+        p.state as snState,
+        p.id
+        from ${snQueryDto.tableName} c
+        left join label_label_print b on b.ELEMENT_BO = c.BO
+        LEFT JOIN z_sn a ON b.BO = a.LABEL_PRINT_BO
+        inner join me_product_status p on a.BO = p.sn_bo
+        <where>
+            a.SITE = #{snQueryDto.site}
+            <if test="snQueryDto.element!=null and snQueryDto.element!=''">
+                and p.SHOP_ORDER like #{snQueryDto.element}
+            </if>
+            <if test="snQueryDto.sn!=null and snQueryDto.sn !=''">
+                and a.SN like #{snQueryDto.sn}
+            </if>
+            <if test="snQueryDto.currentOperation!=null and snQueryDto.currentOperation !=''">
+                and current_operation = #{snQueryDto.currentOperation}
+            </if>
+            <if test="snQueryDto.nextOperation != null and snQueryDto.nextOperation !=''">
+                and next_operation = #{snQueryDto.nextOperation}
+            </if>
+            <if test="snQueryDto.currentPlStation != null and snQueryDto.currentPlStation != ''">
+                and current_pl_station like concat('%',#{snQueryDto.currentPlStation})
+            </if>
+            <if test="snQueryDto.done != null and snQueryDto.done != ''">
+                and done = #{snQueryDto.done}
+            </if>
+            <if test="snQueryDto.onLine != null and snQueryDto.onLine != ''">
+                and on_line = #{snQueryDto.onLine}
+            </if>
+            <if test="snQueryDto.state != null and snQueryDto.state != ''">
+                and p.state = #{snQueryDto.state}
+            </if>
+            <if test="snQueryDto.isHold != null and snQueryDto.isHold != ''">
+                and p.hold = #{snQueryDto.isHold}
+            </if>
+            <if test="snQueryDto.isScrapped != null and snQueryDto.isScrapped == '1'.toString()">
+                and a.state = 'SCRAPPED'
+            </if>
+            <if test="snQueryDto.isScrapped != null and snQueryDto.isScrapped == '0'.toString()">
+                and a.state != 'SCRAPPED'
+            </if >
+        </where>) a
+    </select>
+    <select id="findPackingLabelPrintDetail" resultType="com.itl.mom.label.api.vo.SnVo">
+        select
+            a.BO as bo,
+            c.PACK_NAME as elementCode,
+            a.SN as detailCode,
+            a.LAST_PRINT_USER as lastPrintUser,
+            a.LAST_PRINT_DATE as lastPrintDate,
+            a.PRINT_COUNT as printCount,
+            a.PACKING_QUANTITY as packingQuantity,
+            a.PACKING_MAX_QUANTITY as packingMaxQuantity,
+            a.STATE as state
+        from z_sn a
+                 left join label_label_print b on a.LABEL_PRINT_BO = b.BO
+                 left join ${snQueryDto.tableName} c on b.ELEMENT_BO = c.BO
+        where
+            b.BO = #{snQueryDto.labelPrintBo}
+          and b.ELEMENT_TYPE = #{snQueryDto.elementType}
+        ORDER BY a.SN
+    </select>
+
+    <select id="getItemInfoAndSnStateBySn" resultType="java.util.Map" databaseId="oracle">
+        select m_item.BO        as  "itemBo",
+               m_item.ITEM      as  "item",
+               m_item.ITEM_NAME as  "itemName",
+               z_sn.STATE       as  "snState"
+        from z_sn,
+             label_label_print  llp,
+             m_shop_order  mso,
+             m_item,
+            me_product_status p
+        where z_sn.SN = #{sn} and p.state = 1
+            and p.sn_bo = z_sn.bo
+          and z_sn.LABEL_PRINT_BO = llp.BO
+          and llp.ELEMENT_BO = mso.BO
+          and m_item.BO = mso.ITEM_BO
+    </select>
+
+    <select id="getById" resultType="String">
+        select PROCESS_INFO
+        from m_order_router_process a
+                     left join m_shop_order b on a.ROUTER_BO = b.ROUTER_BO
+        where b.BO = #{id};
+    </select>
+    <select id="getItemInfoAndSnStateBySn" resultType="java.util.Map" databaseId="ms-sql">
+        select m_item.BO        as itemBo,
+               m_item.ITEM      as item,
+               m_item.ITEM_NAME as itemName,
+               z_sn.STATE       as snState
+        from z_sn,
+             label_label_print  llp,
+             m_shop_order  mso,
+             m_item,
+            me_product_status p
+        where z_sn.SN = #{sn} and p.state = 1
+            and p.sn_bo = z_sn.bo
+          and z_sn.LABEL_PRINT_BO = llp.BO
+          and llp.ELEMENT_BO = mso.BO
+          and m_item.BO = mso.ITEM_BO
+    </select>
+
+    <select id="queryOrderBoList" resultType="java.lang.String">
+        SELECT
+            distinct a.BO AS bo
+        FROM
+            z_sn a
+            LEFT JOIN label_label_print b ON a.LABEL_PRINT_BO = b.BO
+            LEFT JOIN m_shop_order c ON b.ELEMENT_BO = c.BO
+            left join me_product_status mps ON a.bo= mps.sn_bo
+        WHERE c.bo = #{orderBo}
+        AND b.ELEMENT_TYPE = 'SHOP_ORDER'
+        <choose>
+            <when test="onLine != null and onLine == 1">
+                and mps.on_line = #{onLine}
+            </when>
+            <otherwise>
+                and (mps.on_line = #{onLine} or mps.on_line is null)
+                and (mps.state = 1 or mps.state is null)
+            </otherwise>
+        </choose>
+        ORDER BY a.BO
+    </select>
+
+</mapper>

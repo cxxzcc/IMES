@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.OperationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.itl.mes.core.api.entity.Operation">
+        <id column="BO" property="bo" />
+        <result column="SITE" property="site" />
+        <result column="OPERATION" property="operation" />
+        <result column="VERSION" property="version" />
+        <result column="OPERATION_NAME" property="operationName" />
+        <result column="PRODUCTION_LINE_BO" property="productionLineBo" />
+        <result column="OPERATION_DESC" property="operationDesc" />
+        <result column="STATE" property="state" />
+        <result column="IS_CURRENT_VERSION" property="isCurrentVersion" />
+        <result column="OPERATION_TYPE" property="operationType" />
+        <result column="MAX_TIMES" property="maxTimes" />
+        <result column="REPEAT_TEST_TIMES" property="repeatTestTimes" />
+        <result column="DEFAULT_NC_CODE_BO" property="defaultNcCodeBo" />
+        <result column="NC_GROUP_BO" property="ncGroupBo" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="CREATE_USER" property="createUser" />
+        <result column="MODIFY_DATE" property="modifyDate" />
+        <result column="MODIFY_USER" property="modifyUser" />
+        <result column="DEFAULT_STATION_BO" property="defaultStationBo" />
+        <result column="STATION_TYPE_BO" property="stationTypeBo" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        BO, SITE, OPERATION, VERSION, OPERATION_NAME, PRODUCTION_LINE_BO, OPERATION_DESC, STATE, IS_CURRENT_VERSION, OPERATION_TYPE, MAX_TIMES, REPEAT_TEST_TIMES, DEFAULT_NC_CODE_BO, NC_GROUP_BO, CREATE_DATE, CREATE_USER, MODIFY_DATE, MODIFY_USER, DEFAULT_STATION_BO, STATION_TYPE_BO
+    </sql>
+
+    <!--获取当前版本工序，返回字段包含：OPERATION：工序，OPERATION_DESC：工序描述
+     参数：site 工厂-->
+    <select id="selectCurrentVersionOperations" resultType="java.util.Map">
+        SELECT OPERATION,OPERATION_DESC FROM M_OPERATION
+        WHERE SITE=#{site} AND IS_CURRENT_VERSION='Y'
+    </select>
+
+    <select id="updateOperationVersionType" resultType="java.lang.Integer" parameterType="string">
+        UPDATE M_OPERATION SET IS_CURRENT_VERSION = 'N' WHERE IS_CURRENT_VERSION = 'Y'  AND
+        OPERATION = #{operation} AND SITE = #{site}
+    </select>
+
+       <select id="selectTop" resultType="com.itl.mes.core.api.entity.Operation" databaseId="ms-sql">
+        SELECT TOP 500 BO, SITE, OPERATION, VERSION, OPERATION_NAME, PRODUCTION_LINE_BO, OPERATION_DESC, STATE, IS_CURRENT_VERSION, OPERATION_TYPE, MAX_TIMES, REPEAT_TEST_TIMES, DEFAULT_NC_CODE_BO, NC_GROUP_BO, CREATE_DATE, CREATE_USER, MODIFY_DATE, MODIFY_USER, DEFAULT_STATION_BO, STATION_TYPE_BO
+        FROM m_operation WHERE SITE = #{site}
+    </select>
+
+    <select id="selectTop" resultType="com.itl.mes.core.api.entity.Operation" databaseId="oracle">
+        SELECT   BO, SITE, OPERATION, VERSION, OPERATION_NAME, PRODUCTION_LINE_BO, OPERATION_DESC, STATE, IS_CURRENT_VERSION, OPERATION_TYPE, MAX_TIMES, REPEAT_TEST_TIMES, DEFAULT_NC_CODE_BO, NC_GROUP_BO, CREATE_DATE, CREATE_USER, MODIFY_DATE, MODIFY_USER, DEFAULT_STATION_BO, STATION_TYPE_BO
+        FROM m_operation WHERE SITE = #{site} AND ROWNUM <![CDATA[ <= ]]> 500
+    </select>
+</mapper>

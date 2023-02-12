@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.QualitativeInspectionMapper">
+
+    <select id="findProductInspectionItemsByOperationBo" resultType="com.itl.mes.me.api.dto.MeProductInspectionItemsOrderDto">
+        SELECT
+            mpiio.*
+        FROM
+            m_shop_order mso
+        RIGHT JOIN me_product_inspection_items_order mpiio ON mso.BO = mpiio.orderbo
+        INNER JOIN label_label_print lp ON lp.ELEMENT_BO = mso.BO
+        LEFT JOIN z_sn sn ON sn.LABEL_PRINT_BO = lp.BO
+        WHERE
+            sn.BO = #{sn}
+          AND mso.site = #{site}
+          AND mpiio.operationbo = #{operationBo}
+          AND mpiio.check_mark = #{checkMark}
+    </select>
+</mapper>

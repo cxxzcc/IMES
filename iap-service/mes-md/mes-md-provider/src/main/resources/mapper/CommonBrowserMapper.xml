@@ -1,0 +1,1944 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.CommonBrowserMapper">
+    <!--模糊查询车间数据site,workShop,state,workShopDesc-->
+    <select id="selectPageWorkShop" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT BO,WORK_SHOP,WORK_SHOP_DESC,STATE , MODIFY_DATE FROM M_WORK_SHOP WHERE SITE =#{ params.site }
+        <if test=" params.workShop != null and  params.workShop != '' ">
+            AND WORK_SHOP LIKE '${ params.workShop }%'
+        </if>
+        <if test=" params.state != null and  params.state != '' ">
+            AND STATE LIKE '${ params.state }%'
+        </if>
+        <if test=" params.workShopDesc != null and  params.workShopDesc != ''  ">
+            AND WORK_SHOP_DESC LIKE '${ params.workShopDesc }%'
+        </if>
+        order by CREATE_DATE desc
+    </select>
+
+    <!--模糊查询车间数据site,workShop,state,workShopDesc-->
+    <select id="selectPageWorkShop" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="oracle">
+        SELECT BO,WORK_SHOP,WORK_SHOP_DESC,STATE ,SUBSTR(to_char(MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23) as
+        MODIFY_DATE FROM M_WORK_SHOP WHERE
+        SITE =#{ params.site }
+        <if test=" params.workShop != null and  params.workShop != '' ">
+            AND WORK_SHOP LIKE '${ params.workShop }%'
+        </if>
+        <if test=" params.state != null and  params.state != '' ">
+            AND STATE LIKE '${ params.state }%'
+        </if>
+        <if test=" params.workShopDesc != null and  params.workShopDesc != ''  ">
+            AND WORK_SHOP_DESC LIKE '${ params.workShopDesc }%'
+        </if>
+        order by CREATE_DATE desc
+    </select>
+
+    <select id="selectPageWorkShopByState" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT BO,WORK_SHOP,WORK_SHOP_DESC,STATE FROM M_WORK_SHOP WHERE SITE =#{ params.site }
+        <if test=" params.workShop != null and  params.workShop != '' ">
+            AND WORK_SHOP LIKE '${ params.workShop }%'
+        </if>
+        AND STATE ='1'
+        <if test=" params.workShopDesc != null and  params.workShopDesc != ''  ">
+            AND WORK_SHOP_DESC LIKE '${ params.workShopDesc }%'
+        </if>
+        order by M_WORK_SHOP.CREATE_DATE desc
+    </select>
+
+    <!--模糊查询工厂数据site,siteDesc,siteType,enableFlag-->
+    <select id="selectPageSite" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT SITE,SITE_DESC,SITE_TYPE,ENABLE_FLAG FROM M_SITE
+        WHERE 1=1
+        <if test=" params.site != null and  params.site != '' ">
+            AND SITE LIKE '${ params.site }%'
+        </if>
+        <if test=" params.siteDesc != null and  params.siteDesc != '' ">
+            AND SITE_DESC LIKE '${ params.siteDesc }%'
+        </if>
+        <if test=" params.siteType != null and  params.siteType != ''  ">
+            AND SITE_TYPE LIKE '${ params.siteType }%'
+        </if>
+        <if test=" params.enableFlag != null and  params.enableFlag != ''  ">
+            AND ENABLE_FLAG LIKE '${ params.enableFlag }%'
+        </if>
+    </select>
+
+    <select id="selectPageSiteByState" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT SITE,SITE_DESC,SITE_TYPE,ENABLE_FLAG FROM M_SITE
+        WHERE 1=1
+        <if test=" params.site != null and  params.site != '' ">
+            AND SITE LIKE '${ params.site }%'
+        </if>
+        <if test=" params.siteDesc != null and  params.siteDesc != '' ">
+            AND SITE_DESC LIKE '${ params.siteDesc }%'
+        </if>
+        <if test=" params.siteType != null and  params.siteType != ''  ">
+            AND SITE_TYPE LIKE '${ params.siteType }%'
+        </if>
+        AND ENABLE_FLAG = '1'
+    </select>
+
+    <!--模糊查询供应商 查询条件 vend,vendName-->
+    <select id="selectPageVendor" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT SITE,VEND,VEND_NAME,VEND_DESC,CONTACT,TEL,ADDRESS FROM M_VENDOR
+        WHERE SITE =#{params.site}
+        <if test="params.vend != null and params.vend != '' ">
+            AND VEND LIKE '${ params.vend }%'
+        </if>
+        <if test="params.vendName !=null and params.vendName !='' ">
+            AND VEND_NAME LIKE '${params.vendName}%'
+        </if>
+    </select>
+
+    <!--查询物料清单 bom bomDesc version-->
+    <select id="selectPageBom" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT BO,BOM,BOM_DESC,VERSION,STATE FROM M_BOM WHERE SITE=#{params.site}
+        <if test="params.bom != null and params.bom !='' ">
+            AND BOM LIKE '${params.bom}%'
+        </if>
+        <if test="params.bomDesc != null and params.bomDesc != '' ">
+            AND BOM_DESC LIKE '${params.bomDesc}%'
+        </if>
+        <if test="params.version != null and params.version != '' ">
+            AND VERSION LIKE '${params.version}%'
+        </if>
+        <if test="params.state != null and params.state !='' ">
+            AND STATE = '${params.state}'
+        </if>
+    </select>
+    <select id="selectPageBomForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT M_BOM.BO,
+        M_BOM.BOM,
+        M_BOM.BOM_NAME,
+        M_BOM.BOM_DESC,
+        M_BOM.VERSION,
+        M_BOM.STATE,
+        M_BOM.IS_CURRENT_VERSION,
+        M_BOM.SHOP_ORDER_BO,
+        M_BOM.BOM_TYPE,
+        M_BOM.BOM_STANDARD,
+        M_BOM.ERP_BOM,
+        LEFT(CONVERT(varchar(100), M_BOM.MODIFY_DATE, 121), 23) MODIFY_DATE,
+        M_SHOP_ORDER.SHOP_ORDER
+        FROM M_BOM
+        left join M_SHOP_ORDER on M_SHOP_ORDER.BO = M_BOM.SHOP_ORDER_BO WHERE M_BOM.SITE=#{params.site}
+        <if test="params.bom != null and params.bom !='' ">
+            AND M_BOM.BOM LIKE '${params.bom}%'
+        </if>
+        <if test="params.bomDesc != null and params.bomDesc != '' ">
+            AND M_BOM.BOM_DESC LIKE '${params.bomDesc}%'
+        </if>
+        <if test="params.version != null and params.version != '' ">
+            AND M_BOM.VERSION LIKE '${params.version}%'
+        </if>
+        <if test="params.state != null and params.state !='' ">
+            AND M_BOM.STATE = '${params.state}'
+        </if>
+        <if test="params.bomType != null and params.bomType !='' ">
+            AND M_BOM.BOM_TYPE = '${params.bomType}'
+        </if>
+        order by M_BOM.CREATE_DATE
+    </select>
+
+    <select id="selectPageBomForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT M_BOM.BO,
+        M_BOM.BOM,
+        M_BOM.BOM_NAME,
+        M_BOM.BOM_DESC,
+        M_BOM.VERSION,
+        M_BOM.STATE,
+        M_BOM.IS_CURRENT_VERSION,
+        M_BOM.SHOP_ORDER_BO,
+        M_BOM.BOM_TYPE,
+        M_BOM.BOM_STANDARD,
+        M_BOM.ERP_BOM,
+        SUBSTR(to_char(M_BOM.MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE,
+        M_SHOP_ORDER.SHOP_ORDER
+        FROM M_BOM
+        left join M_SHOP_ORDER on M_SHOP_ORDER.BO = M_BOM.SHOP_ORDER_BO WHERE M_BOM.SITE=#{params.site}
+        <if test="params.bom != null and params.bom !='' ">
+            AND M_BOM.BOM LIKE '${params.bom}%'
+        </if>
+        <if test="params.bomDesc != null and params.bomDesc != '' ">
+            AND M_BOM.BOM_DESC LIKE '${params.bomDesc}%'
+        </if>
+        <if test="params.version != null and params.version != '' ">
+            AND M_BOM.VERSION LIKE '${params.version}%'
+        </if>
+        <if test="params.state != null and params.state !='' ">
+            AND M_BOM.STATE = '${params.state}'
+        </if>
+        <if test="params.bomType != null and params.bomType !='' ">
+            AND M_BOM.BOM_TYPE = '${params.bomType}'
+        </if>
+        order by M_BOM.CREATE_DATE
+    </select>
+
+    <!--模糊查询物料组数据site,itemGroup,groupName,groupDesc-->
+    <select id="selectPageItemGroup" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT BO,ITEM_GROUP,GROUP_NAME,GROUP_DESC FROM M_ITEM_GROUP
+        WHERE SITE=#{ params.site }
+        <if test=" params.itemGroup != null and  params.itemGroup != '' ">
+            AND ITEM_GROUP LIKE '${ params.itemGroup }%'
+        </if>
+        <if test=" params.groupName != null and  params.groupName != '' ">
+            AND GROUP_NAME LIKE '${ params.groupName }%'
+        </if>
+        <if test=" params.groupDesc != null and  params.groupDesc != ''  ">
+            AND GROUP_DESC LIKE '${ params.groupDesc }%'
+        </if>
+        order by CREATE_DATE DESC
+    </select>
+
+    <!--模糊查询工位信息 station stationName stanameDesc state-->
+    <select id="selectPageStation" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT STATION,STATION_NAME,STATION_DESC,STATE FROM M_STATION WHERE SITE =#{params.site}
+        <if test="params.station != null and params.station !='' ">
+            AND STATION LIKE '${params.station}%'
+        </if>
+        <if test="params.stationDesc != null and params.stationDesc != '' ">
+            AND STATION_DESC LIKE '${params.stationDesc}%'
+        </if>
+    </select>
+    <select id="selectPageStationForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT
+        MS.STATION,
+        MS.STATION_NAME,
+        MS.STATION_DESC,
+        MS.STATE,
+        MS.MODIFY_DATE ,
+        MS.PRODUCT_LINE_BO,
+        MPL.PRODUCT_LINE,
+        MS.OPERATION_BO,
+        MO.OPERATION_NAME
+        FROM
+        M_STATION MS
+        LEFT JOIN M_OPERATION MO ON MS.OPERATION_BO= MO.BO
+        LEFT JOIN M_PRODUCT_LINE MPL ON MS.PRODUCT_LINE_BO= MPL.BO
+        WHERE MS.SITE =#{params.site}
+        <if test="params.station != null and params.station !='' ">
+            AND MS.STATION LIKE '${params.station}%'
+        </if>
+        <if test="params.stationName != null and params.stationName != '' ">
+            AND MS.STATION_NAME LIKE '${params.stationName}%'
+        </if>
+        <if test="params.productLineBo != null and params.productLineBo != '' ">
+            AND MS.PRODUCT_LINE_BO =#{params.productLineBo}
+        </if>
+        <if test="params.operationBo != null and params.operationBo != '' ">
+            AND MS.OPERATION_BO =#{params.operationBo}
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND MS.STATE =#{params.state}
+        </if>
+        order by MS.CREATE_DATE desc
+    </select>
+
+    <select id="selectPageStationForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT
+        MS.STATION,
+        MS.STATION_NAME,
+        MS.STATION_DESC,
+        MS.STATE,
+        SUBSTR(to_char(MS.MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE,
+        MS.PRODUCT_LINE_BO,
+        MPL.PRODUCT_LINE,
+        MS.OPERATION_BO,
+        MO.OPERATION_NAME
+        FROM
+        M_STATION MS
+        LEFT JOIN M_OPERATION MO ON MS.OPERATION_BO= MO.BO
+        LEFT JOIN M_PRODUCT_LINE MPL ON MS.PRODUCT_LINE_BO= MPL.BO
+        WHERE MS.SITE =#{params.site}
+        <if test="params.station != null and params.station !='' ">
+            AND MS.STATION LIKE '${params.station}%'
+        </if>
+        <if test="params.stationName != null and params.stationName != '' ">
+            AND MS.STATION_NAME LIKE '${params.stationName}%'
+        </if>
+        <if test="params.productLineBo != null and params.productLineBo != '' ">
+            AND MS.PRODUCT_LINE_BO =#{params.productLineBo}
+        </if>
+        <if test="params.operationBo != null and params.operationBo != '' ">
+            AND MS.OPERATION_BO =#{params.operationBo}
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND MS.STATE =#{params.state}
+        </if>
+        order by MS.CREATE_DATE desc
+    </select>
+
+    <select id="selectPageStationByState" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT STATION,STATION_NAME,STATION_DESC,STATE FROM M_STATION WHERE SITE =#{params.site}
+        <if test="params.station != null and params.station !='' ">
+            AND STATION LIKE '${params.station}%'
+        </if>
+        <if test="params.stationDesc != null and params.stationDesc != '' ">
+            AND STATION_DESC LIKE '${params.stationDesc}%'
+        </if>
+        AND STATE ='1'
+    </select>
+
+    <!--模糊查询工序信息 operation  operationDesc productLine state isCurrentVersion-->
+    <select id="selectPageOperation" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+        a.BO,
+        a.OPERATION,
+        a.OPERATION_NAME,
+        a.OPERATION_DESC,
+        a.OPERATION_TYPE,
+        a.STATE,
+        b.PRODUCT_LINE,
+        a.VERSION,
+        a.STATION_TYPE_BO
+        FROM
+        M_OPERATION a left join m_product_line b ON a.PRODUCTION_LINE_BO = b.BO
+        WHERE a.SITE=#{params.site}
+        <if test="params.operation != null and params.operation != '' ">
+            AND OPERATION LIKE '%'+#{params.operation}+'%'
+        </if>
+        <if test="params.operationName != null and params.operationName != '' ">
+            AND OPERATION_NAME LIKE '%'+#{params.operationName}+'%'
+        </if>
+        <if test="params.operationDesc != null and params.operationDesc != '' ">
+            AND OPERATION_DESC LIKE '%'+#{params.operationDesc}+'%'
+        </if>
+        <if test="params.productLine != null and params.productLine != '' ">
+            AND PRODUCTION_LINE_BO LIKE '%'+#{params.productLine}+'%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND a.STATE = #{params.state}
+        </if>
+        <if test="params.operationType != null and params.operationType != ''">
+            AND a.STATION_TYPE_BO like '%'+#{params.operationType}+'%'
+        </if>
+        <if test="params.isCurrentVersion != null and params.isCurrentVersion != ''">
+            AND a.IS_CURRENT_VERSION =#{params.isCurrentVersion}
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <!--模糊查询不合格代码弹框 ncCode ncDesc-->
+    <select id="selectPageNcCode" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT * from (
+        SELECT DISTINCT NC.NC_CODE, NC.NC_NAME , NC.NC_DESC ,NC.STATE,
+        NC.NC_TYPE,NC.PRIORITY,NC.SEVERITY,NC.MAX_NC_LIMIT,NC.MODIFY_DATE FROM M_NC_CODE NC LEFT JOIN M_NC_GROUP_MEMBER
+        NGM ON NC.BO = NGM.NC_CODE_BO
+        LEFT JOIN M_NC_GROUP NG ON NGM.NC_GROUP_BO = NG.BO WHERE NC.SITE =#{params.site}
+        <if test="params.ncCode != null and params.ncCode != '' ">
+            AND NC.NC_CODE LIKE '${params.ncCode}%'
+        </if>
+        <if test="params.ncDesc != null and params.ncDesc != '' ">
+            AND NC.NC_DESC LIKE '${params.ncDesc}%'
+        </if>
+        <if test="params.ncGroup != null and params.ncGroup !='' ">
+            AND NG.NC_GROUP = '#{params.ncGroup}'
+        </if>
+        <if test="params.ncType != null and params.ncType !='' ">
+            AND NC.NC_TYPE = '${params.ncType}'
+        </if>
+        <if test="params.state != null and params.state !='' ">
+            AND NC.STATE = '${params.state}'
+        </if>
+        ) a
+    </select>
+
+    <!--模糊查询不合格代码弹框 ncCode ncDesc-->
+    <select id="selectPageNcCode" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT * from (
+        SELECT DISTINCT NC.NC_CODE, NC.NC_NAME , NC.NC_DESC ,NC.STATE,
+        NC.NC_TYPE,NC.PRIORITY,NC.SEVERITY,NC.MAX_NC_LIMIT, SUBSTR(to_char(NC.MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0,
+        23) as MODIFY_DATE FROM M_NC_CODE NC LEFT JOIN M_NC_GROUP_MEMBER
+        NGM ON NC.BO = NGM.NC_CODE_BO
+        LEFT JOIN M_NC_GROUP NG ON NGM.NC_GROUP_BO = NG.BO WHERE NC.SITE =#{params.site}
+        <if test="params.ncCode != null and params.ncCode != '' ">
+            AND NC.NC_CODE LIKE '${params.ncCode}%'
+        </if>
+        <if test="params.ncDesc != null and params.ncDesc != '' ">
+            AND NC.NC_DESC LIKE '${params.ncDesc}%'
+        </if>
+        <if test="params.ncGroup != null and params.ncGroup !='' ">
+            AND NG.NC_GROUP = '#{params.ncGroup}'
+        </if>
+        <if test="params.ncType != null and params.ncType !='' ">
+            AND NC.NC_TYPE = '${params.ncType}'
+        </if>
+        <if test="params.state != null and params.state !='' ">
+            AND NC.STATE = '${params.state}'
+        </if>
+        ) a
+    </select>
+
+
+    <select id="selectPageNcCodeByState" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DISTINCT NC_CODE,NC_DESC
+        FROM M_NC_CODE NC
+        LEFT JOIN M_NC_GROUP_MEMBER NGM ON NC.BO = NGM.NC_CODE_BO
+        LEFT JOIN M_NC_GROUP NG ON NGM.NC_GROUP_BO = NG.BO WHERE NC.SITE =#{params.site}
+        <if test="params.ncCode != null and params.ncCode != '' ">
+            AND NC.NC_CODE LIKE '${params.ncCode}%'
+        </if>
+        <if test="params.ncDesc != null and params.ncDesc != '' ">
+            AND NC.NC_DESC LIKE '${params.ncDesc}%'
+        </if>
+        <if test="params.ncGroup != null and params.ncGroup !='' ">
+            AND NG.NC_GROUP = #{params.ncGroup}
+        </if>
+        AND NC.state='1'
+    </select>
+
+    <select id="selectPageNcCodeByStateByNcGroup" resultType="java.util.Map">
+        select mng.bo AS ncBo, mng.NC_CODE, mng.NC_DESC, mng.NC_NAME
+        from m_nc_code mng
+                 join m_nc_group_member mngm on mng.BO = mngm.NC_CODE_BO
+        where mngm.NC_GROUP_BO = #{bo}
+          and mng.SITE = #{site}
+          and mng.STATE = '1';
+    </select>
+    <!--模糊查询不合格代码组 ncGroup ncGroupDesc-->
+    <select id="selectPageNcGroup" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT NC_GROUP,NC_GROUP_DESC ,MODIFY_DATE ,NC_GROUP_NAME FROM M_NC_GROUP WHERE SITE =#{params.site}
+        <if test="params.ncGroup != null and params.ncGroup != '' ">
+            AND NC_GROUP LIKE '${params.ncGroup}%'
+        </if>
+        <if test="params.ncGroupDesc != null and params.ncGroupDesc != ''">
+            AND NC_GROUP_DESC LIKE '${params.ncGroupDesc}%'
+        </if>
+        order by CREATE_DATE desc
+    </select>
+
+
+    <!--模糊查询不合格代码组 ncGroup ncGroupDesc-->
+    <select id="selectPageNcGroup" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT NC_GROUP,NC_GROUP_DESC ,SUBSTR(to_char(MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23) as
+        MODIFY_DATE,NC_GROUP_NAME FROM M_NC_GROUP
+        WHERE SITE =#{params.site}
+        <if test="params.ncGroup != null and params.ncGroup != '' ">
+            AND NC_GROUP LIKE '${params.ncGroup}%'
+        </if>
+        <if test="params.ncGroupDesc != null and params.ncGroupDesc != ''">
+            AND NC_GROUP_DESC LIKE '${params.ncGroupDesc}%'
+        </if>
+    </select>
+
+    <!--模糊查询工位类型-->
+    <select id="selectPageStationType" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+        STATION_TYPE,
+        STATION_TYPE_DESC,
+        STATION_TYPE_NAME,
+        SITE,
+        CREATE_DATE
+        FROM M_STATION_TYPE
+        WHERE SITE=#{params.site}
+        <if test="params.stationType != null and params.stationType != '' ">
+            AND STATION_TYPE LIKE '${params.stationType}%'
+        </if>
+        <if test="params.stationTypeDesc != null and params.stationTypeDesc != '' ">
+            AND STATION_TYPE_DESC LIKE '${params.stationTypeDesc}%'
+        </if>
+    </select>
+    <!--模糊查询产线数据site,productLine,state,productLineDesc-->
+    <select id="selectPageProductLine" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT BO,PRODUCT_LINE,STATE,PRODUCT_LINE_DESC,WORK_SHOP_BO ,MODIFY_DATE FROM M_PRODUCT_LINE WHERE SITE
+        =#{params.site}
+        <if test="params.productLine != null and params.productLine != '' ">
+            AND PRODUCT_LINE LIKE '${params.productLine}%'
+        </if>
+        <if test="params.state != null and params.state != ''">
+            AND STATE LIKE '${params.state}%'
+        </if>
+        <if test="params.productLineDesc != null and params.productLineDesc != ''">
+            AND PRODUCT_LINE_DESC LIKE '${params.productLineDesc}%'
+        </if>
+        <if test="params.workShop != null and params.workShop != ''">
+            AND WORK_SHOP_BO = #{params.workShop}
+        </if>
+        order by CREATE_DATE desc
+    </select>
+
+    <!--模糊查询产线数据site,productLine,state,productLineDesc-->
+    <select id="selectPageProductLine" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT BO,PRODUCT_LINE,STATE,PRODUCT_LINE_DESC,WORK_SHOP_BO , SUBSTR(to_char(MODIFY_DATE,'yyyy-MM-dd
+        HH24:MI:ss.ff'),0, 23) as MODIFY_DATE FROM
+        M_PRODUCT_LINE WHERE SITE =#{params.site}
+        <if test="params.productLine != null and params.productLine != '' ">
+            AND PRODUCT_LINE LIKE '${params.productLine}%'
+        </if>
+        <if test="params.state != null and params.state != ''">
+            AND STATE LIKE '${params.state}%'
+        </if>
+        <if test="params.productLineDesc != null and params.productLineDesc != ''">
+            AND PRODUCT_LINE_DESC LIKE '${params.productLineDesc}%'
+        </if>
+        <if test="params.workShop != null and params.workShop != ''">
+            AND WORK_SHOP_BO = #{params.workShop}
+        </if>
+        order by CREATE_DATE desc
+    </select>
+
+    <select id="selectPageProductLineByState" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT BO,PRODUCT_LINE,STATE,PRODUCT_LINE_DESC,WORK_SHOP_BO FROM M_PRODUCT_LINE WHERE SITE =#{params.site}
+        <if test="params.productLine != null and params.productLine != '' ">
+            AND PRODUCT_LINE LIKE '${params.productLine}%'
+        </if>
+
+        AND STATE ='1'
+
+        <if test="params.productLineDesc != null and params.productLineDesc != ''">
+            AND PRODUCT_LINE_DESC LIKE '${params.productLineDesc}%'
+        </if>
+        <if test="params.workShop != null and params.workShop != ''">
+            AND WORK_SHOP_BO = #{params.workShop}
+        </if>
+        order by M_PRODUCT_LINE.CREATE_DATE desc
+    </select>
+
+    <!--模糊查询客户 查询条件 customer,customerName,customerDesc-->
+    <select id="selectPageCustomer" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT SITE,CUSTOMER,CUSTOMER_NAME,CUSTOMER_DESC,ADDRESS1 FROM M_CUSTOMER
+        WHERE SITE =#{ params.site }
+        <if test=" params.customer != null and  params.customer != '' ">
+            AND CUSTOMER LIKE '${ params.customer }%'
+        </if>
+        <if test=" params.customerName != null and  params.customerName != '' ">
+            AND CUSTOMER_NAME LIKE '${ params.customerName }%'
+        </if>
+        <if test=" params.customerDesc != null and  params.customerDesc != '' ">
+            AND CUSTOMER_DESC LIKE '${ params.customerDesc }%'
+        </if>
+    </select>
+
+    <!--模糊查询物料信息-->
+    <select id="selectPageItem" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT BO,ITEM,ITEM_NAME,ITEM_DESC,VERSION,ZS_TYPE FROM M_ITEM WHERE SITE = #{params.site}
+        <if test="params.item != null and params.item != '' ">
+            AND ITEM LIKE '${params.item}%'
+        </if>
+        <if test="params.itemName != null and params.itemName != '' ">
+            AND ITEM_NAME LIKE '${params.itemName}%'
+        </if>
+        <if test="params.itemDesc != null and params.itemDesc != '' ">
+            AND ITEM_DESC LIKE '${params.itemDesc}%'
+        </if>
+        <if test="params.version != null and params.version !='' ">
+            AND VERSION LIKE '${params.version}%'
+        </if>
+        <if test="params.itemType != null and params.itemType !='' ">
+            AND ITEM_TYPE = #{params.itemType}
+        </if>
+        order by ITEM asc, VERSION asc
+    </select>
+
+    <!--模糊查询客户订单信息 customer  customerOrder  state-->
+    <select id="selectPageCustomerOrder" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT CUSTOMER,CUSTOMER_ORDER,STATE,PLAN_START_DATE,PLAN_END_DATE FROM M_CUSTOMER_ORDER a left join M_CUSTOMER
+        b ON a.CUSTOMER_BO = b.BO
+        WHERE a.SITE=#{params.site}
+        <if test="params.customer != null and params.customer != '' ">
+            AND CUSTOMER LIKE '${params.customer}%'
+        </if>
+        <if test="params.customerOrder != null and params.customerOrder != '' ">
+            AND CUSTOMER_ORDER LIKE '${params.customerOrder}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE = #{params.state}
+        </if>
+    </select>
+
+    <!--模糊查询客户订单信息 customer  customerOrder  state-->
+    <select id="selectPageCustomerOrder" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT CUSTOMER,CUSTOMER_ORDER,STATE,
+        SUBSTR(to_char(PLAN_START_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as PLAN_START_DATE,
+        SUBSTR(to_char(PLAN_END_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as PLAN_END_DATE FROM
+        M_CUSTOMER_ORDER a left join M_CUSTOMER
+        b ON a.CUSTOMER_BO = b.BO
+        WHERE a.SITE=#{params.site}
+        <if test="params.customer != null and params.customer != '' ">
+            AND CUSTOMER LIKE '${params.customer}%'
+        </if>
+        <if test="params.customerOrder != null and params.customerOrder != '' ">
+            AND CUSTOMER_ORDER LIKE '${params.customerOrder}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE = #{params.state}
+        </if>
+    </select>
+
+    <select id="pageItem" resultType="com.itl.mes.core.api.dto.MboMitemDTO">
+        select
+        a.BO AS bo,
+        a.SITE AS site,
+        a.ITEM AS item,
+        a.VERSION AS version,
+        a.IS_CURRENT_VERSION AS isCurrentVersion,
+        a.ITEM_NAME AS itemName,
+        a.ITEM_DESC AS itemDesc,
+        a.ITEM_UNIT AS itemUnit,
+        <!--        b.BO as uomBo,-->
+        <!--        b.UOM_CODE as uomCode,-->
+        <!--        b.UOM_NAME as uomName,-->
+        a.ITEM_STATE_BO AS itemStateBo,
+        a.ITEM_TYPE AS itemType
+        FROM
+        m_item a
+        <!--        left  join  m_uom b on a.ITEM_UNIT=b.BO-->
+        WHERE 1=1
+        <if test="mboMitemDTO.item != null and mboMitemDTO.item !='' ">
+            and a.ITEM like CONCAT('%',#{mboMitemDTO.item},'%')
+        </if>
+        <if test="mboMitemDTO.itemName != null and mboMitemDTO.itemName != ''">
+            and a.ITEM_NAME like CONCAT('%',#{mboMitemDTO.itemName},'%')
+        </if>
+        <if test="mboMitemDTO.itemDesc != null and mboMitemDTO.itemDesc != ''">
+            and a.ITEM_DESC like CONCAT('%',#{mboMitemDTO.itemDesc},'%')
+        </if>
+        <if test="mboMitemDTO.site != null and mboMitemDTO.site != ''">
+            and a.SITE = #{mboMitemDTO.site}
+        </if>
+        <if test="mboMitemDTO.itemBoList != null and mboMitemDTO.itemBoList.size() > 0">
+            and a.BO in <foreach collection="mboMitemDTO.itemBoList" open="(" separator="," close=")" item="item">#{item}</foreach>
+        </if>
+        order by a.ITEM asc
+
+    </select>
+    <!--模糊查询数据列表 查询条件 dataList,listName-->
+    <select id="selectPageDataList" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DATA_LIST,LIST_NAME,LIST_DESC FROM M_DATA_LIST
+        WHERE 1 = 1
+        <if test=" params.dataList != null and  params.dataList != '' ">
+            AND DATA_LIST LIKE '${ params.dataList }%'
+        </if>
+        <if test=" params.listName != null and  params.listName != '' ">
+            AND LIST_NAME LIKE '${ params.listName }%'
+        </if>
+    </select>
+    <select id="selectPageDataListForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="oracle">
+        SELECT DATA_LIST,LIST_NAME,LIST_DESC,
+        SUBSTR(to_char(MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE
+        FROM M_DATA_LIST
+        WHERE
+        SITE = #{params.site}
+        <if test=" params.dataList != null and  params.dataList != '' ">
+            AND DATA_LIST LIKE '${ params.dataList }%'
+        </if>
+        <if test=" params.listName != null and  params.listName != '' ">
+            AND LIST_NAME LIKE '${ params.listName }%'
+        </if>
+
+        order by CREATE_DATE desc
+    </select>
+
+    <select id="selectPageDataListForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="ms-sql">
+        SELECT DATA_LIST,LIST_NAME,LIST_DESC,LEFT(CONVERT(varchar(100), M_DATA_LIST.MODIFY_DATE, 121), 23) MODIFY_DATE
+        FROM M_DATA_LIST
+        WHERE
+        SITE = #{params.site}
+        <if test=" params.dataList != null and  params.dataList != '' ">
+            AND DATA_LIST LIKE '${ params.dataList }%'
+        </if>
+        <if test=" params.listName != null and  params.listName != '' ">
+            AND LIST_NAME LIKE '${ params.listName }%'
+        </if>
+        order by CREATE_DATE
+    </select>
+    <!--模糊查询数据收集组信息 dcGroup  dcName state-->
+    <select id="selectPageDcGroup" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DC_GROUP,DC_NAME,DC_DESC,STATE FROM M_DC_GROUP
+        WHERE SITE=#{params.site}
+        <if test="params.dcGroup != null and params.dcGroup != '' ">
+            AND DC_GROUP LIKE '${params.dcGroup}%'
+        </if>
+        <if test="params.dcName != null and params.dcName != '' ">
+            AND DC_NAME LIKE '${params.dcName}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE =#{params.state}
+        </if>
+    </select>
+    <!--模糊查询作业指导书弹出框-->
+    <select id="selectPageInstructor" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT INSTRUCTOR,INSTRUCTOR_NAME,INSTRUCTOR_DESC,STATE,VERSION FROM M_INSTRUCTOR WHERE SITE =#{params.site}
+        <if test="params.instructor !=null and params.instructor != '' ">
+            AND INSTRUCTOR LIKE '${params.instructor}%'
+        </if>
+        <if test="params.instructorName != null and params.instructorName != '' ">
+            AND INSTRUCTOR_NAME LIKE '${params.instructorName}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE LIKE '${params.state}%'
+        </if>
+    </select>
+
+    <!-- 模糊查询工单数据 site,shopOrder,item,startDate,endDate-->
+    <select id="selectPageShopOrder" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="ms-sql">
+        SELECT
+        MSO.BO,MSO.SHOP_ORDER,MSO.ORDER_DESC,MSO.ORDER_QTY,MSO.Label_QTY,MSO.OVERFULFILL_QTY,MSO.ITEM_BO,MIT.ITEM,MIT.ITEM_DESC,MIT.VERSION
+        AS ITEM_VERSION,dbo.SPLIT(MSO.STATE_BO,1)
+        STATE,MSO.PLAN_END_DATE,MSO.ROUTER_BO,MR.ROUTER,MR.VERSION AS ROUTER_VERSION,MSO.BOM_BO,MB.BOM,MB.VERSION AS
+        BOM_VERSION,MWS.BO AS WORK_SHOP_BO,
+        MWS.WORK_SHOP
+        FROM M_SHOP_ORDER MSO
+        INNER JOIN M_ITEM MIT ON MSO.ITEM_BO = MIT.BO
+        LEFT JOIN M_ROUTER MR ON MSO.ROUTER_BO = MR.BO
+        LEFT JOIN M_BOM MB ON MSO.BOM_BO = MB.BO
+        LEFT JOIN M_PRODUCT_LINE MPL ON MSO.PRODUCT_LINE_BO= MPL.BO
+        LEFT JOIN M_WORK_SHOP MWS ON MWS.BO = MPL.WORK_SHOP_BO
+        WHERE MSO.SITE=#{params.site}
+        <if test="params.shopOrder !=null and params.shopOrder != '' ">
+            AND MSO.SHOP_ORDER LIKE '${params.shopOrder}%'
+        </if>
+        <if test="params.item != null and params.item != '' ">
+            AND MIT.ITEM LIKE '${params.item}%'
+        </if>
+        <if test="params.startDate != null and params.startDate != '' ">
+            AND MSO.CREATE_DATE >= #{params.startDate}
+        </if>
+        <if test="params.endDate != null and params.endDate != '' ">
+            AND MSO.CREATE_DATE &lt; #{params.endDate}
+        </if>
+        <if test="params.filter">
+            AND dbo.SPLIT(MSO.STATE_BO,1) not in('505','506','507')
+        </if>
+        order by MSO.CREATE_DATE desc
+    </select>
+
+
+    <!-- 模糊查询工单数据 site,shopOrder,item,startDate,endDate-->
+    <select id="selectPageShopOrder" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT
+        MSO.BO,MSO.SHOP_ORDER,MSO.ORDER_DESC,MSO.ORDER_QTY,MSO.Label_QTY,MSO.OVERFULFILL_QTY,MSO.ITEM_BO,MIT.ITEM,MIT.ITEM_DESC,MIT.VERSION
+        AS ITEM_VERSION, SUBSTR(MSO.STATE_BO,INSTR(MSO.STATE_BO, ',')+1) as
+        STATE,
+        SUBSTR(to_char(MSO.PLAN_END_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as PLAN_END_DATE,
+        MSO.ROUTER_BO,MR.ROUTER,MR.VERSION AS
+        ROUTER_VERSION,MSO.BOM_BO,MB.BOM,MB.VERSION AS BOM_VERSION,
+        MWS.BO AS WORK_SHOP_BO,
+        MWS.WORK_SHOP
+        FROM M_SHOP_ORDER MSO
+        INNER JOIN M_ITEM MIT ON MSO.ITEM_BO = MIT.BO
+        LEFT JOIN M_ROUTER MR ON MSO.ROUTER_BO = MR.BO
+        LEFT JOIN M_BOM MB ON MSO.BOM_BO = MB.BO
+        LEFT JOIN M_PRODUCT_LINE MPL ON MSO.PRODUCT_LINE_BO= MPL.BO
+        LEFT JOIN M_WORK_SHOP MWS ON MWS.BO = MPL.WORK_SHOP_BO
+        WHERE MSO.SITE=#{params.site}
+        <if test="params.shopOrder !=null and params.shopOrder != '' ">
+            AND MSO.SHOP_ORDER LIKE '${params.shopOrder}%'
+        </if>
+        <if test="params.item != null and params.item != '' ">
+            AND MIT.ITEM LIKE '${params.item}%'
+        </if>
+        <if test="params.startDate != null and params.startDate != '' ">
+            AND MSO.CREATE_DATE >= #{params.startDate}
+        </if>
+        <if test="params.endDate != null and params.endDate != '' ">
+            AND MSO.CREATE_DATE &lt; #{params.endDate}
+        </if>
+        <if test="params.filter">
+            AND substr(MSO.STATE_BO, -3) not in('505','506','507')
+        </if>
+    </select>
+    <select id="selectPageShopOrderForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="ms-sql">
+        SELECT
+        MSO.BO,
+        MSO.SHOP_ORDER,
+        MSO.PLAN_START_DATE,
+        MSO.PLAN_END_DATE,
+        MSO.OVERFULFILL_QTY,
+        MSO.SCHEDUL_QTY,
+        MSO.COMPLETE_QTY,
+        MSO.ORDER_DESC,
+        MSO.ORDER_QTY,
+        MSO.ROUTER_BO,
+        MSO.MODIFY_DATE,
+        MSO.NEGOTIATION_TIME,
+        MSO.FIXED_TIME,
+        MSO.ORDER_DELIVERY_TIME ,
+        MSO.PRODUCT_LINE_BO,
+        MR.VERSION as ROUTER_VERSION,
+        MR.ROUTER,
+        MIT.ITEM,
+        MIT.ITEM_NAME AS ITEM_NAME,
+        MIT.VERSION AS ITEM_VERSION,
+        MB.BOM,
+        MB.VERSION AS BOM_VERSION,
+        MPL.PRODUCT_LINE,
+        MSO.CUSTOMER_ORDER_BO,
+        MSO.STATE_BO,
+        MSO.SHOP_ORDER_TYPE,
+        MSO.ACTUAL_START_TIME,
+        MSO.ACTUAL_END_TIME,
+        MSO.IS_OVERFULFILL,
+        MSO.RECOVERY_STATUS,
+        MSO.ORDER_BOM_BO,
+        ML.BOM AS ORDER_BOM,
+        ML.VERSION AS ORDER_BOM_VERSION,
+        dbo.SPLIT ( MSO.STATE_BO, 1 ) STATE
+        FROM
+        M_SHOP_ORDER MSO
+        LEFT JOIN M_ITEM MIT ON MSO.ITEM_BO = MIT.BO
+        LEFT JOIN M_BOM MB ON MSO.BOM_BO= MB.BO
+        LEFT JOIN M_BOM ML ON MSO.ORDER_BOM_BO= ML.BO
+        LEFT JOIN M_ROUTER MR ON MSO.ROUTER_BO= MR.BO
+        LEFT JOIN M_PRODUCT_LINE MPL ON MSO.PRODUCT_LINE_BO= MPL.BO
+        WHERE MSO.SITE=#{params.site}
+        <if test="params.shopOrder !=null and params.shopOrder != '' ">
+            AND MSO.SHOP_ORDER LIKE '${params.shopOrder}%'
+        </if>
+        <if test="params.item != null and params.item != '' ">
+            AND MIT.ITEM LIKE '${params.item}%'
+        </if>
+        <if test="params.orderDesc !=null and params.orderDesc != '' ">
+            AND MSO.ORDER_DESC LIKE '${params.orderDesc}%'
+        </if>
+        <if test="params.productLineBo !=null and params.productLineBo != '' ">
+            AND MSO.PRODUCT_LINE_BO =#{params.productLineBo}
+        </if>
+        <if test="params.routerBo !=null and params.routerBo != '' ">
+            AND MSO.ROUTER_BO =#{params.routerBo}
+        </if>
+        <if test="params.stateBo !=null and params.stateBo != '' ">
+            AND MSO.STATE_BO =#{params.stateBo}
+        </if>
+        <if test="params.planStartDateS != null and params.planStartDateS != '' and params.planStartDateE != null and params.planStartDateE != ''">
+            AND MSO.PLAN_START_DATE between #{params.planStartDateS} and #{params.planStartDateE}
+        </if>
+        <if test="params.planEndDateS != null and params.planEndDateS != '' and params.planEndDateE != null and params.planEndDateE != '' ">
+            AND MSO.PLAN_END_DATE between #{params.planEndDateS} and #{params.planEndDateE}
+        </if>
+        order by MSO.CREATE_DATE desc
+    </select>
+
+
+    <select id="selectPageShopOrderForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="oracle">
+        SELECT
+        MSO.BO,
+        MSO.SHOP_ORDER,
+        SUBSTR(to_char(MSO.PLAN_START_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as PLAN_START_DATE,
+        SUBSTR(to_char(MSO.PLAN_END_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as PLAN_END_DATE,
+        MSO.OVERFULFILL_QTY,
+        MSO.SCHEDUL_QTY,
+        MSO.COMPLETE_QTY,
+        MSO.ORDER_DESC,
+        MSO.ORDER_QTY,
+        MSO.ROUTER_BO,
+        SUBSTR(to_char(MSO.MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE,
+        SUBSTR(to_char(MSO.NEGOTIATION_TIME,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as NEGOTIATION_TIME,
+        SUBSTR(to_char(MSO.FIXED_TIME,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as FIXED_TIME,
+        SUBSTR(to_char(MSO.ORDER_DELIVERY_TIME,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as ORDER_DELIVERY_TIME ,
+        MSO.PRODUCT_LINE_BO,
+        MR.VERSION as ROUTER_VERSION,
+        MR.ROUTER,
+        MIT.ITEM,
+        MIT.VERSION AS ITEM_VERSION,
+        MB.BOM,
+        MB.VERSION AS BOM_VERSION,
+        MPL.PRODUCT_LINE,
+        MSO.CUSTOMER_ORDER_BO,
+        MSO.STATE_BO,
+        MSO.SHOP_ORDER_TYPE,
+        MSO.ACTUAL_START_TIME,
+        MSO.ACTUAL_END_TIME,
+        MSO.IS_OVERFULFILL,
+        MSO.RECOVERY_STATUS,
+        MSO.ORDER_BOM_BO,
+        ML.BOM AS ORDER_BOM,
+        ML.VERSION AS ORDER_BOM_VERSION,
+        SUBSTR(MSO.STATE_BO,INSTR(MSO.STATE_BO, ',')+1) as STATE
+        FROM
+        M_SHOP_ORDER MSO
+        LEFT JOIN M_ITEM MIT ON MSO.ITEM_BO = MIT.BO
+        LEFT JOIN M_BOM MB ON MSO.BOM_BO= MB.BO
+        LEFT JOIN M_BOM ML ON MSO.ORDER_BOM_BO= ML.BO
+        LEFT JOIN M_ROUTER MR ON MSO.ROUTER_BO= MR.BO
+        LEFT JOIN M_PRODUCT_LINE MPL ON MSO.PRODUCT_LINE_BO= MPL.BO
+        WHERE MSO.SITE=#{params.site}
+        <if test="params.shopOrder !=null and params.shopOrder != '' ">
+            AND MSO.SHOP_ORDER LIKE '${params.shopOrder}%'
+        </if>
+        <if test="params.item != null and params.item != '' ">
+            AND MIT.ITEM LIKE '${params.item}%'
+        </if>
+        <if test="params.orderDesc !=null and params.orderDesc != '' ">
+            AND MSO.ORDER_DESC LIKE '${params.orderDesc}%'
+        </if>
+        <if test="params.productLineBo !=null and params.productLineBo != '' ">
+            AND MSO.PRODUCT_LINE_BO =#{params.productLineBo}
+        </if>
+        <if test="params.routerBo !=null and params.routerBo != '' ">
+            AND MSO.ROUTER_BO =#{params.routerBo}
+        </if>
+        <if test="params.stateBo !=null and params.stateBo != '' ">
+            AND MSO.STATE_BO =#{params.stateBo}
+        </if>
+        <if test="params.planStartDateS != null and params.planStartDateS != '' and params.planStartDateE != null and params.planStartDateE != ''">
+            AND MSO.PLAN_START_DATE between #{params.planStartDateS} and #{params.planStartDateE}
+        </if>
+        <if test="params.planEndDateS != null and params.planEndDateS != '' and params.planEndDateE != null and params.planEndDateE != '' ">
+            AND MSO.PLAN_END_DATE between #{params.planEndDateS} and #{params.planEndDateE}
+        </if>
+        order by MSO.CREATE_DATE desc
+    </select>
+
+
+    <!-- 模糊查询工单数据Two site,shopOrder,item,startDate,endDate-->
+    <select id="selectPageShopOrderTwo" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="ms-sql">
+        SELECT
+        MSO.BO as shopOrderBo, --工单BO
+        MSO.SHOP_ORDER as shopOrder, --工单编号
+        MSO.PLAN_START_DATE as planStartDate, --工单开始时间
+        MSO.PLAN_END_DATE as planEndDate, --工单结束时间
+        MSO.OVERFULFILL_QTY as overfulfillQty, --超产数量
+        MSO.SCHEDUL_QTY as scheduleQty, --工单排程数量
+        MSO.COMPLETE_QTY as completeQty, --完工数量completeQty
+        MSO.ERP_ORDER_BO as erpOrderBo, --ERP生产订单BO
+        MSO.ERP_ORDER_CODE as erpOrderCode, --ERP生产订单编号
+        MSO.ERP_ORDER_DESC as erpOrderDesc, --ERP生产订单描述
+        PS.SCHEDULE_NO as scheduleNo, --排程编号
+        MSO.ORDER_DESC as orderDesc, --订单描述
+        MSO.ORDER_QTY as orderQty, --订单数量
+        MSO.ROUTER_BO as routerBo, --工艺路线BO
+        MR.ROUTER as router, --工艺路线编号
+        MR.VERSION as routerVersion, --工艺路线版本
+        MSO.MODIFY_DATE as modifyDate, --修改时间
+        MSO.MODIFY_USER as modifyUser, --修改用户
+        MSO.NEGOTIATION_TIME as negotiationTime,
+        MSO.FIXED_TIME as fixedTime,
+        MSO.ORDER_DELIVERY_TIME as orderDeliveryTime, --订单交付时间
+        MIT.ITEM as itemCode, --物料编码
+        MIT.ITEM_NAME AS itemName, --物料名称
+        MIT.VERSION AS itemVersion, --物料版本
+        MB.BOM as bom, --bom
+        MB.VERSION as bomVersion, --bon版本
+        MWS.BO as workShopBo, --车间BO
+        MWS.WORK_SHOP as workShop, --车间编号
+        MWS.WORK_SHOP_DESC as workShopDesc, --车间描述
+        MSO.PRODUCT_LINE_BO as productLineBo, --产线BO
+        MPL.PRODUCT_LINE as productLine, --产线编号
+        MPL.PRODUCT_LINE_DESC as productLineDesc, --产线描述
+        MSO.SHIFT_BO as shiftBo, --班次BO
+        PCF.CODE AS shiftCode, --班次编号
+        PCF.NAME AS shiftName, --班次名称
+        MSO.CUSTOMER_ORDER_BO as customerOrderBo, --
+        MSO.STATE_BO as stateBo, --工单状态BO
+        MSO.SHOP_ORDER_TYPE as shopOrderType, --工单类型
+        MSO.ACTUAL_START_TIME as actualStartTime, --实际开始时间
+        MSO.ACTUAL_END_TIME as actualEndTime, --实际结束时间
+        MSO.IS_OVERFULFILL as isOverfulfill, --是否允许超产
+        MSO.RECOVERY_STATUS as recoveryStatus, --恢复状态
+        MSO.ORDER_BOM_BO as orderBomBo, --工单BOM_BO
+        ML.BOM AS orderBom, --工单BOM
+        ML.VERSION AS orderBomVersion, --工单BOM版本
+        MSO.CUSTOMER_BO as customerBo, --客户BO
+        MC.CUSTOMER as customer, --客户编号
+        MC.CUSTOMER_NAME as customerName, --客户名称
+        dbo.SPLIT ( MSO.STATE_BO, 1 ) state --状态
+        FROM
+        M_SHOP_ORDER MSO
+        LEFT JOIN M_ITEM MIT ON MSO.ITEM_BO = MIT.BO
+        LEFT JOIN M_BOM MB ON MSO.BOM_BO= MB.BO
+        LEFT JOIN M_BOM ML ON MSO.ORDER_BOM_BO= ML.BO
+        LEFT JOIN M_ROUTER MR ON MSO.ROUTER_BO= MR.BO
+        LEFT JOIN M_PRODUCT_LINE MPL ON MSO.PRODUCT_LINE_BO= MPL.BO
+        LEFT JOIN P_CLASS_FREQUENCY PCF ON MSO.SHIFT_BO = PCF.ID
+        LEFT JOIN M_WORK_SHOP MWS ON MPL.WORK_SHOP_BO = MWS.BO
+        LEFT JOIN M_CUSTOMER MC ON MSO.CUSTOMER_BO = MC.BO
+        LEFT JOIN P_SCHEDULE_PRODUCTION_LINE PSPL ON MSO.SHOP_ORDER = PSPL.SHOP_ORDER
+        LEFT JOIN P_SCHEDULE PS ON PS.BO = PSPL.SCHEDULE_BO
+        WHERE MSO.SITE=#{params.site}
+        <if test="params.shopOrder !=null and params.shopOrder != '' ">
+            AND MSO.SHOP_ORDER LIKE '${params.shopOrder}%'
+        </if>
+        <if test="params.item != null and params.item != '' ">
+            AND MIT.ITEM LIKE '${params.item}%'
+        </if>
+        <if test="params.startDate != null and params.startDate != '' ">
+            AND MSO.CREATE_DATE >= #{params.startDate}
+        </if>
+        <if test="params.endDate != null and params.endDate != '' ">
+            AND MSO.CREATE_DATE &lt; #{params.endDate}
+        </if>
+        <if test="params.filter">
+            AND dbo.SPLIT(MSO.STATE_BO,1) not in('505','506','507')
+        </if>
+        order by MSO.CREATE_DATE desc
+    </select>
+
+    <select id="selectPageShopOrderTwoForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="ms-sql">
+        SELECT
+        MSO.BO as shopOrderBo, --工单BO
+        MSO.SHOP_ORDER as shopOrder, --工单编号
+        MSO.PLAN_START_DATE as planStartDate, --工单开始时间
+        MSO.PLAN_END_DATE as planEndDate, --工单结束时间
+        MSO.OVERFULFILL_QTY as overfulfillQty, --超产数量
+        MSO.SCHEDUL_QTY as scheduleQty, --工单排程数量
+        MSO.COMPLETE_QTY as completeQty, --完工数量completeQty
+        MSO.ERP_ORDER_BO as erpOrderBo, --ERP生产订单BO
+        MSO.ERP_ORDER_CODE as erpOrderCode, --ERP生产订单编号
+        MSO.ERP_ORDER_DESC as erpOrderDesc, --ERP生产订单描述
+        PS.SCHEDULE_NO as scheduleNo, --排程编号
+        MSO.ORDER_QTY as orderQty, --订单数量
+        MSO.ROUTER_BO as routerBo, --工艺路线BO
+        MR.ROUTER as router, --工艺路线编号
+        MR.VERSION as routerVersion, --工艺路线版本
+        MSO.MODIFY_DATE as modifyDate, --修改时间
+        MSO.MODIFY_USER as modifyUser, --修改用户
+        MSO.NEGOTIATION_TIME as negotiationTime,
+        MSO.FIXED_TIME as fixedTime,
+        MSO.ORDER_DELIVERY_TIME as orderDeliveryTime, --订单交付时间
+        MIT.ITEM as itemCode, --物料编码
+        MIT.ITEM_NAME AS itemName, --物料名称
+        MIT.VERSION AS itemVersion, --物料版本
+        MB.BOM as bom, --bom
+        MB.VERSION as bomVersion, --bon版本
+        MWS.BO as workShopBo, --车间BO
+        MWS.WORK_SHOP as workShop, --车间编号
+        MWS.WORK_SHOP_DESC as workShopDesc, --车间描述
+        MSO.PRODUCT_LINE_BO as productLineBo, --产线BO
+        MPL.PRODUCT_LINE as productLine, --产线编号
+        MPL.PRODUCT_LINE_DESC as productLineDesc, --产线描述
+        MSO.SHIFT_BO as shiftBo, --班次BO
+        PCF.CODE AS shiftCode, --班次编号
+        PCF.NAME AS shiftName, --班次名称
+        MSO.CUSTOMER_ORDER_BO as customerOrderBo, --
+        MSO.STATE_BO as stateBo, --工单状态BO
+        MSO.SHOP_ORDER_TYPE as shopOrderType, --工单类型
+        MSO.ACTUAL_START_TIME as actualStartTime, --实际开始时间
+        MSO.ACTUAL_END_TIME as actualEndTime, --实际结束时间
+        MSO.IS_OVERFULFILL as isOverfulfill, --是否允许超产
+        MSO.RECOVERY_STATUS as recoveryStatus, --恢复状态
+        MSO.ORDER_BOM_BO as orderBomBo, --工单BOM_BO
+        ML.BOM AS orderBom, --工单BOM
+        ML.VERSION AS orderBomVersion, --工单BOM版本
+        MSO.CUSTOMER_BO as customerBo, --客户BO
+        MC.CUSTOMER as customer, --客户编号
+        MC.CUSTOMER_NAME as customerName, --客户名称
+        dbo.SPLIT ( MSO.STATE_BO, 1 ) state --状态
+        FROM
+        M_SHOP_ORDER MSO
+        LEFT JOIN M_ITEM MIT ON MSO.ITEM_BO = MIT.BO
+        LEFT JOIN M_BOM MB ON MSO.BOM_BO= MB.BO
+        LEFT JOIN M_BOM ML ON MSO.ORDER_BOM_BO= ML.BO
+        LEFT JOIN M_ROUTER MR ON MSO.ROUTER_BO= MR.BO
+        LEFT JOIN M_PRODUCT_LINE MPL ON MSO.PRODUCT_LINE_BO= MPL.BO
+        LEFT JOIN P_CLASS_FREQUENCY PCF ON MSO.SHIFT_BO = PCF.ID
+        LEFT JOIN M_WORK_SHOP MWS ON MPL.WORK_SHOP_BO = MWS.BO
+        LEFT JOIN M_CUSTOMER MC ON MSO.CUSTOMER_BO = MC.BO
+        LEFT JOIN P_SCHEDULE_PRODUCTION_LINE PSPL ON MSO.SHOP_ORDER = PSPL.SHOP_ORDER
+        LEFT JOIN P_SCHEDULE PS ON PS.BO = PSPL.SCHEDULE_BO
+        WHERE MSO.SITE=#{params.site}
+        <if test="params.shopOrder !=null and params.shopOrder != '' ">
+            AND MSO.SHOP_ORDER LIKE #{params.shopOrder}
+        </if>
+        <if test="params.shopOrderType !=null and params.shopOrderType != '' ">
+            AND MSO.SHOP_ORDER_TYPE =#{params.shopOrderType}
+        </if>
+        <if test="params.itemCode != null and params.itemCode != '' ">
+            AND MIT.ITEM LIKE #{params.itemCode}
+        </if>
+        <if test="params.itemName != null and params.itemName != '' ">
+            AND MIT.ITEM_NAME LIKE #{params.itemName}
+        </if>
+        <if test="params.scheduleNo !=null and params.scheduleNo != '' ">
+            AND PS.SCHEDULE_NO LIKE #{params.scheduleNo}
+        </if>
+        <if test="params.erpOrderBo !=null and params.erpOrderBo != '' ">
+            AND MSO.ERP_ORDER_BO =#{params.erpOrderBo}
+        </if>
+        <if test="params.erpOrderCode !=null and params.erpOrderCode != '' ">
+            AND MSO.ERP_ORDER_CODE LIKE #{params.erpOrderCode}
+        </if>
+        <if test="params.erpOrderDesc !=null and params.erpOrderDesc != '' ">
+            AND MSO.ERP_ORDER_DESC LIKE #{params.erpOrderDesc}
+        </if>
+        <if test="params.customerBo !=null and params.customerBo != '' ">
+            AND MSO.CUSTOMER_BO =#{params.customerBo}
+        </if>
+        <if test="params.customer !=null and params.customer != '' ">
+            AND MC.CUSTOMER LIKE #{params.customer}
+        </if>
+        <if test="params.customerName !=null and params.customerName != '' ">
+            AND MC.CUSTOMER_NAME LIKE #{params.customerName}
+        </if>
+        <if test="params.workShopBo !=null and params.workShopBo != '' ">
+            AND MWS.BO = #{params.workShopBo}
+        </if>
+        <if test="params.workShop !=null and params.workShop != '' ">
+            AND MWS.WORK_SHOP like #{params.workShop}
+        </if>
+        <if test="params.workShopDesc !=null and params.workShopDesc != '' ">
+            AND MWS.WORK_SHOP_DESC like #{params.workShopDesc}
+        </if>
+        <if test="params.productLineBo !=null and params.productLineBo != '' ">
+            AND MSO.PRODUCT_LINE_BO = #{params.productLineBo}
+        </if>
+        <if test="params.productLineCode !=null and params.productLineCode != '' ">
+            AND MPL.PRODUCT_LINE like #{params.productLineCode}
+        </if>
+        <if test="params.productLineDesc !=null and params.productLineDesc != '' ">
+            AND MPL.PRODUCT_LINE_DESC like #{params.productLineDesc}
+        </if>
+        <if test="params.shiftBo !=null and params.shiftBo != '' ">
+            AND MSO.SHIFT_BO =#{params.shiftBo}
+        </if>
+        <if test="params.shiftCode !=null and params.shiftCode != '' ">
+            AND PCF.CODE like #{params.shiftCode}
+        </if>
+        <if test="params.shiftName !=null and params.shiftName != '' ">
+            AND PCF.NAME like #{params.shiftName}
+        </if>
+        <if test="params.routerBo !=null and params.routerBo != '' ">
+            AND MSO.ROUTER_BO =#{params.routerBo}
+        </if>
+        <if test="params.stateBo !=null and params.stateBo != '' ">
+            AND MSO.STATE_BO =#{params.stateBo}
+        </if>
+        <if test="params.state !=null and params.state != '' ">
+            AND dbo.SPLIT ( MSO.STATE_BO, 1 ) =#{params.state}
+        </if>
+        <if test="params.planStartDateS != null and params.planStartDateS != '' and params.planStartDateE != null and params.planStartDateE != ''">
+            AND MSO.PLAN_START_DATE between #{params.planStartDateS} and #{params.planStartDateE}
+        </if>
+        <if test="params.planEndDateS != null and params.planEndDateS != '' and params.planEndDateE != null and params.planEndDateE != '' ">
+            AND MSO.PLAN_END_DATE between #{params.planEndDateS} and #{params.planEndDateE}
+        </if>
+        order by MSO.CREATE_DATE desc
+    </select>
+
+
+    <!--模糊查询设备信息 device  deviceName -->
+    <select id="selectPageDevice" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT
+        MD.BO,MD.DEVICE,MD.DEVICE_NAME,MD.STATE,MD.DEVICE_MODEL,MD.DEVICE_DESC,MDT.DEVICE_TYPE,MDT.DEVICE_TYPE_NAME,MDT.DEVICE_TYPE_DESC,MD.COVER_IMG
+        FROM M_DEVICE MD
+        LEFT JOIN M_DEVICE_TYPE_ITEM MDTI ON MDTI.DEVICE_BO = MD.BO
+        LEFT JOIN M_DEVICE_TYPE MDT ON MDT.BO = MDTI.DEVICE_TYPE_BO
+        <if test="params.productLineName != null and params.productLineName != ''">
+            LEFT JOIN m_product_line line on MD.PRODUCT_LINE_BO = line.BO AND PRODUCT_LINE like concat('%',
+            #{params.productLineName},'%')
+        </if>
+        WHERE MD.SITE=#{params.site}
+        <if test="params.states != null and params.states.size() > 0">
+            AND MD.STATE in
+            <foreach collection="params.states" item="item" open="(" separator="," close=")">#{item}</foreach>
+        </if>
+        <if test="params.device != null and params.device != '' ">
+            AND MD.DEVICE LIKE concat('%', #{params.device},'%')
+        </if>
+        <if test="params.deviceName != null and params.deviceName != '' ">
+            AND MD.DEVICE_NAME LIKE concat('%', #{params.deviceName}, '%')
+        </if>
+        <if test="params.deviceTypeBo != null and params.deviceTypeBo != '' ">
+            AND MDTI.DEVICE_TYPE_BO = #{params.deviceTypeBo}
+        </if>
+        <if test="params.deviceTypeName != null and params.deviceTypeName != '' ">
+            AND MDT.DEVICE_TYPE_NAME like concat('%',#{params.deviceTypeName},'%')
+        </if>
+        <if test="params.productLineBo != null and params.productLineBo != '' ">
+            AND MD.PRODUCT_LINE_BO = #{params.productLineBo}
+        </if>
+        <if test="params.isProcessDevice != null and params.isProcessDevice != '' ">
+            AND MD.IS_PROCESS_DEVICE = #{params.isProcessDevice}
+        </if>
+        order by MD.CREATE_DATE desc
+    </select>
+    <select id="selectPageDeviceForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT
+        M_DEVICE.BO,
+        M_DEVICE.SITE,
+        M_DEVICE.DEVICE,
+        M_DEVICE.DEVICE_NAME,
+        M_DEVICE.DEVICE_DESC,
+        M_DEVICE.DEVICE_MODEL,
+        M_DEVICE.STATE,
+        M_DEVICE.IS_PROCESS_DEVICE,
+        M_DEVICE.PRODUCT_LINE_BO,
+        M_DEVICE.STATION_BO,
+        M_DEVICE.LOCATION,
+        M_DEVICE.ASSETS_CODE,
+        M_DEVICE.MANUFACTURER,
+        M_DEVICE.VALID_START_DATE,
+        M_DEVICE.VALID_END_DATE,
+        M_DEVICE.MEMO,
+        M_DEVICE.CREATE_DATE,
+        M_DEVICE.CREATE_USER,
+        M_DEVICE.MODIFY_USER,
+        M_DEVICE.COVER_IMG,
+        LEFT(CONVERT(varchar(100), M_DEVICE.MODIFY_DATE, 121), 23) MODIFY_DATE,
+        M_PRODUCT_LINE.PRODUCT_LINE PRODUCT_LINE,
+        M_STATION.STATION STATION,
+        SCREW_COMBINATION,
+        dt.DEVICE_TYPE_NAME,
+        dt.DEVICE_TYPE
+        FROM M_DEVICE
+        left join M_STATION on M_STATION.BO = M_DEVICE.STATION_BO
+        left join M_PRODUCT_LINE on M_PRODUCT_LINE.BO = M_DEVICE.PRODUCT_LINE_BO
+        left join (
+        select i.DEVICE_BO, STRING_AGG(t.DEVICE_TYPE_NAME, ',') as DEVICE_TYPE_NAME, STRING_AGG(t.DEVICE_TYPE, ',') as
+        DEVICE_TYPE
+        from m_device_type_item i
+        inner join m_device_type t on i.DEVICE_TYPE_BO = t.BO
+        <if test="params.deviceTypeBo != null and params.deviceTypeBo != '' ">
+            AND i.DEVICE_TYPE_BO = #{params.deviceTypeBo}
+        </if>
+        group by i.DEVICE_BO
+        ) dt on M_DEVICE.BO = dt.DEVICE_BO
+        WHERE M_DEVICE.SITE=#{params.site}
+        <if test="params.deviceTypeBo != null and params.deviceTypeBo != '' ">
+            AND dt.DEVICE_TYPE_NAME is not null
+        </if>
+        <if test="params.device != null and params.device != '' ">
+            AND M_DEVICE.DEVICE LIKE concat('%', #{params.device}, '%')
+        </if>
+        <if test="params.deviceName != null and params.deviceName != '' ">
+            AND M_DEVICE.DEVICE_NAME LIKE concat('%', #{params.deviceName}, '%')
+        </if>
+        <if test="params.state != null and params.state != ''">
+            AND M_DEVICE.STATE = #{params.state}
+        </if>
+        order by M_DEVICE.CREATE_DATE desc
+    </select>
+
+
+    <select id="selectPageDeviceForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT
+        M_DEVICE.BO,
+        M_DEVICE.SITE,
+        M_DEVICE.DEVICE,
+        M_DEVICE.DEVICE_NAME,
+        M_DEVICE.DEVICE_DESC,
+        M_DEVICE.DEVICE_MODEL,
+        M_DEVICE.STATE,
+        M_DEVICE.IS_PROCESS_DEVICE,
+        M_DEVICE.PRODUCT_LINE_BO,
+        M_DEVICE.STATION_BO,
+        M_DEVICE.LOCATION,
+        M_DEVICE.ASSETS_CODE,
+        M_DEVICE.MANUFACTURER,
+        M_DEVICE.VALID_START_DATE,
+        M_DEVICE.VALID_END_DATE,
+        M_DEVICE.MEMO,
+        M_DEVICE.CREATE_DATE,
+        M_DEVICE.CREATE_USER,
+        M_DEVICE.MODIFY_USER,
+        M_DEVICE.COVER_IMG,
+        LEFT(CONVERT(varchar(100), M_DEVICE.MODIFY_DATE, 121), 23) MODIFY_DATE,
+        M_PRODUCT_LINE.PRODUCT_LINE PRODUCT_LINE,
+        M_STATION.STATION STATION,
+        SCREW_COMBINATION,
+        dt.DEVICE_TYPE_NAME
+        FROM M_DEVICE
+        left join M_STATION on M_STATION.BO = M_DEVICE.STATION_BO
+        left join M_PRODUCT_LINE on M_PRODUCT_LINE.BO = M_DEVICE.PRODUCT_LINE_BO
+        inner join (
+        select i.DEVICE_BO, STRING_AGG(t.DEVICE_TYPE_NAME, ',') as DEVICE_TYPE_NAME
+        from m_device_type_item i
+        inner join m_device_type t on i.DEVICE_TYPE_BO = t.BO
+        <if test="params.deviceTypeBo != null and params.deviceTypeBo != '' ">
+            AND i.DEVICE_TYPE_BO = #{params.deviceTypeBo}
+        </if>
+        group by i.DEVICE_BO
+        ) dt on M_DEVICE.BO = dt.DEVICE_BO
+        WHERE M_DEVICE.SITE=#{params.site}
+        <if test="params.deviceTypeBo != null and params.deviceTypeBo != '' ">
+            AND dt.DEVICE_TYPE_NAME is not null
+        </if>
+        <if test="params.device != null and params.device != '' ">
+            AND M_DEVICE.DEVICE LIKE concat('%', #{params.device}, '%')
+        </if>
+        <if test="params.deviceName != null and params.deviceName != '' ">
+            AND M_DEVICE.DEVICE_NAME LIKE concat('%', #{params.deviceName}, '%')
+        </if>
+        <if test="params.state != null and params.state != ''">
+            AND M_DEVICE.STATE = #{params.state}
+        </if>
+        order by M_DEVICE.CREATE_DATE desc
+    </select>
+    <!--模糊查询线边仓弹出框-->
+    <select id="selectPageWarehouse" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT WAREHOUSE,WAREHOUSE_NAME,WAREHOUSE_DESC,WAREHOUSE_TYPE FROM W_WAREHOUSE WHERE SITE =#{params.site}
+        <if test="params.warehouse != null and params.warehouse != '' ">
+            AND WAREHOUSE LIKE '${params.warehouse}%'
+        </if>
+        <if test="params.warehouseName != null and params.warehouseName != '' ">
+            AND WAREHOUSE_NAME LIKE '${params.warehouseName}%'
+        </if>
+        order by W_WAREHOUSE.CREATE_DATE desc
+    </select>
+    <select id="selectPageWarehouseForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="ms-sql">
+        SELECT WAREHOUSE,WAREHOUSE_NAME,WAREHOUSE_DESC,WAREHOUSE_TYPE,MODIFY_DATE FROM W_WAREHOUSE WHERE SITE
+        =#{params.site}
+        <if test="params.warehouse != null and params.warehouse != '' ">
+            AND WAREHOUSE LIKE '${params.warehouse}%'
+        </if>
+        <if test="params.warehouseName != null and params.warehouseName != '' ">
+            AND WAREHOUSE_NAME LIKE '${params.warehouseName}%'
+        </if>
+        <if test="params.warehouseType != null and params.warehouseType != '' ">
+            AND WAREHOUSE_TYPE =#{params.warehouseType}
+        </if>
+        ORDER BY CREATE_DATE DESC
+    </select>
+
+    <select id="selectPageWarehouseForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="oracle">
+        SELECT WAREHOUSE,WAREHOUSE_NAME,WAREHOUSE_DESC,WAREHOUSE_TYPE,
+        SUBSTR(to_char(MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE FROM
+        W_WAREHOUSE WHERE SITE =#{params.site}
+        <if test="params.warehouse != null and params.warehouse != '' ">
+            AND WAREHOUSE LIKE '${params.warehouse}%'
+        </if>
+        <if test="params.warehouseName != null and params.warehouseName != '' ">
+            AND WAREHOUSE_NAME LIKE '${params.warehouseName}%'
+        </if>
+        <if test="params.warehouseType != null and params.warehouseType != '' ">
+            AND WAREHOUSE_TYPE =#{params.warehouseType}
+        </if>
+        ORDER BY CREATE_DATE DESC
+    </select>
+    <!--模糊查询班次信息-->
+    <select id="selectPageShift" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT SHIFT,SHIFT_NAME,SHIFT_DESC,WORK_TIME,IS_VALID FROM M_SHIFT WHERE SITE=#{params.site}
+        <if test="params.shift != null and params.shift != ''">
+            AND SHIFT LIKE '${params.shift}%'
+        </if>
+        <if test="params.shiftName != null and params.shiftName != '' ">
+            AND SHIFT_NAME LIKE '${params.shiftName}%'
+        </if>
+    </select>
+
+
+    <!--模糊查询设备类型信息 deviceType  deviceTypeName -->
+    <select id="selectPageDeviceType" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DEVICE_TYPE,DEVICE_TYPE_NAME,DEVICE_TYPE_DESC,BO FROM M_DEVICE_TYPE
+        WHERE SITE=#{params.site}
+        <if test="params.deviceType != null and params.deviceType != '' ">
+            AND DEVICE_TYPE LIKE '${params.deviceType}%'
+        </if>
+        <if test="params.deviceTypeName != null and params.deviceTypeName != '' ">
+            AND DEVICE_TYPE_NAME LIKE '${params.deviceTypeName}%'
+        </if>
+    </select>
+    <select id="selectPageDeviceTypeForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="ms-sql">
+        SELECT DEVICE_TYPE,DEVICE_TYPE_NAME,DEVICE_TYPE_DESC,BO,LEFT(CONVERT(varchar(100), MODIFY_DATE, 121), 23)
+        MODIFY_DATE FROM M_DEVICE_TYPE
+        WHERE SITE=#{params.site}
+        <if test="params.deviceType != null and params.deviceType != '' ">
+            AND DEVICE_TYPE LIKE '${params.deviceType}%'
+        </if>
+        <if test="params.deviceTypeName != null and params.deviceTypeName != '' ">
+            AND DEVICE_TYPE_NAME LIKE '${params.deviceTypeName}%'
+        </if>
+        order by CREATE_DATE desc
+    </select>
+
+    <select id="selectPageDeviceTypeForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="oracle">
+        SELECT DEVICE_TYPE,DEVICE_TYPE_NAME,DEVICE_TYPE_DESC,BO,
+        SUBSTR(to_char(MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE FROM M_DEVICE_TYPE
+        WHERE SITE=#{params.site}
+        <if test="params.deviceType != null and params.deviceType != '' ">
+            AND DEVICE_TYPE LIKE '${params.deviceType}%'
+        </if>
+        <if test="params.deviceTypeName != null and params.deviceTypeName != '' ">
+            AND DEVICE_TYPE_NAME LIKE '${params.deviceTypeName}%'
+        </if>
+        order by CREATE_DATE desc
+    </select>
+    <!--模糊查询班组信息 -->
+    <select id="selectPageTeam" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT A.TEAM,A.TEAM_DESC,A.LEADER,B.PRODUCT_LINE,B.PRODUCT_LINE_DESC FROM M_TEAM A
+        LEFT JOIN M_PRODUCT_LINE B ON A.PRODUCT_LINE_BO = B.BO WHERE A.SITE = #{params.site}
+        <if test="params.team != null and params.team != '' ">
+            AND A.TEAM LIKE '${params.team}%'
+        </if>
+        <if test="params.teamDesc != null and params.teamDesc != '' ">
+            AND A.TEAM_DESC LIKE '${params.teamDesc}%'
+        </if>
+    </select>
+    <select id="selectPageTeamForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT
+        A.BO,
+        A.TEAM,
+        A.TEAM_DESC,
+        A.LEADER,
+        B.PRODUCT_LINE,
+        B.PRODUCT_LINE_DESC,
+        A.MODIFY_DATE
+        FROM
+        M_TEAM A
+        LEFT JOIN M_PRODUCT_LINE B ON A.PRODUCT_LINE_BO = B.BO
+        WHERE A.SITE = #{params.site}
+        <if test="params.team != null and params.team != '' ">
+            AND A.TEAM LIKE '${params.team}%'
+        </if>
+        <if test="params.bo != null and params.bo != '' ">
+            AND A.BO LIKE '${params.bo}%'
+        </if>
+        <if test="params.productLineBo != null and params.productLineBo != '' ">
+            AND A.PRODUCT_LINE_BO =#{params.productLineBo}
+        </if>
+        order by A.CREATE_DATE desc
+    </select>
+
+    <select id="selectPageTeamForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT
+        A.BO,
+        A.TEAM,
+        A.TEAM_DESC,
+        A.LEADER,
+        B.PRODUCT_LINE,
+        B.PRODUCT_LINE_DESC,
+        SUBSTR(to_char(A.MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE
+        FROM
+        M_TEAM A
+        LEFT JOIN M_PRODUCT_LINE B ON A.PRODUCT_LINE_BO = B.BO
+        WHERE A.SITE = #{params.site}
+        <if test="params.team != null and params.team != '' ">
+            AND A.TEAM LIKE '${params.team}%'
+        </if>
+        <if test="params.bo != null and params.bo != '' ">
+            AND A.BO LIKE '${params.bo}%'
+        </if>
+        <if test="params.productLineBo != null and params.productLineBo != '' ">
+            AND A.PRODUCT_LINE_BO =#{params.productLineBo}
+        </if>
+        order by A.CREATE_DATE desc
+    </select>
+    <!--模糊查询员工信息-->
+    <select id="selectPageEmployee" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT user_name as EMPLOYEE_CODE,real_name as NAME,
+        CAST (state as varchar(5)) as ENABLED_FLAG FROM iap_sys_user_t WHERE 1=1
+        <if test="params.employeeCode!=null and params.employeeCode != '' ">
+            AND user_name LIKE '${params.employeeCode}%'
+        </if>
+        <if test="params.name != null and params.name != '' ">
+            AND real_name LIKE '${params.name}%'
+        </if>
+        order by iap_sys_user_t.create_date desc
+    </select>
+
+    <!--POD查询SN-->
+    <select id="selectPageSN" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT sfc.sfc, i.item, so.shop_order, sfc.qty, sfc.MODIFY_USER
+        FROM p_sfc sfc,
+             m_shop_order so,
+             m_item i,
+             p_sfc_step ss,
+             p_sfc_router sr
+        WHERE sfc.shop_order_bo = so.bo
+          AND sfc.item_bo = i.bo
+          AND sfc.item_bo = i.bo
+          AND sfc.bo = sr.sfc_bo
+          AND sr.bo = ss.sfc_router_bo
+          AND sfc.site = #{params.site}
+          AND ss.operation_bo = #{params.operationBo}
+          AND ss.QTY_IN_QUEUE > 0
+    </select>
+
+
+    <!--模糊查询数据收集组参数表-->
+    <select id="selectPageDcParameters" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT DC_GROUP, PARAM_NAME,PARAM_DESC,PARAM_TYPE FROM M_DC_PARAMETER dp ,M_DC_GROUP dg
+        WHERE dp.SITE = #{params.site} AND dp.DC_GROUP_BO = dg.BO
+        <if test="params.paramName!=null and params.paramName != '' ">
+            AND PARAM_NAME LIKE '${params.paramName}%'
+        </if>
+    </select>
+
+
+    <!--模糊查询车间作业控制信息表弹出框-->
+    <select id="selectPageSfc" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT SFC, ITEM_BO,QTY,BOM_BO,SHOP_ORDER_BO,PRODUCT_LINE_BO,MODIFY_USER FROM P_SFC WHERE 1=1
+        <if test="params.sfc!=null and params.sfc != '' ">
+            AND SFC LIKE '${params.sfc}%'
+        </if>
+    </select>
+    <!--模糊查询工艺路线弹出框 router routerDesc -->
+    <select id="selectPageRouter" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT BO,ROUTER,ROUTER_DESC,STATE,VERSION FROM M_ROUTER
+        WHERE SITE=#{params.site}
+        <if test="params.router != null and params.router != '' ">
+            AND M_ROUTER.ROUTER LIKE '${params.router}%'
+        </if>
+        <if test="params.routerDesc != null and params.routerDesc != '' ">
+            AND M_ROUTER.ROUTER_DESC LIKE '${params.routerDesc}%'
+        </if>
+        order by M_ROUTER.CREATE_DATE desc
+    </select>
+    <select id="selectPageRouterForTable" parameterType="java.util.Map" resultType="java.util.Map"
+            databaseId="ms-sql">
+        SELECT M_ROUTER.BO,
+        M_ROUTER.ROUTER,
+        M_ROUTER.ROUTER_TYPE,
+        M_ROUTER.ROUTER_NAME,
+        LEFT(CONVERT(varchar(100), M_ROUTER.MODIFY_DATE, 121), 23) MODIFY_DATE,
+        M_ROUTER.ROUTER_DESC,
+        M_ROUTER.STATE,
+        M_ROUTER.ITEM_BO,
+        M_ROUTER.VERSION,
+        M_ITEM.ITEM,
+        M_ITEM.VERSION ITEM_VERSION
+        FROM M_ROUTER
+        left join M_ITEM on M_ROUTER.ITEM_BO = M_ITEM.BO
+        WHERE M_ROUTER.SITE=#{params.site}
+        <if test="params.router != null and params.router != '' ">
+            AND ROUTER LIKE '${params.router}%'
+        </if>
+        <if test="params.routerDesc != null and params.routerDesc != '' ">
+            AND ROUTER_DESC LIKE '${params.routerDesc}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE =#{params.state}
+        </if>
+        order by M_ROUTER.CREATE_DATE desc
+    </select>
+
+    <select id="selectPageRouterForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT M_ROUTER.BO,
+        M_ROUTER.ROUTER,
+        M_ROUTER.ROUTER_TYPE,
+        M_ROUTER.ROUTER_NAME,
+        SUBSTR(to_char(M_ROUTER.MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE,
+        M_ROUTER.ROUTER_DESC,
+        M_ROUTER.STATE,
+        M_ROUTER.ITEM_BO,
+        M_ROUTER.VERSION,
+        M_ITEM.ITEM,
+        M_ITEM.VERSION ITEM_VERSION
+        FROM M_ROUTER
+        left join M_ITEM on M_ROUTER.ITEM_BO = M_ITEM.BO
+        WHERE M_ROUTER.SITE=#{params.site}
+        <if test="params.router != null and params.router != '' ">
+            AND ROUTER LIKE '${params.router}%'
+        </if>
+        <if test="params.routerDesc != null and params.routerDesc != '' ">
+            AND ROUTER_DESC LIKE '${params.routerDesc}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE =#{params.state}
+        </if>
+        order by M_ROUTER.CREATE_DATE desc
+    </select>
+
+    <!--模糊查询包装数据弹出框 packCode -->
+    <select id="selectPagePackData" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT B.PACK_CODE, A.PACK_NAME, A.PACK_DESC, B.STATE, SUM(C.QTY)
+        FROM P_PACKING A
+                 LEFT JOIN P_PACK_DATA B ON A.BO = B.PACKING_BO
+                 LEFT JOIN P_PACK_DATA_ITEM C
+                           ON B.BO = C.PACK_DATA_BO
+        WHERE A.SITE = #{params.site}
+          AND A.PACK_NAME = #{params.packName}
+          AND B.PACK_CODE LIKE '%${params.packCode}%'
+        GROUP BY B.PACK_CODE, A.PACK_NAME, A.PACK_DESC, B.STATE
+    </select>
+    <select id="selectPagePackingForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT PACK_NAME,
+        PACK_DESC,
+        STATE,
+        CASE STATE
+        WHEN 'H' THEN '保留'
+        WHEN 'C' THEN '冻结'
+        WHEN 'R' THEN '可下达'
+        WHEN 'N' THEN '新建'
+        WHEN 'S' THEN '作废'
+        ELSE '' END STATE_NAME,
+        PACK_GRADE,
+        MAX_QTY,
+        MIN_QTY,
+        LEFT(CONVERT(varchar(100), MODIFY_DATE, 121), 23) MODIFY_DATE
+        FROM P_PACKING WHERE SITE = #{params.site}
+        <if test="params.packName != null and params.packName != '' ">
+            AND PACK_NAME LIKE '${params.packName}%'
+        </if>
+        <if test="params.packDesc != null and params.packDesc != '' ">
+            AND PACK_DESC LIKE '${params.packDesc}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE LIKE '${params.state}%'
+        </if>
+        order by CREATE_DATE desc
+    </select>
+
+    <select id="selectPagePackingForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT PACK_NAME,
+        PACK_DESC,
+        STATE,
+        CASE STATE
+        WHEN 'H' THEN '保留'
+        WHEN 'C' THEN '冻结'
+        WHEN 'R' THEN '可下达'
+        WHEN 'N' THEN '新建'
+        WHEN 'S' THEN '作废'
+        ELSE '' END STATE_NAME,
+        PACK_GRADE,
+        MAX_QTY,
+        MIN_QTY,
+        SUBSTR(to_char(MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE
+        FROM P_PACKING WHERE SITE = #{params.site}
+        <if test="params.packName != null and params.packName != '' ">
+            AND PACK_NAME LIKE '${params.packName}%'
+        </if>
+        <if test="params.packDesc != null and params.packDesc != '' ">
+            AND PACK_DESC LIKE '${params.packDesc}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE LIKE '${params.state}%'
+        </if>
+        order by CREATE_DATE desc
+    </select>
+    <select id="selectPagePacking" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT PACK_NAME,PACK_DESC,STATE,PACK_GRADE,MAX_QTY,MIN_QTY FROM P_PACKING WHERE SITE = #{params.site}
+        <if test="params.packName != null and params.packName != '' ">
+            AND PACK_NAME LIKE '${params.packName}%'
+        </if>
+        <if test="params.packDesc != null and params.packDesc != '' ">
+            AND PACK_DESC LIKE '${params.packDesc}%'
+        </if>
+        <if test="params.state != null and params.state != '' ">
+            AND STATE LIKE '${params.state}%'
+        </if>
+        order by CREATE_DATE
+    </select>
+
+    <!--模糊查询载具类型维护-->
+    <select id="selectPageCarrierType" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT
+        M.BO ,
+        M.CARRIER_TYPE,
+        M.DESCRIPTION,
+        M.CAPACITY,
+        M.ROW_SIZE,
+        M.COLUMN_SIZE ,
+        M.MODIFY_DATE,
+        M.IS_BLEND
+        FROM M_CARRIER_TYPE M WHERE M.SITE = #{params.site}
+        <if test="params.carrierType != null and params.carrierType != '' ">
+            AND M.CARRIER_TYPE LIKE '${params.carrierType}%'
+        </if>
+        <if test="params.description != null and params.description != '' ">
+            AND M.DESCRIPTION LIKE '${params.description}%'
+        </if>
+        <if test="params.bo != null and params.bo != '' ">
+            AND M.BO LIKE '${params.bo}%'
+        </if>
+    </select>
+
+    <!--模糊查询载具类型维护-->
+    <select id="selectPageCarrierType" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT
+        M.BO ,
+        M.CARRIER_TYPE,
+        M.DESCRIPTION,
+        M.CAPACITY,
+        M.ROW_SIZE,
+        M.COLUMN_SIZE ,
+        SUBSTR(to_char(M.MODIFY_DATE,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE,
+        M.IS_BLEND
+        FROM M_CARRIER_TYPE M WHERE M.SITE = #{params.site}
+        <if test="params.carrierType != null and params.carrierType != '' ">
+            AND M.CARRIER_TYPE LIKE '${params.carrierType}%'
+        </if>
+        <if test="params.description != null and params.description != '' ">
+            AND M.DESCRIPTION LIKE '${params.description}%'
+        </if>
+        <if test="params.bo != null and params.bo != '' ">
+            AND M.BO LIKE '${params.bo}%'
+        </if>
+    </select>
+
+    <!--模糊查询载具维护信息-->
+    <select id="selectPageCarrier" parameterType="java.util.Map" resultType="java.util.Map">
+        SELECT C.BO,C.CARRIER,C.DESCRIPTION,CT.CARRIER_TYPE,CT.DESCRIPTION AS CARRIER_TYPE_DESCRIPTION FROM M_CARRIER C
+        LEFT
+        JOIN M_CARRIER_TYPE CT
+        ON C.CARRIER_TYPE_BO = CT.BO WHERE C.SITE =#{params.site}
+        <if test="params.carrier != null and params.carrier != ''">
+            AND C.CARRIER LIKE '${params.carrier}%'
+        </if>
+        <if test="params.bo != null and params.bo != ''">
+            AND C.BO LIKE '${params.bo}%'
+        </if>
+        <if test="params.carrierType != null and params.carrierType != ''">
+            AND C.CARRIER_TYPE_BO LIKE '%${params.carrierType}%'
+        </if>
+    </select>
+
+    <select id="selectPageCarrierForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT C.BO,C.CARRIER,C.DESCRIPTION,CT.CARRIER_TYPE,C.MODIFY_DATE,C.USE_COUNT,CT.DESCRIPTION AS
+        CARRIER_TYPE_DESCRIPTION FROM M_CARRIER C LEFT
+        JOIN M_CARRIER_TYPE CT
+        ON C.CARRIER_TYPE_BO = CT.BO WHERE C.SITE =#{params.site}
+        <if test="params.carrier != null and params.carrier != ''">
+            AND C.CARRIER LIKE '${params.carrier}%'
+        </if>
+        <if test="params.bo != null and params.bo != ''">
+            AND C.BO LIKE '${params.bo}%'
+        </if>
+        <if test="params.carrierType != null and params.carrierType != ''">
+            AND C.CARRIER_TYPE_BO LIKE '%${params.carrierType}%'
+        </if>
+        order by C.CREATE_DATE desc
+    </select>
+
+    <select id="selectPageCarrierForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="oracle">
+        SELECT C.BO,C.CARRIER,C.DESCRIPTION,CT.CARRIER_TYPE, SUBSTR(to_char(C.MODIFY_DATE ,'yyyy-MM-dd
+        HH24:MI:ss.ff'),0, 23) as
+        MODIFY_DATE,C.USE_COUNT,CT.DESCRIPTION AS
+        CARRIER_TYPE_DESCRIPTION FROM M_CARRIER C LEFT
+        JOIN M_CARRIER_TYPE CT
+        ON C.CARRIER_TYPE_BO = CT.BO WHERE C.SITE =#{params.site}
+        <if test="params.carrier != null and params.carrier != ''">
+            AND C.CARRIER LIKE '${params.carrier}%'
+        </if>
+        <if test="params.bo != null and params.bo != ''">
+            AND C.BO LIKE '${params.bo}%'
+        </if>
+        <if test="params.carrierType != null and params.carrierType != ''">
+            AND C.CARRIER_TYPE_BO LIKE '%${params.carrierType}%'
+        </if>
+        order by C.CREATE_DATE desc
+    </select>
+    <select id="selectPageUser" resultType="java.util.Map">
+        SELECT
+        iap_sys_user_t.USER_NAME,
+        iap_sys_user_t.REAL_NAME,
+        iap_sys_user_t.STATE
+        FROM iap_sys_user_t
+        LEFT JOIN iap_sys_user_role_t
+        on iap_sys_user_role_t.user_id = iap_sys_user_t.id
+        LEFT JOIN iap_sys_role_t
+        on iap_sys_role_t.id = iap_sys_user_role_t.role_id
+        WHERE 1=1
+        <if test="params.userType ==1 or params.userType =='1'">
+            AND iap_sys_user_t.user_type =1
+        </if>
+        <if test="params.userName != null and params.userName != ''">
+            AND iap_sys_user_t.USER_NAME LIKE '%${params.userName}%'
+        </if>
+        <if test="params.realName != null and params.realName != ''">
+            AND iap_sys_user_t.REAL_NAME LIKE '%${params.realName}%'
+        </if>
+        <if test="params.state != null and params.state != ''">
+            AND iap_sys_user_t.STATE LIKE '%${params.state}%'
+        </if>
+        <if test="params.userType != null and params.userType != ''">
+            AND iap_sys_user_t.user_type = #{params.userType}
+        </if>
+        <if test="params.roleCodeList != null and params.roleCodeList.size >0 ">
+            AND iap_sys_role_t.role_code IN
+            <foreach item='item' index='index' collection='params.roleCodeList' open='(' separator=',' close=')'>
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <select id="selectPageUserForTable" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT
+        MSU.SITE,
+        MSU.USR as usr,
+        MSU.IS_DEFAULT_SITE,
+        MSU.MODIFY_DATE ,
+        isut.real_name as usrName,
+        MS.SITE_TYPE
+        FROM
+        M_SITE_USR MSU
+        LEFT JOIN M_SITE MS ON MSU.SITE= MS.SITE
+        LEFT JOIN iap_sys_user_t isut ON MSU.USR=isut.user_name
+        WHERE 1=1
+        <if test="params.usr != null and params.usr != ''">
+            AND MSU.USR LIKE '%${params.usr}%'
+        </if>
+        <if test="params.usrName != null and params.usrName != ''">
+            AND isut.real_name LIKE '%${params.usrName}%'
+        </if>
+        <if test="params.site != null and params.site != ''">
+            AND MSU.SITE LIKE '%${params.site}%'
+        </if>
+        <if test="params.isDefaultSite != null and params.isDefaultSite != ''">
+            AND MSU.IS_DEFAULT_SITE =#{params.isDefaultSite}
+        </if>
+        <if test="params.siteType != null and params.siteType != ''">
+            AND MS.SITE_TYPE =#{params.siteType}
+        </if>
+        order by MSU.CREATE_DATE desc
+    </select>
+
+
+    <select id="selectPageUserForTable" resultType="java.util.Map" databaseId="oracle">
+        SELECT
+        MSU.SITE,
+        MSU.USR as "usr",
+        MSU.IS_DEFAULT_SITE,
+        SUBSTR(to_char(MSU.MODIFY_DATE ,'yyyy-MM-dd HH24:MI:ss.ff'),0, 23)
+        as MODIFY_DATE,
+        isut.real_name as "usrName",
+        MS.SITE_TYPE
+        FROM
+        M_SITE_USR MSU
+        LEFT JOIN M_SITE MS ON MSU.SITE= MS.SITE
+        LEFT JOIN iap_sys_user_t isut ON MSU.USR=isut.user_name
+        WHERE 1=1
+        <if test="params.usr != null and params.usr != ''">
+            AND MSU.USR LIKE '%${params.usr}%'
+        </if>
+        <if test="params.usrName != null and params.usrName != ''">
+            AND isut.real_name LIKE '%${params.usrName}%'
+        </if>
+        <if test="params.site != null and params.site != ''">
+            AND MSU.SITE LIKE '%${params.site}%'
+        </if>
+        <if test="params.isDefaultSite != null and params.isDefaultSite != ''">
+            AND MSU.IS_DEFAULT_SITE =#{params.isDefaultSite}
+        </if>
+        <if test="params.siteType != null and params.siteType != ''">
+            AND MS.SITE_TYPE =#{params.siteType}
+        </if>
+        order by MSU.CREATE_DATE desc
+    </select>
+    <select id="selectProductStatusUpdate" resultType="com.itl.mes.core.api.vo.ProductStatusUpdateVo">
+
+        SELECT MSO.SHOP_ORDER as shopOrder,  --工单编号
+               PS.SCHEDULE_NO as scheduleNo, --排程编号
+               MIT.ITEM       as itemCode,   --物料编码
+               MIT.ITEM_NAME  AS itemName    --物料名称
+        FROM M_SHOP_ORDER MSO
+                 LEFT JOIN M_ITEM MIT ON MSO.ITEM_BO = MIT.BO
+                 LEFT JOIN M_BOM MB ON MSO.BOM_BO = MB.BO
+                 LEFT JOIN M_BOM ML ON MSO.ORDER_BOM_BO = ML.BO
+                 LEFT JOIN M_ROUTER MR ON MSO.ROUTER_BO = MR.BO
+                 LEFT JOIN M_PRODUCT_LINE MPL ON MSO.PRODUCT_LINE_BO = MPL.BO
+                 LEFT JOIN P_CLASS_FREQUENCY PCF ON MSO.SHIFT_BO = PCF.ID
+                 LEFT JOIN M_WORK_SHOP MWS ON MPL.WORK_SHOP_BO = MWS.BO
+                 LEFT JOIN M_CUSTOMER MC ON MSO.CUSTOMER_BO = MC.BO
+                 LEFT JOIN P_SCHEDULE_PRODUCTION_LINE PSPL ON MSO.SHOP_ORDER = PSPL.SHOP_ORDER
+                 LEFT JOIN P_SCHEDULE PS ON PS.BO = PSPL.SCHEDULE_BO
+        WHERE MSO.SITE = #{site}
+          and mso.BO = #{bo}
+
+        order by MSO.CREATE_DATE desc
+
+
+    </select>
+    <select id="selectByStationName" resultType="java.util.Map">
+        SELECT MS.STATION,
+               MS.STATION_NAME,
+               MS.STATION_DESC,
+               MS.STATE,
+               MS.MODIFY_DATE,
+               MS.PRODUCT_LINE_BO,
+               MPL.PRODUCT_LINE,
+               MS.OPERATION_BO,
+               MO.OPERATION_NAME
+        FROM M_STATION MS
+                 LEFT JOIN M_OPERATION MO ON MS.OPERATION_BO = MO.BO
+                 LEFT JOIN M_PRODUCT_LINE MPL ON MS.PRODUCT_LINE_BO = MPL.BO
+        WHERE MS.SITE = #{site}
+          and MS.STATION = #{station}
+
+    </select>
+    <select id="selectShopOrder" resultType="java.util.Map">
+        SELECT
+            MSO.BO as shopOrderBo, --工单BO
+            MSO.SHOP_ORDER as shopOrder, --工单编号
+            MSO.PLAN_START_DATE as planStartDate, --工单开始时间
+            MSO.PLAN_END_DATE as planEndDate, --工单结束时间
+            MSO.OVERFULFILL_QTY as overfulfillQty, --超产数量
+            MSO.SCHEDUL_QTY as scheduleQty, --工单排程数量
+            MSO.COMPLETE_QTY as completeQty, --完工数量completeQty
+            MSO.ERP_ORDER_BO as erpOrderBo, --ERP生产订单BO
+            MSO.ERP_ORDER_CODE as erpOrderCode, --ERP生产订单编号
+            MSO.ERP_ORDER_DESC as erpOrderDesc, --ERP生产订单描述
+            PS.SCHEDULE_NO as scheduleNo, --排程编号
+            MSO.ORDER_QTY as orderQty, --订单数量
+            MSO.ROUTER_BO as routerBo, --工艺路线BO
+            MR.ROUTER as router, --工艺路线编号
+            MR.VERSION as routerVersion, --工艺路线版本
+            MSO.MODIFY_DATE as modifyDate, --修改时间
+            MSO.MODIFY_USER as modifyUser, --修改用户
+            MSO.NEGOTIATION_TIME as negotiationTime,
+            MSO.FIXED_TIME as fixedTime,
+            MSO.ORDER_DELIVERY_TIME as orderDeliveryTime, --订单交付时间
+            MIT.ITEM as itemCode, --物料编码
+            MIT.ITEM_NAME AS itemName, --物料名称
+            MIT.VERSION AS itemVersion, --物料版本
+            MB.BOM as bom, --bom
+            MB.VERSION as bomVersion, --bon版本
+            MWS.BO as workShopBo, --车间BO
+            MWS.WORK_SHOP as workShop, --车间编号
+            MWS.WORK_SHOP_DESC as workShopDesc, --车间描述
+            MSO.PRODUCT_LINE_BO as productLineBo, --产线BO
+            MPL.PRODUCT_LINE as productLine, --产线编号
+            MPL.PRODUCT_LINE_DESC as productLineDesc, --产线描述
+            MSO.SHIFT_BO as shiftBo, --班次BO
+            PCF.CODE AS shiftCode, --班次编号
+            PCF.NAME AS shiftName, --班次名称
+            MSO.CUSTOMER_ORDER_BO as customerOrderBo, --
+            MSO.STATE_BO as stateBo, --工单状态BO
+            MSO.SHOP_ORDER_TYPE as shopOrderType, --工单类型
+            MSO.ACTUAL_START_TIME as actualStartTime, --实际开始时间
+            MSO.ACTUAL_END_TIME as actualEndTime, --实际结束时间
+            MSO.IS_OVERFULFILL as isOverfulfill, --是否允许超产
+            MSO.RECOVERY_STATUS as recoveryStatus, --恢复状态
+            MSO.ORDER_BOM_BO as orderBomBo, --工单BOM_BO
+            ML.BOM AS orderBom, --工单BOM
+            ML.VERSION AS orderBomVersion, --工单BOM版本
+            MSO.CUSTOMER_BO as customerBo, --客户BO
+            MC.CUSTOMER as customer, --客户编号
+            MC.CUSTOMER_NAME as customerName, --客户名称
+            dbo.SPLIT ( MSO.STATE_BO, 1 ) state --状态
+        FROM
+            M_SHOP_ORDER MSO
+                LEFT JOIN M_ITEM MIT ON MSO.ITEM_BO = MIT.BO
+                LEFT JOIN M_BOM MB ON MSO.BOM_BO= MB.BO
+                LEFT JOIN M_BOM ML ON MSO.ORDER_BOM_BO= ML.BO
+                LEFT JOIN M_ROUTER MR ON MSO.ROUTER_BO= MR.BO
+                LEFT JOIN M_PRODUCT_LINE MPL ON MSO.PRODUCT_LINE_BO= MPL.BO
+                LEFT JOIN P_CLASS_FREQUENCY PCF ON MSO.SHIFT_BO = PCF.ID
+                LEFT JOIN M_WORK_SHOP MWS ON MPL.WORK_SHOP_BO = MWS.BO
+                LEFT JOIN M_CUSTOMER MC ON MSO.CUSTOMER_BO = MC.BO
+                LEFT JOIN P_SCHEDULE_PRODUCTION_LINE PSPL ON MSO.SHOP_ORDER = PSPL.SHOP_ORDER
+                LEFT JOIN P_SCHEDULE PS ON PS.BO = PSPL.SCHEDULE_BO
+        WHERE MSO.SITE= #{site}
+          and MSO.BO = #{bo}
+
+
+    </select>
+    <select id="selectPageItemByItemBo" resultType="java.util.Map">
+        SELECT BO,ITEM,ITEM_NAME,ITEM_DESC,VERSION,ZS_TYPE FROM M_ITEM WHERE SITE = #{params.site}
+          <if test="params.itemBoList !=null and params.itemBoList.size()>0">
+        and BO in
+        <foreach collection="params.itemBoList" open="(" close=")" item="value" separator=",">
+            #{value}
+        </foreach>
+          </if>
+    </select>
+</mapper>

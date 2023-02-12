@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.iap.system.provider.mapper.IapSysOrganizationTMapper">
+    <insert id="insertListFromExcel" parameterType="com.itl.iap.system.api.entity.IapSysOrganizationT"
+            databaseId="ms-sql">
+        INSERT INTO
+        iap_sys_organization_t(id,code,name,parent_org_id,address,type,description,delete_status,creater,create_date,last_update_by,last_update_date)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (#{item.id},#{item.code},#{item.name},#{item.parentOrgId},#{item.address},#{item.type},#{item.description},#{item.deleteStatus},
+            #{item.creater},#{item.createDate},#{item.lastUpdateBy},#{item.lastUpdateDate})
+        </foreach>
+    </insert>
+
+    <insert id="insertListFromExcel" parameterType="com.itl.iap.system.api.entity.IapSysOrganizationT"
+            databaseId="oracle">
+        INSERT INTO
+        iap_sys_organization_t(id,code,name,parent_org_id,address,type,description,delete_status,creater,create_date,last_update_by,last_update_date)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (#{item.id,jdbcType=VARCHAR},#{item.code,jdbcType=VARCHAR},#{item.name,jdbcType=VARCHAR},#{item.parentOrgId,jdbcType=VARCHAR},
+            #{item.address,jdbcType=VARCHAR},#{item.type,jdbcType=VARCHAR},#{item.description,jdbcType=VARCHAR},#{item.deleteStatus,jdbcType=SMALLINT},
+            #{item.creater,jdbcType=VARCHAR},#{item.createDate,jdbcType=TIMESTAMP},#{item.lastUpdateBy,jdbcType=VARCHAR},#{item.lastUpdateDate,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+
+    <select id="queryById" resultType="com.itl.iap.system.api.dto.IapSysOrganizationTDto" databaseId="ms-sql">
+        SELECT
+        id,
+        code,
+        name,
+        parent_org_id AS parentOrgId,
+        address,
+        type,
+        description,
+        delete_status AS deleteStatus,
+        creater,
+        create_date AS createDate,
+        last_update_by AS lastUpdateBy,
+        last_update_date AS lastUpdateDate
+        FROM
+        iap_sys_organization_t
+        <where>
+            <if test="organizationDTO.id != null and organizationDTO.id != ''">
+                id = #{organizationDTO.id}
+            </if>
+            <if test="organizationDTO.name != null and organizationDTO.name != ''">
+                and name like concat('%', #{organizationDTO.name}, '%')
+            </if>
+            <if test="organizationDTO.address != null and organizationDTO.address != ''">
+                and address like concat('%',#{organizationDTO.address},'%')
+            </if>
+            <if test="organizationDTO.type != null and organizationDTO.type != ''">
+                and type like concat('%',#{organizationDTO.type},'%')
+            </if>
+            <if test="organizationDTO.description != null and organizationDTO.description != ''">
+                and description like concat('%',#{organizationDTO.description},'%')
+            </if>
+            <if test="organizationDTO.code != null and organizationDTO.code != ''">
+                and code = #{organizationDTO.code}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="queryById" resultType="com.itl.iap.system.api.dto.IapSysOrganizationTDto" databaseId="oracle">
+        SELECT
+        id,
+        code,
+        name,
+        parent_org_id AS parentOrgId,
+        address,
+        type,
+        description,
+        delete_status AS deleteStatus,
+        creater,
+        create_date AS createDate,
+        last_update_by AS lastUpdateBy,
+        last_update_date AS lastUpdateDate
+        FROM
+        iap_sys_organization_t
+        where 1=1
+
+        <if test="organizationDTO.id != null and organizationDTO.id != ''">
+            and id = #{organizationDTO.id}
+        </if>
+        <if test="organizationDTO.name != null and organizationDTO.name != ''">
+            and name like '${organizationDTO.name}%'
+        </if>
+        <if test="organizationDTO.address != null and organizationDTO.address != ''">
+            and address like '${organizationDTO.address}%'
+        </if>
+        <if test="organizationDTO.type != null and organizationDTO.type != ''">
+            and type like '${organizationDTO.type}%'
+        </if>
+        <if test="organizationDTO.description != null and organizationDTO.description != ''">
+            and description like '${organizationDTO.description}%'
+        </if>
+        <if test="organizationDTO.code != null and organizationDTO.code != ''">
+            and code = #{organizationDTO.code}
+        </if>
+
+    </select>
+
+
+    <select id="pageQuery" resultType="com.itl.iap.system.api.entity.excelDataEntity.SysOrganizationExcelEntity">
+		SELECT
+			org.id,
+			org.code,
+			org.name,
+			org.parent_org_id AS parentOrgId,
+			org.address,
+			org.type,
+			org.description,
+			org.creater,
+			org.create_date AS createDate,
+			org.last_update_by AS lastUpdateBy,
+			org.last_update_date AS lastUpdateDate,
+			parentOrg.name AS parentOrgName
+		FROM
+			iap_sys_organization_t AS org
+		LEFT JOIN iap_sys_organization_t AS parentOrg ON org.parent_org_id = parentOrg.id
+	</select>
+    <!--	<select id="pageQuery" resultType="com.itl.iap.system.api.entity.excelDataEntity.SysOrganizationExcelEntity">-->
+    <!--		SELECT-->
+    <!--			org.id,-->
+    <!--			org.code,-->
+    <!--			org.name,-->
+    <!--			org.parent_org_id AS parentOrgId,-->
+    <!--			org.address,-->
+    <!--			org.type,-->
+    <!--			org.description,-->
+    <!--			org.creater,-->
+    <!--			org.create_date AS createDate,-->
+    <!--			org.last_update_by AS lastUpdateBy,-->
+    <!--			org.last_update_date AS lastUpdateDate-->
+    <!--		FROM-->
+    <!--			iap_sys_organization_t AS org-->
+    <!--	</select>-->
+
+    <select id="queryByPositAndOrgan" resultType="com.itl.iap.system.api.dto.IapSysOrganizationTDto"
+            databaseId="ms-sql">
+        SELECT
+        id,
+        name,
+        create_date ,
+        parent_org_id as parentOrgId
+        FROM
+        iap_sys_organization_t
+        <where>
+            <if test="organizationName != null and organizationName != ''">
+                name like concat('%', #{organizationName}, '%')
+            </if>
+        </where>
+        ORDER BY create_date DESC
+    </select>
+
+
+    <select id="queryByPositAndOrgan" resultType="com.itl.iap.system.api.dto.IapSysOrganizationTDto"
+            databaseId="oracle">
+        SELECT
+        id,
+        name,
+        create_date ,
+        parent_org_id as parentOrgId
+        FROM
+        iap_sys_organization_t
+        <where>
+            <if test="organizationName != null and organizationName != ''">
+                name like '${organizationName}%'
+            </if>
+        </where>
+        ORDER BY create_date DESC
+    </select>
+
+    <select id="getByIds" resultType="java.util.Map">
+        select id as id,
+        name as name,
+        code as code
+        from iap_sys_organization_t
+        where id in
+        <foreach collection="ids" open="(" close=")" item="value" separator=",">
+            #{value}
+        </foreach>
+    </select>
+
+    <select id="getIdByCode" resultType="com.itl.iap.system.api.dto.IapSysOrganizationTDto">
+        select id as id
+        from   iap_sys_organization_t
+        where code=#{code}
+    </select>
+
+
+    <select id="getAll" resultType="com.itl.iap.system.api.dto.IapSysOrganizationTDto" databaseId="ms-sql">
+        select id,code,name,type FROM iap_sys_organization_t
+        where 1=1
+        <if test="iapSysOrganizationTDto.code != null and iapSysOrganizationTDto.code !='' ">
+            and code like CONCAT('%',#{iapSysOrganizationTDto.code},'%')
+        </if>
+        <if test="iapSysOrganizationTDto.name != null and iapSysOrganizationTDto.name != ''">
+            and name like CONCAT('%', #{iapSysOrganizationTDto.name},'%')
+        </if>
+        <if test="iapSysOrganizationTDto.type != null and iapSysOrganizationTDto.type != ''">
+            and type = #{iapSysOrganizationTDto.type}
+        </if>
+    </select>
+
+    <select id="getAll" resultType="com.itl.iap.system.api.dto.IapSysOrganizationTDto" databaseId="oracle">
+        select id,code,name,type FROM iap_sys_organization_t
+        where 1=1
+        <if test="iapSysOrganizationTDto.code != null and iapSysOrganizationTDto.code !='' ">
+            and code like '${iapSysOrganizationTDto.code}%'
+        </if>
+        <if test="iapSysOrganizationTDto.name != null and iapSysOrganizationTDto.name != ''">
+            and name like '${iapSysOrganizationTDto.name}%'
+        </if>
+        <if test="iapSysOrganizationTDto.type != null and iapSysOrganizationTDto.type != ''">
+            and type = #{iapSysOrganizationTDto.type}
+        </if>
+    </select>
+</mapper>

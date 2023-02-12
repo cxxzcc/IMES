@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.CheckExecuteMapper">
+
+    <sql id="FIELD">
+        t
+        .
+        id
+        AS id,t.checkNo AS checkNo,t.checkPlanId AS checkPlanId,t.checkPlanName AS checkPlanName,
+        t.code AS code,t.name AS name,t.type AS type,t.productionLine AS productionLine,
+        t.dataCollectionId AS dataCollectionId,t.dataCollectionName AS dataCollectionName,
+        t.checkUserId AS checkUserId,t.checkUserName AS checkUserName,t.executeTime AS executeTime,
+        t.state AS state,t.planExecuteTime AS planExecuteTime,t.createBy,t.createTime,t.updateBy,t.updateTime,
+        t.operaStartTime,t.operaEndTime
+    </sql>
+    <!--    <sql id="WHERE_FIELD">
+            <where>
+                AND t.siteId = #{checkExecute.siteId}
+                <if test="checkExecute.code != null and checkExecute.code!=''">
+                    AND t.code LIKE CONCAT('%',#{checkExecute.code},'%')
+                </if>
+                <if test="checkExecute.checkPlanName != null and checkExecute.checkPlanName !=''">
+                    AND t.checkPlanName LIKE CONCAT('%',#{checkExecute.checkPlanName},'%')
+                </if>
+                <if test="checkExecute.dataCollectionName != null and checkExecute.dataCollectionName!=''">
+                    AND t.dataCollectionName LIKE CONCAT('%',#{checkExecute.dataCollectionName},'%')
+                </if>
+                <if test="checkExecute.checkUserName != null and checkExecute.checkUserName !=''">
+                    AND t.checkUserName LIKE CONCAT('%',#{checkExecute.checkUserName},'%')
+                </if>
+                <if test="checkExecute.startTime != null and checkExecute.endTime != null">
+                    AND t.executeTime BETWEEN #{checkExecute.startTime} AND #{checkExecute.endTime}
+                </if>
+            </where>
+        </sql>-->
+
+    <sql id="WHERE_FIELD">
+        <where>
+            AND t.siteId = #{checkExecute.siteId}
+            <if test="checkExecute.diviceCode != null and checkExecute.diviceCode!=''">
+                AND t.code LIKE '%${checkExecute.diviceCode}%'
+            </if>
+            <if test="checkExecute.diviceName != null and checkExecute.diviceName!=''">
+                AND t.name LIKE '%${checkExecute.diviceName}%'
+            </if>
+            <if test="checkExecute.diviceCodeOrName != null and checkExecute.diviceCodeOrName!=''">
+                AND (t.code LIKE '%${checkExecute.diviceCodeOrName}%' or t.name like
+                '%${checkExecute.diviceCodeOrName}%')
+            </if>
+            <if test="checkExecute.checkPlanName != null and checkExecute.checkPlanName !=''">
+                AND t.checkPlanName LIKE '%${checkExecute.checkPlanName}%'
+            </if>
+            <if test="checkExecute.dataCollectionId != null and checkExecute.dataCollectionId!=''">
+                AND t.dataCollectionId LIKE '%${checkExecute.dataCollectionId}%'
+            </if>
+            <if test="checkExecute.dataCollectionName != null and checkExecute.dataCollectionName!=''">
+                AND t.dataCollectionName LIKE '%${checkExecute.dataCollectionName}%'
+            </if>
+            <if test="checkExecute.startTime != null and checkExecute.startTime!=''  and checkExecute.endTime != null and checkExecute.endTime !=''">
+                AND t.executeTime BETWEEN #{checkExecute.startTime} AND #{checkExecute.endTime}
+            </if>
+            <if test="checkExecute.start != null and checkExecute.start !=''  and checkExecute.end != null  and checkExecute.end != ''">
+                and not (t.startTime>'${checkExecute.end}' or t.endTime &lt; '${checkExecute.start}')
+            </if>
+            <if test="checkExecute.checkUserCode != null and checkExecute.checkUserCode!=''">
+                and EXISTS (
+                SELECT 1 from m_repair_check_user t2 where t2.CHECK_ID = t.checkPlanId and t2.CHECK_USER_ID =
+                '${checkExecute.checkUserCode}'
+                )
+            </if>
+            <if test="checkExecute.checkUserName != null and checkExecute.checkUserName!=''">
+                and EXISTS (
+                SELECT 1 from m_repair_check_user t2 where t2.CHECK_ID = t.checkPlanId and t2.CHECK_USER_NAME like
+                '%${checkExecute.checkUserName}%'
+                )
+            </if>
+            <if test="checkExecute.state != null">
+                and t.state = '${checkExecute.state}'
+            </if>
+        </where>
+    </sql>
+
+    <select id="pageQuery" parameterType="com.itl.iap.mes.api.entity.CheckExecute"
+            resultType="com.itl.iap.mes.api.entity.CheckExecute">
+        select *
+        from (
+                 SELECT DISTINCT t.*,
+                                 t1.checkPlanName
+                 FROM m_repair_check_execute t
+                          LEFT JOIN m_repair_check_plan t1
+                                    ON t1.id = t.checkPlanId
+                          LEFT JOIN m_repair_check_user t2
+                                    on t2.CHECK_ID = t.checkPlanId
+                     ${ew.customSqlSegment}
+             ) a
+        order by a.updateTime desc
+    </select>
+
+    <select id="listQuery" parameterType="com.itl.iap.mes.api.entity.CheckExecute"
+            resultType="com.itl.iap.mes.api.entity.CheckExecute">
+        SELECT
+        <include refid="FIELD"/>
+        FROM m_repair_check_execute t
+        <include refid="WHERE_FIELD"/>
+    </select>
+
+    <select id="checkRecord" resultType="com.itl.iap.mes.api.dto.CheckRecordDTO">
+        SELECT t.id            AS id,
+               t.checkNo       AS checkNo,
+               u.CHECK_USER_ID AS checkUserName,
+               t.endTime       AS checkDate,
+               t.dataCollectionId,
+               t.startTime,
+               t.endTime
+        FROM m_repair_check_execute t
+        LEFT JOIN m_repair_check_user u ON t.id = u.CHECK_ID AND u.IDENTITY_TYPE = 0
+        WHERE t.deviceId = #{params.deviceId}
+          AND t.siteId = #{params.site}
+          AND t.state = 1
+    </select>
+    <select id="getCheckCountByUser" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM m_repair_check_execute e
+                 INNER JOIN m_repair_check_user u ON e.checkPlanId = u.CHECK_ID
+        WHERE e.state = 0
+          and u.CHECK_USER_ID = #{userId}
+          and e.siteId = #{site}
+        GROUP BY u.CHECK_USER_ID
+    </select>
+    <select id="checkExecuteStatistics" resultType="com.itl.iap.mes.api.dto.RepairExecuteCountStatisticsDTO">
+        SELECT a.startTime as date,
+            COUNT (*) AS totalCount,
+            SUM (
+                    CASE
+                        WHEN a.startTime = a.executeTime THEN
+                            1
+                        ELSE
+                            0
+                    END
+                ) AS executeCount
+        FROM
+            (
+            SELECT
+            id,
+            CONVERT (DATE, startTime, 23) AS startTime,
+            CONVERT (DATE, executeTime, 23) AS executeTime
+            FROM m_repair_check_execute
+            WHERE
+            siteId = #{site}
+            AND startTime >= #{startTime}
+            AND startTime &lt;= #{endTime}
+            ) a
+        GROUP BY a.startTime;
+    </select>
+    <select id="findById" resultType="com.itl.iap.mes.api.entity.CheckExecute">
+        SELECT t.*,
+               t1.checkPlanName
+        FROM m_repair_check_execute t
+                 LEFT JOIN m_repair_check_plan t1 ON t1.id = t.checkPlanId
+        where t.id = #{id}
+    </select>
+    <select id="getCheckExecuteList" resultType="com.itl.iap.mes.api.dto.CheckExecuteAndPlanDTO">
+        SELECT
+            t.id,
+            t.checkNo,
+            t.checkPlanId,
+            t1.checkPlanName,
+            t.deviceId,
+            t.state,
+            t.operaStartTime,
+            t.operaEndTime,
+            t.dataCollectionId
+        FROM
+            m_repair_check_execute t
+            LEFT JOIN m_repair_check_plan t1 ON t1.id = t.checkPlanId
+            ${ew.customSqlSegment}
+    </select>
+</mapper>

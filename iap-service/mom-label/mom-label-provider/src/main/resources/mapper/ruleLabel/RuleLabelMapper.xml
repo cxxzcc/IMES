@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mom.label.provider.mapper.ruleLabel.RuleLabelMapper">
+    <resultMap type="com.itl.mom.label.api.dto.ruleLabel.RuleLabelShowDto" id="baseMap">
+        <id property="bo" column="bo"/>
+        <result property="ruleLabel" column="ruleLabel"/>
+        <result property="ruleLabelName" column="ruleLabelName"/>
+        <result property="elementType" column="elementType"/>
+        <result property="codeRuleBo" column="codeRuleBo"/>
+        <result property="codeRuleType" column="codeRuleType"/>
+        <result property="labelBo" column="labelBo"/>
+        <result property="label" column="label"/>
+        <result property="labelType" column="labelType"/>
+
+        <result property="documentType" column="documentType"/>
+
+        <result property="templateType" column="templateType"/>
+        <result property="lodopText" column="lodopText"/>
+
+        <collection property="details" ofType="com.itl.mom.label.api.entity.ruleLabel.RuleLabelDetail">
+            <result property="ruleVar" column="ruleVar"/>
+            <result property="ruleVal" column="ruleVal"/>
+            <result property="isCustom" column="isCustom"/>
+            <result property="isDetail" column="isDetail"/>
+            <result property="name" column="name"/>
+
+            <result property="labelParamType" column="labelParamType"/>
+
+            <result property="templateArg" column="templateArg"/>
+            <result property="type" column="type"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="getCustoms" resultType="java.lang.String">
+        SELECT
+        CD_FIELD
+        FROM m_custom_data
+        WHERE CUSTOM_DATA_TYPE IN
+        <foreach collection="list" open="(" close=")" separator="," item="value">
+            #{value}
+        </foreach>
+        AND SITE = #{site}
+    </select>
+
+    <select id="queryList" resultMap="baseMap">
+        SELECT
+        irl.BO AS bo,
+        irl.ELEMENT_Type AS elementType,
+        irl.RULE_LABEL AS ruleLabel,
+        irl.RULE_LABEL_NAME AS ruleLabelName,
+        irl.CODE_RULE_BO AS codeRuleBo,
+        cr.CODE_RULE_TYPE AS codeRuleType,
+        irl.DOCUMENT_TYPE AS documentType,
+        irl.LABEL_BO AS labelBo,
+        l.LABEL AS label,
+        irl.LABEL_TYPE AS labelType
+        FROM label_rule_label  irl
+        LEFT JOIN m_code_rule  cr ON cr.BO = irl.CODE_RULE_BO
+        LEFT JOIN label_label  l ON l.ID = irl.LABEL_BO
+        WHERE irl.SITE = #{queryDto.site} AND irl.ELEMENT_TYPE = #{queryDto.elementType}
+        <if test="queryDto.bo != null and queryDto.bo !=''">
+            AND irl.BO = #{queryDto.bo}
+        </if>
+        <if test="queryDto.ruleLabel != null and queryDto.ruleLabel !=''">
+            AND irl.RULE_LABEL like '%${queryDto.ruleLabel}%'
+        </if>
+        <if test="queryDto.ruleLabelName != null and queryDto.ruleLabelName !=''">
+            AND irl.RULE_LABEL_NAME like '%${queryDto.ruleLabelName}%'
+        </if>
+    </select>
+
+    <select id="getColumns" resultType="com.itl.mom.label.api.dto.ruleLabel.ItemColumns" databaseId="ms-sql">
+        (SELECT c.name AS columnName,
+        e.value AS columnLabel
+        FROM sys.tables t
+        INNER JOIN sys.columns c ON c.object_id = t.object_id
+        LEFT JOIN sys.extended_properties e ON e.major_id = c.object_id AND e.minor_id = c.column_id
+        WHERE t.name = #{tableName}
+        AND c.name NOT IN ('CREATE_DATE', 'MODIFY_DATE', 'CREATE_USER', 'MODIFY_USER')
+        AND c.name NOT LIKE '%BO'
+        )
+        <if test="customDataType != null and customDataType !=''">
+            UNION
+            (SELECT CD_FIELD AS columnName,
+            CD_LABEL   AS columnLabel
+            FROM m_custom_data
+            WHERE CUSTOM_DATA_TYPE = #{customDataType}
+            AND SITE = #{site}
+            )
+        </if>
+    </select>
+    <select id="getColumns" resultType="com.itl.mom.label.api.dto.ruleLabel.ItemColumns" databaseId="oracle">
+        (
+        select
+        LOWER(atC.TABLE_NAME || '.'  || ATC.COLUMN_NAME)  as columnName,  LOWER(utc.comments || '.'  ||  ucc.comments)  as  columnLabel
+        from
+        (select ATC.OWNER,atC.TABLE_NAME,ATC.COLUMN_NAME,ATC.DATA_TYPE,ATC.DATA_LENGTH,ATC.NULLABLE
+        from all_tab_columns ATC where OWNER ='MES_DEV' ) atc
+        left outer join user_col_comments ucc on atc.table_name=ucc.table_name and atc.column_name=ucc.column_name
+        left outer join user_tab_comments utc on atc.table_name=utc.table_name
+        where  atC.TABLE_NAME = #{tableName}
+        and   ATC.COLUMN_NAME not in('CREATE_DATE', 'MODIFY_DATE', 'CREATE_USER', 'MODIFY_USER')
+        AND ATC.COLUMN_NAME NOT LIKE '%BO'
+        )
+        <if test="customDataType != null and customDataType !=''">
+            UNION
+            (SELECT CD_FIELD   AS columnName,
+            CD_LABEL   AS columnLabel
+            FROM m_custom_data
+            WHERE CUSTOM_DATA_TYPE = #{customDataType}
+            AND SITE = #{site}
+            )
+        </if>
+    </select>
+    <select id="getColumnsP" resultType="com.itl.mom.label.api.dto.ruleLabel.ItemColumns" databaseId="ms-sql">
+        (SELECT concat(t.name, '.', c.name) AS columnName,
+        e.value AS columnLabel
+        FROM sys.tables t
+        INNER JOIN sys.columns c ON c.object_id = t.object_id
+        LEFT JOIN sys.extended_properties e ON e.major_id = c.object_id AND e.minor_id = c.column_id
+        WHERE t.name = 'P_PACK_LEVEL' OR t.name = 'P_PACKING'
+        AND c.name NOT IN ('CREATE_DATE', 'MODIFY_DATE', 'CREATE_USER', 'MODIFY_USER')
+        AND c.name NOT LIKE '%BO'
+        )
+        <if test="customDataType != null and customDataType !=''">
+            UNION
+            (SELECT CD_FIELD AS columnName,
+            CD_LABEL AS columnLabel
+            FROM m_custom_data
+            WHERE CUSTOM_DATA_TYPE = #{customDataType}
+            AND SITE = #{site}
+            )
+        </if>
+    </select>
+
+    <select id="getColumnsP" resultType="com.itl.mom.label.api.dto.ruleLabel.ItemColumns" databaseId="oracle">
+        (
+        select
+        LOWER( atC.TABLE_NAME || '.'  || ATC.COLUMN_NAME)  as columnName, LOWER( utc.comments || '.'  ||  ucc.comments ) as  columnLabel
+        from
+        (select ATC.OWNER,atC.TABLE_NAME,ATC.COLUMN_NAME,ATC.DATA_TYPE,ATC.DATA_LENGTH,ATC.NULLABLE
+        from all_tab_columns ATC where OWNER ='MES_DEV' ) atc
+        left outer join user_col_comments ucc on atc.table_name=ucc.table_name and atc.column_name=ucc.column_name
+        left outer join user_tab_comments utc on atc.table_name=utc.table_name
+        where  atC.TABLE_NAME ='P_PACK_LEVEL' and   atC.TABLE_NAME ='P_PACKING'
+        and   ATC.COLUMN_NAME not in('CREATE_DATE', 'MODIFY_DATE', 'CREATE_USER', 'MODIFY_USER')
+        AND ATC.COLUMN_NAME NOT LIKE '%BO'
+        )
+        <if test="customDataType != null and customDataType !=''">
+            UNION
+            (SELECT CD_FIELD AS columnName,
+            CD_LABEL AS columnLabel
+            FROM m_custom_data
+            WHERE CUSTOM_DATA_TYPE = #{customDataType}
+            AND SITE = #{site}
+            )
+        </if>
+    </select>
+
+    <select id="getLabelEntityParams" resultType="com.itl.mom.label.api.entity.label.LabelEntityParams">
+        SELECT a.name,
+               a.code,
+               a.IS_FILE as isFile
+        FROM label_label_params a
+                 JOIN label_label b ON a.LABEL_ID = b.id
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="getByBo" resultMap="baseMap">
+        SELECT irl.BO                AS bo,
+               irl.RULE_LABEL        AS ruleLabel,
+               irl.RULE_LABEL_NAME   AS ruleLabelName,
+               irl.ELEMENT_TYPE      AS elementType,
+               irl.CODE_RULE_BO      AS codeRuleBo,
+               irl.DOCUMENT_TYPE     AS documentType,
+               cr.CODE_RULE_TYPE     AS codeRuleType,
+               irl.LABEL_BO          AS labelBo,
+               l.LABEL               AS label,
+               irl.LABEL_TYPE        AS labelType,
+               irld.RULE_VAR         AS ruleVar,
+               irld.RULE_VAL         AS ruleVal,
+               irld.TEMPLATE_ARG     AS templateArg,
+               irld.TYPE             AS type,
+               irld.IS_CUSTOM        AS isCustom,
+               irld.IS_DETAIL        AS isDetail,
+               irld.NAME             AS name,
+               irld.LABEL_PARAM_TYPE AS labelParamType,
+               l.TEMPLATE_TYPE       AS templateType,
+               l.LODOP_TEXT          AS lodopText
+        FROM label_rule_label  irl
+                 LEFT JOIN m_code_rule  cr ON cr.BO = irl.CODE_RULE_BO
+                 LEFT JOIN label_label  l ON l.ID = irl.LABEL_BO
+                 LEFt JOIN label_rule_label_detail  irld ON irld.IRL_BO = irl.BO
+        WHERE irl.BO = #{bo}
+    </select>
+
+    <select id="getByCode" resultMap="baseMap">
+        SELECT irl.BO                AS bo,
+               irl.RULE_LABEL        AS ruleLabel,
+               irl.RULE_LABEL_NAME   AS ruleLabelName,
+               irl.ELEMENT_TYPE      AS elementType,
+               irl.CODE_RULE_BO      AS codeRuleBo,
+               irl.DOCUMENT_TYPE     AS documentType,
+               cr.CODE_RULE_TYPE     AS codeRuleType,
+               irl.LABEL_BO          AS labelBo,
+               l.LABEL               AS label,
+               irl.LABEL_TYPE        AS labelType,
+               irld.RULE_VAR         AS ruleVar,
+               irld.RULE_VAL         AS ruleVal,
+               irld.TEMPLATE_ARG     AS templateArg,
+               irld.TYPE             AS type,
+               irld.LABEL_PARAM_TYPE AS labelParamType,
+               l.TEMPLATE_TYPE       AS templateType,
+               l.LODOP_TEXT          AS lodopText
+        FROM label_rule_label  irl
+                 LEFT JOIN m_code_rule  cr ON cr.BO = irl.CODE_RULE_BO
+                 LEFT JOIN label_label  l ON l.ID = irl.LABEL_BO
+                 LEFt JOIN label_rule_label_detail  irld ON irld.IRL_BO = irl.BO
+        WHERE irl.RULE_LABEL = #{ruleLabel}
+          and irl.ELEMENT_TYPE = #{elementType}
+    </select>
+
+</mapper>
+

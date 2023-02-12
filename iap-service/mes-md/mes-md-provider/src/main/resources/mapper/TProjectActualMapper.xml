@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.core.provider.mapper.TProjectActualMapper">
+
+    <select id="pageList" resultType="com.itl.mes.core.api.vo.TProjectActualVO">
+        SELECT
+            d.code as baseCode,
+            d.name as baseName,
+            e.name as instrumentTypeName,
+            c.device,
+            c.device_name AS deviceName,
+            c.BASE_LOCATION AS baseLocation,
+            a.code AS projectCode,
+            a.name AS projectName,
+            b.use_date AS useDate,
+            b.standard,
+            b.range,
+            b.result,
+            b.actual,
+            b.actual1,
+            b.actual2,
+            b.actual3,
+            b.actual4,
+            b.actual5,
+            b.actual6,
+            b.actual7,
+            b.actual8,
+            b.actual9,
+            b.actual10,
+            b.createBy,
+            b.createTime,
+            a.standardDeviation,
+            a.unit,
+            a.digital
+        FROM
+            t_project_actual b
+            LEFT JOIN t_project a ON b.project_code = a.code
+            LEFT JOIN m_device c ON c.bo = b.device_bo
+            Left JOIN t_base d on d.id = c.BASE_ID
+            LEFT JOIN t_instrument_type e on e.id = c.instrument_type_id
+            ${ew.customSqlSegment}
+        order by c.is_standard desc
+    </select>
+</mapper>

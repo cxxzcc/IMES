@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mom.label.provider.mapper.label.LabelPrintLogMapper">
+
+    <select id="findList" resultType="com.itl.mom.label.api.vo.LabelPrintLogVo">
+
+            SELECT
+                PRINT_USER printUser,
+                PRINT_DATE printDate,
+                COUNT ( 1 ) printCount
+            FROM
+                label_label_print_log
+            WHERE
+                LABEL_PRINT_BO = #{labelPrintBo}
+            GROUP BY
+                PRINT_USER,
+                PRINT_DATE
+
+    </select>
+
+    <select id="findDetailList" resultType="com.itl.mom.label.api.vo.LabelPrintLogVo">
+
+            SELECT
+                PRINT_USER printUser,
+                PRINT_DATE printDate
+            FROM
+                label_label_print_log
+            WHERE
+                LABEL_PRINT_DETAIL_BO = #{labelPrintDetailBo}
+
+    </select>
+    <select id="getPrintLogByStation" resultType="com.itl.mom.label.api.vo.LabelPrintLogVo">
+        select a.SN as sn,
+           c.${snQueryDto.queryColumn} as elementCode,
+           z.STATE as state,
+           z.PRINT_COUNT as printCount,
+           z.PRINT_USER as printUser,
+           z.PRINT_DATE as printDate
+        from ${snQueryDto.tableName} c
+        left join label_label_print b on b.ELEMENT_BO = c.BO
+        left join label_label_print_log z on z.LABEL_PRINT_BO = b.BO
+        left join z_sn a on z.LABEL_PRINT_DETAIL_BO = a.BO
+
+    </select>
+</mapper>

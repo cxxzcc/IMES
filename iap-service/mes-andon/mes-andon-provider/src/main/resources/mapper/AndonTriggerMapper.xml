@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.andon.provider.mapper.AndonTriggerMapper">
+
+    <select id="findList" resultType="com.itl.mes.andon.api.vo.AndonTriggerAndonVo" databaseId="ms-sql">
+        SELECT
+        a.BO as andonBo,
+        a.ANDON_NAME as andonName,
+        a.RESOURCE_TYPE as resourceType,
+        a.ITEM_BO as itemBo,
+        a.DEVICE_BO as deviceBo,
+        b.ABNORMAL_REMARK as abnormalRemark,
+        t.ANDON_TYPE_TAG as andonTypeTag,
+        t.BO as andonTypeBo,
+        t.ANDON_TYPE as andonType,
+        t.ANDON_TYPE_NAME as andonTypeName,
+        CASE
+            WHEN b.STATE IS NULL
+                THEN '2'
+                ELSE b.STATE
+            END AS STATE
+        FROM
+        andon_andon a
+        LEFT JOIN andon_record b on a.BO = b.ANDON_BO
+        left join andon_type t on a.ANDON_TYPE_BO = t.BO
+        <where>
+            1=1 AND a.SITE = #{site}
+            <if test="idList!=null and idList.size()>0">
+                and ANDON_BOX_BO IN
+                <foreach item="item" collection="idList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="stationBo!=null and stationBo!=''">
+                AND a.STATION_BO=#{stationBo}
+            </if>
+            <if test="productLineBo!=null and productLineBo!=''">
+                AND a.PRODUCT_LINE_BO=#{productLineBo}
+            </if>
+            <if test="workShopBo!=null and workShopBo!=''">
+                AND a.WORK_SHOP_BO=#{workShopBo}
+            </if>
+            <if test="deviceBo!=null and deviceBo!=''">
+                AND a.DEVICE_BO=#{deviceBo}
+            </if>
+        </where>
+        ORDER BY STATE
+    </select>
+
+    <select id="findList" resultType="com.itl.mes.andon.api.vo.AndonTriggerAndonVo" databaseId="oracle">
+
+        SELECT
+        a.BO as andonBo,
+        a.ANDON_NAME as andonName,
+        a.RESOURCE_TYPE as resourceType,
+        a.ITEM_BO as itemBo,
+        a.DEVICE_BO as deviceBo,
+        t.BO as andonTypeBo,
+        t.ANDON_TYPE as andonType,
+        t.ANDON_TYPE_NAME as andonTypeName,
+        CASE
+            WHEN b.STATE IS NULL
+                THEN '2'
+                ELSE b.STATE
+            END AS STATE
+        FROM
+        andon_andon a LEFT JOIN andon_record b on a.BO = b.ANDON_BO
+        WHERE
+        ANDON_BOX_BO IN
+        <foreach item="item" collection="idList" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY STATE
+    </select>
+
+    <select id="getStationList" resultType="java.util.Map" databaseId="ms-sql">
+
+        select a.STATION_BO as stationBo, b.STATION as station
+        from iap_sys_user_station_t a
+                 left join m_station b on a.STATION_BO = b.BO
+        where a.user_id = #{userId}
+          and a.site = #{site}
+
+    </select>
+
+    <select id="getStationList" resultType="java.util.Map" databaseId="oracle">
+
+        select a.STATION_BO as "stationBo", b.STATION as "station"
+        from iap_sys_user_station_t a
+                 left join m_station b on a.STATION_BO = b.BO
+        where a.user_id = #{userId}
+          and a.site = #{site}
+
+    </select>
+
+
+    <select id="getProductLineBo" resultType="java.lang.String" databaseId="ms-sql">
+
+        select PRODUCT_LINE_BO as productLineBo
+        from m_station
+        where bo = #{stationBo}
+    </select>
+
+    <select id="getProductLineBo" resultType="java.lang.String" databaseId="oracle">
+
+        select PRODUCT_LINE_BO as productLineBo
+        from m_station
+        where bo = #{stationBo}
+    </select>
+
+    <select id="getLineBo" resultType="java.lang.String">
+        select PRODUCT_LINE_BO as productLineBo from m_station
+        where bo in
+        <foreach collection="stationBos" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getWorkShopBo" resultType="java.lang.String" databaseId="ms-sql">
+
+        select WORK_SHOP_BO as workShopBo
+        from m_product_line
+        where bo = #{productLineBo}
+
+    </select>
+
+    <select id="getWorkShopBo" resultType="java.lang.String" databaseId="oracle">
+
+        select WORK_SHOP_BO as workShopBo
+        from m_product_line
+        where bo = #{productLineBo}
+
+    </select>
+
+    <select id="getWorkShopBoList" resultType="java.lang.String">
+        select WORK_SHOP_BO as workShopBo
+        from m_product_line
+        where bo in
+        <foreach collection="productLineBoList" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getDeviceList" resultType="java.util.Map" databaseId="ms-sql">
+
+        select BO as deviceBo, DEVICE as device
+        from m_device
+        where station_bo = #{stationBo}
+
+    </select>
+
+    <select id="getDeviceList" resultType="java.util.Map" databaseId="oracle">
+
+        select BO as "deviceBo", DEVICE as "device"
+        from m_device
+        where station_bo = #{stationBo}
+
+    </select>
+
+    <select id="getPushUser" resultType="com.itl.mes.andon.api.vo.AndonTriggerPushUserVo" databaseId="ms-sql">
+
+        select u.user_name as userName, u.real_name as realName
+        from andon_andon aa
+                 left join andon_push ap on aa.ANDON_PUSH_BO = ap.BO
+                 LEFT JOIN andon_grade_push agp on ap.BO = agp.ANDON_PUSH_BO
+                 LEFT JOIN iap_sys_user_t u on agp.PUSH_TO_USER = u.user_name
+        where aa.BO = #{andonBo}
+        union all
+        select u.user_name as userName, u.real_name as realName
+        from andon_andon aa
+                 left join andon_push ap on aa.ANDON_PUSH_BO = ap.BO
+                 LEFT JOIN andon_grade_push agp on ap.BO = agp.ANDON_PUSH_BO
+                 LEFT JOIN iap_sys_position_t sp on agp.PUSH_TO_POSITION = sp.name
+                 LEFT JOIN iap_sys_position_user_t pu on sp.id = pu.position_id
+                 LEFT JOIN iap_sys_user_t u on pu.user_id = u.id
+        where aa.BO = #{andonBo}
+
+    </select>
+
+    <select id="getPushUser" resultType="com.itl.mes.andon.api.vo.AndonTriggerPushUserVo" databaseId="oracle">
+
+        select u.user_name as userName, u.real_name as realName
+        from andon_andon aa
+                 left join andon_push ap on aa.ANDON_PUSH_BO = ap.BO
+                 LEFT JOIN andon_grade_push agp on ap.BO = agp.ANDON_PUSH_BO
+                 LEFT JOIN iap_sys_user_t u on agp.PUSH_TO_USER = u.user_name
+        where aa.BO = #{andonBo}
+        union all
+        select u.user_name as userName, u.real_name as realName
+        from andon_andon aa
+                 left join andon_push ap on aa.ANDON_PUSH_BO = ap.BO
+                 LEFT JOIN andon_grade_push agp on ap.BO = agp.ANDON_PUSH_BO
+                 LEFT JOIN iap_sys_position_t sp on agp.PUSH_TO_POSITION = sp.name
+                 LEFT JOIN iap_sys_position_user_t pu on sp.id = pu.position_id
+                 LEFT JOIN iap_sys_user_t u on pu.user_id = u.id
+        where aa.BO = #{andonBo}
+
+    </select>
+
+    <select id="getItem" resultType="java.lang.String" databaseId="ms-sql">
+
+        select item
+        from m_item
+        where bo = #{itemBo}
+    </select>
+
+    <select id="getItem" resultType="java.lang.String" databaseId="oracle">
+
+        select item
+        from m_item
+        where bo = #{itemBo}
+    </select>
+</mapper>

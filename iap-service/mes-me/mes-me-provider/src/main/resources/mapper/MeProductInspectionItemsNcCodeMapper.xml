@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.me.provider.mapper.MeProductInspectionItemsNcCodeMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.itl.mes.core.api.entity.NcCode" id="ncCodeMap">
+        <result property="bo" column="bo"/>
+        <result property="site" column="site"/>
+        <result property="ncCode" column="NC_CODE"/>
+        <result property="ncName" column="NC_NAME"/>
+        <result property="ncDesc" column="NC_DESC"/>
+        <result property="state" column="state"/>
+        <result property="ncType" column="NC_TYPE"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="maxNcLimit" column="MAX_NC_LIMIT"/>
+        <result property="severity" column="SEVERITY"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="createUser" column="create_user"/>
+        <result property="modifyDate" column="MODIFY_DATE"/>
+        <result property="modifyUser" column="modify_user"/>
+    </resultMap>
+
+    <select id="selectByNcCode" resultMap="ncCodeMap">
+        SELECT
+            nc.bo,
+            nc.site,
+            nc.nc_code,
+            nc.nc_name,
+            nc.nc_desc,
+            nc.state,
+            nc.nc_type,
+            nc.priority,
+            nc.MAX_NC_LIMIT,
+            nc.severity,
+            nc.create_date,
+            nc.create_user,
+            nc.modify_date,
+            nc.modify_user
+        FROM
+            m_nc_code nc
+        WHERE
+            site = #{ncCode.site}
+        <if test="ncCode.bo != null and ncCode.bo != ''">
+            and nc.bo = #{ncCode.bo}
+        </if>
+        <if test="ncCode.ncCode != null and ncCode.ncCode != ''">
+            and nc.NC_CODE = #{ncCode.ncCode}
+        </if>
+        <if test="ncCode.state != null and ncCode.state != ''">
+            and nc.state = #{ncCode.state}
+        </if>
+    </select>
+
+
+    <select id="listItemNcCodesTwo" resultType="com.itl.mes.me.api.vo.MeProductInspectionItemsNcCodeVo">
+        SELECT
+            inc.bo as bo,
+            inc.INSPECTION_ITEM_ID as inspectionItemId,
+            inc.ITEM_TYPE as itemType,
+            inc.SERIAL_NUM as serialNum,
+            inc.NC_BO as ncBo,
+            nc.nc_code as ncCode,
+            nc.nc_name as ncName,
+            nc.nc_desc as ncDesc,
+            nc.nc_type as ncType,
+            nc.state as state,
+            nc.priority as priority,
+            nc.max_nc_limit as maxNcLimit,
+            nc.severity as severity,
+            nc.site as site
+        FROM
+            me_product_inspection_items_nc_code inc
+            left join m_nc_code nc on inc.nc_bo = nc.bo
+        WHERE
+        inc.site = #{ncCode.site}
+        <if test="ncCode.bo != null and ncCode.bo != ''">
+            and inc.bo = #{ncCode.bo}
+        </if>
+        <if test="ncCode.inspectionItemId != null and ncCode.inspectionItemId != ''">
+            and inc.INSPECTION_ITEM_ID = #{ncCode.inspectionItemId}
+        </if>
+        <if test="ncCode.itemType != null and ncCode.itemType != ''">
+            and inc.ITEM_TYPE = #{ncCode.itemType}
+        </if>
+        <if test="ncCode.ncBo != null and ncCode.ncBo != ''">
+            and inc.NC_BO = #{ncCode.ncBo}
+        </if>
+        <if test="ncCode.ncCode != null and ncCode.ncCode != ''">
+            and nc.NC_CODE = #{ncCode.ncCode}
+        </if>
+        <if test="ncCode.state != null and ncCode.state != ''">
+            and nc.state = #{ncCode.state}
+        </if>
+        order by inc.INSPECTION_ITEM_ID,inc.ITEM_TYPE,inc.SERIAL_NUM asc
+    </select>
+</mapper>

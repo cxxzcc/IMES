@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.pp.provider.mapper.ScheduleProductionLineMapper">
+
+    <select id="findList" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleProductionLineRespDTO">
+            select
+            a.QUANTITY as quantity,
+            a.START_DATE as startDate,
+            a.END_DATE as endDate,
+            b.PRODUCT_LINE_DESC as productionLineName,
+            b.BO as productionLineBo,
+            a.BO as bo,
+            null as stationBo,
+            null as stationName
+            from
+            p_schedule_production_line a,
+            m_product_line b
+            where a.PRODUCTION_LINE_BO = b.BO
+            and a.STATION_BO = '0'
+            and a.SCHEDULE_BO = #{scheduleProductionLineQueryDTO.scheduleBo}
+
+    </select>
+
+    <select id="findTwoList" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleProductionLineSaveTwoDTO">
+        SELECT
+            spl.bo AS bo,-- 排程产线BO
+            spl.SCHEDULE_BO AS scheduleBo,-- 所属排程BO
+            spl.WORK_SHOP_BO AS workShopBo,-- 车间BO
+            spl.WORK_SHOP AS workShop,-- 车间编号或名称
+            pl.BO AS productionLineBo,-- 产线ID
+            pl.PRODUCT_LINE AS productionLineCode,-- 产线编号
+            pl.PRODUCT_LINE_DESC AS productionLineDesc,-- 产线描述
+            cs.id as shiftBo, -- 班次ID
+            cs.code as shiftCode, -- 班次编号
+            cs.name as shiftName, -- 班次名称
+            spl.QUANTITY AS quantity,-- 产线班次排程数量
+            spl.START_DATE AS startDate,-- 产线排程开始时间
+            spl.END_DATE AS endDate,-- 产线排程结束时间
+            spl.SHOP_ORDER AS shopOrder,-- 工单号
+            spl.state AS state -- 任务状态
+        FROM
+            p_schedule a -- 排程
+                LEFT JOIN p_schedule_production_line spl ON a.bo = spl.SCHEDULE_BO -- 排程产线
+                LEFT JOIN m_product_line pl ON pl.bo = spl.PRODUCTION_LINE_BO -- 产线信息
+                LEFT JOIN p_class_frequency cs ON cs.id = spl.shift_bo -- 班次
+        WHERE
+            1 =1
+            <if test="bo != null and bo != ''">
+                AND spl.bo = #{bo}
+            </if>
+            <if test="scheduleBo != null and scheduleBo != ''">
+                AND spl.SCHEDULE_BO = #{scheduleBo}
+            </if>
+            <if test="workShopBo != null and workShopBo != ''">
+                AND spl.WORK_SHOP_BO =#{workShopBo}
+            </if>
+            <if test="workShop != null and workShop != ''">
+                AND spl.WORK_SHOP = #{workShop}
+            </if>
+            <if test="productionLineBo != null and productionLineBo != ''">
+                AND pl.BO = #{productionLineBo}
+            </if>
+            <if test="productionLineCode != null and productionLineCode != ''">
+                AND pl.PRODUCT_LINE = #{productionLineCode}
+            </if>
+            <if test="productionLineDesc != null and productionLineDesc != ''">
+                AND pl.PRODUCT_LINE_DESC LIKE '${productionLineDesc}%'
+            </if>
+            <if test="shiftBo != null and shiftBo != ''">
+                AND cs.id = #{shiftBo}
+            </if>
+            <if test="shiftCode != null and shiftCode != ''">
+                AND cs.code = #{shiftCode}
+            </if>
+            <if test="shiftName != null and shiftName != ''">
+                AND cs.name = #{shiftName}
+            </if>
+            <if test="quantity != null and quantity != ''">
+                AND spl.QUANTITY = #{quantity}
+            </if>
+            <if test="shopOrder != null and shopOrder != ''">
+                AND spl.SHOP_ORDER = #{shopOrder}
+            </if>
+            <if test="state != null and state != ''">
+                AND spl.state = #{state}
+            </if>
+        ORDER BY spl.START_DATE DESC
+    </select>
+
+    <select id="findTwoById" resultType="com.itl.mes.pp.api.dto.schedule.ScheduleProductionLineSaveTwoDTO">
+        SELECT
+        spl.bo AS bo,-- 排程产线BO
+        spl.SCHEDULE_BO AS scheduleBo,-- 所属排程BO
+        spl.WORK_SHOP_BO AS workShopBo,-- 车间BO
+        spl.WORK_SHOP AS workShop,-- 车间编号或名称
+        pl.BO AS productionLineBo,-- 产线ID
+        pl.PRODUCT_LINE AS productionLineCode,-- 产线编号
+        pl.PRODUCT_LINE_DESC AS productionLineDesc,-- 产线描述
+        cs.id as shiftBo, -- 班次ID
+        cs.code as shiftCode, -- 班次编号
+        cs.name as shiftName, -- 班次名称
+        spl.QUANTITY AS quantity,-- 产线班次排程数量
+        spl.START_DATE AS startDate,-- 产线排程开始时间
+        spl.END_DATE AS endDate,-- 产线排程结束时间
+        spl.SHOP_ORDER AS shopOrder,-- 工单号
+        spl.state AS state -- 任务状态
+        FROM
+        p_schedule a -- 排程
+        LEFT JOIN p_schedule_production_line spl ON a.bo = spl.SCHEDULE_BO -- 排程产线
+        LEFT JOIN m_product_line pl ON pl.bo = spl.PRODUCTION_LINE_BO -- 产线信息
+        LEFT JOIN p_class_frequency cs ON cs.id = spl.shift_bo -- 班次
+        WHERE
+            spl.bo = #{bo}
+        ORDER BY spl.START_DATE DESC
+    </select>
+</mapper>

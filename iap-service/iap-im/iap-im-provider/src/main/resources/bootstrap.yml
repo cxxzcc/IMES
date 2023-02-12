@@ -1,0 +1,175 @@
+group-id: iap
+
+spring:
+  aop:
+    proxy-target-class: true # 使用CGLIB
+  application:
+    name: iap-imserver-provider #设置项目名称
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost:8848} #Nacos服务接口(不能加http前缀)，直接访问localhost:8848/nacos可以进入管页
+        namespace: ${NAME_SPACE:mesdev}
+      config:
+        server-addr: ${NACOS_HOST:localhost:8848}
+        file-extension: yml # 配置文件的格式，默认为properties
+        namespace: ${NAME_SPACE:mesdev}
+        group: ${group-id}
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: ${SENTINEL_HOST:localhost:9901}
+      # 服务启动直接建立心跳连接
+      eager: true
+  ##################################################################
+  #                         JDBC Config                            #
+  ##################################################################
+  datasource:
+    druid:
+      #url: jdbc:mysql://121.37.141.5:3306/itl-iap?useUnicode=true&serverTimezone=UTC&characterEncoding=UTF-8&useSSL=false&rewriteBatchedStatements=true
+      #username: itliap
+      #password: itlIap#123
+      url: jdbc:sqlserver://120.24.161.71:1433;DatabaseName=mes_dev
+      username: sa
+      password: Sap12345
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      max-active: 20
+      initial-size: 1
+      max-wait: 60000
+      min-idle: 1
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: select 'x'
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-open-prepared-statements: 20
+      filters: stat, wall
+      # 监控配置
+      web-stat-filter:
+        url-pattern: /*
+        exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
+      stat-view-servlet:
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: sysadmin
+        login-password: "000000"
+      #连接池重连检测
+      testConnectionOnCheckout: false
+      testConnectionOnCheckin: true
+      idleConnectionTestPeriod: 3600 #单位是妙,即1小时
+    #nullCatalogMeansCurrent=true&
+    #                         Redis Config                           #
+    ##################################################################
+  redis:
+    port: 6379
+    host: 127.0.0.1
+    password: itl123
+    lettuce:
+      pool:
+        max-active: 10
+        ax-wait: 10s
+        max-idle: 5
+        min-idle: 1
+    timeout: 60s
+  ##################################################################
+  ##################################################################
+  #                          mybatis 配置                          #
+  ##################################################################
+mybatis-plus:
+  mapper-locations: classpath:mapper/*Mapper.xml
+  typeAliasesPackage: com.itl.iap.system.provider.entity
+  configuration:
+    database-id: ms-sql
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+    ##################################################################
+
+  #                         CIM Config                             #
+  ##################################################################
+cim:
+  app:
+    port: 23456
+  web:
+    port: 34567
+apple:
+  apns:
+    debug: false
+  p12:
+    password: your p12 password
+    file: /apns/lvxin.p12
+##################################################################
+#                         System Config                          #
+##################################################################
+sys:
+  message:
+    dispath:
+      url: http://%1$s:${server.port}/api/message/dispatch
+  dashboard:
+    template:
+      multipart:
+        max-file-size: 5MB
+    logo:
+      multipart:
+        max-file-size: 200KB
+  app:
+    multipart:
+      max-file-size: 50MB
+  local:
+    bucket:
+      list: group-icon|user-icon|user-banner|sqlite|chat-space|moment-space|chat-wallpaper|moment-wallpaper|microapp-icon|microserver-icon
+  snowflake:
+    work:
+      id: 1
+    data:
+      center:
+        id: 1
+  manager:
+    name: \u7CFB\u7EDF\u7BA1\u7406\u5458
+    account: system
+    password: system
+web:
+  file:
+    url: http://124.70.193.184:8081/api/imServer/files/%s/%s
+
+##################################################################
+#                         OSS Config                             #
+##################################################################
+
+aliyun:
+  oss:
+    switch: off
+    endpoint: http://oss-cn-hangzhou.aliyuncs.com
+    accessid: xxxxxxxxx
+    accesskey: xxxxxxxxx
+    bucket: xxxxxxxxx
+##################################################################
+#                         Feign Config                           #
+##################################################################
+feign:
+  sentinel:
+    enabled: true
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+#        shared-dataids: mysql.yml #  需要使用的配置文件
+#        refreshable-dataids: mysql.yml # 需要实时刷新的配置文件
+logging:
+  level:
+    IRemoteMessageService: debug
+    ISubscriberEventService: debug
+  file:
+    name: ./${spring.application.name}.log

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ProcessRouteFitProductGroupMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.itl.mes.core.api.entity.ProcessRouteFitProductGroup">
+        <id column="id" property="id"/>
+        <result column="route_code" property="routeCode"/>
+        <result column="item_group" property="itemGroup"/>
+        <result column="order_type" property="orderType"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+
+
+    <select id="getGroupRoute" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+        route.ROUTER as routeCode,
+        route.ROUTER_NAME as routerName,
+        ig.ITEM_GROUP as itemGroup,
+        ig.GROUP_NAME as groupName,
+        fit.id as id,
+        fit.order_type as orderType,
+        fit.create_by as createBy,
+        fit.create_date as createDate
+        from process_route_fit_product_group fit
+        join m_router route on route.ROUTER=fit.route_code
+        join m_item_group ig on fit.item_group=ig.ITEM_GROUP
+        <where>
+            <if test="map.routeCode!=null and map.routeCode!=''">
+                and route.ROUTER like '%'+#{map.routeCode}+'%'
+            </if>
+            <if test="map.routerName!=null and map.routerName!=''">
+                and route.ROUTER_NAME like '%'+#{map.routerName}+'%'
+            </if>
+            <if test="map.site!=null and map.site!=''">
+                and route.SITE = #{map.site}
+            </if>
+            <if test="map.itemGroup!=null and map.itemGroup!=''">
+                and ig.ITEM_GROUP like '%'+#{map.itemGroup}+'%'
+            </if>
+            <if test="map.groupName!=null and map.groupName!=''">
+                and ig.GROUP_NAME like '%'+#{map.groupName}+'%'
+            </if>
+            <if test="map.site!=null and map.site!=''">
+                and ig.SITE = #{map.site}
+            </if>
+            <if test="map.orderType!=null and map.orderType!=''">
+                and fit.order_type = #{map.orderType}
+            </if>
+        </where>
+    </select>
+
+</mapper>

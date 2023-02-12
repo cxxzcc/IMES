@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.me.provider.mapper.LabelPrintDetailMapper">
+
+
+    <!--todo me_label_print 表根本没有 唉!-->
+    <select id="findList" resultType="com.itl.mes.me.api.vo.LabelPrintDetailVo">
+
+        select
+        a.BO as bo,
+        c.${labelPrintDetailQueryDto.queryColumn} as elementCode,
+        a.DETAIL_CODE as detailCode,
+        a.LAST_PRINT_USER as lastPrintUser,
+        a.LAST_PRINT_DATE as lastPrintDate,
+        a.PRINT_COUNT as printCount,
+        a.PACKING_QUANTITY as packingQuantity,
+        a.PACKING_MAX_QUANTITY as packingMaxQuantity,
+        a.STATE as state
+        from me_label_print_detail a
+        left join me_label_print b on a.LABEL_PRINT_BO = b.BO
+        left join ${labelPrintDetailQueryDto.tableName} c on b.ELEMENT_BO = c.BO
+        where
+        b.BO = #{labelPrintDetailQueryDto.labelPrintBo}
+        and b.ELEMENT_TYPE = #{labelPrintDetailQueryDto.elementType}
+        ORDER BY a.DETAIL_CODE
+    </select>
+
+    <select id="findPackingLabelPrintDetail" resultType="com.itl.mes.me.api.vo.LabelPrintDetailVo">
+
+        select
+        a.BO as bo,
+        d.${labelPrintDetailQueryDto.queryColumn} as elementCode,
+        a.DETAIL_CODE as detailCode,
+        a.LAST_PRINT_USER as lastPrintUser,
+        a.LAST_PRINT_DATE as lastPrintDate,
+        a.PRINT_COUNT as printCount,
+        a.PACKING_QUANTITY as packingQuantity,
+        a.PACKING_MAX_QUANTITY as packingMaxQuantity,
+        a.STATE as state
+        from me_label_print_detail a
+        left join me_label_print b on a.LABEL_PRINT_BO = b.BO
+        left join ${labelPrintDetailQueryDto.tableName} c on b.ELEMENT_BO = c.BO
+        left join p_packing d on c.PACKING_BO = d.BO
+        where
+        b.BO = #{labelPrintDetailQueryDto.labelPrintBo}
+        and b.ELEMENT_TYPE = #{labelPrintDetailQueryDto.elementType}
+        ORDER BY a.DETAIL_CODE
+    </select>
+</mapper>

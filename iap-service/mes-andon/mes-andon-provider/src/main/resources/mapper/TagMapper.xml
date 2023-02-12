@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.andon.provider.mapper.TagMapper">
+
+    <resultMap type="com.itl.mes.andon.api.vo.TagVo" id="tagForShowMap">
+        <result property="bo" column="BO"/>
+        <result property="andonTypeTag" column="ANDON_TYPE_TAG"/>
+        <result property="andonTypeTagName" column="ANDON_TYPE_TAG_NAME"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="site" column="SITE"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="modifyDate" column="MODIFY_DATE"/>
+        <result property="modifyUser" column="MODIFY_USER"/>
+    </resultMap>
+
+    <select id="findList" resultMap="tagForShowMap" databaseId="ms-sql">
+        select
+        att.BO,
+        att.ANDON_TYPE_TAG,
+        att.ANDON_TYPE_TAG_NAME,
+        att.CREATE_DATE,
+        att.CREATE_USER,
+        att.MODIFY_DATE,
+        att.MODIFY_USER
+        from andon_type_tag att
+        where att.SITE = #{tagVo.site}
+        <if test="tagVo.andonTypeTag != null and tagVo.andonTypeTag != ''">
+            and att.ANDON_TYPE_TAG like '%'+#{tagVo.andonTypeTag}+'%'
+        </if>
+        <if test="tagVo.andonTypeTagName != null and tagVo.andonTypeTagName != ''">
+            and att.ANDON_TYPE_TAG_NAME like '%'+#{tagVo.andonTypeTagName}+'%'
+        </if>
+        order by att.CREATE_DATE desc
+    </select>
+
+</mapper>

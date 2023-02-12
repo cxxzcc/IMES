@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.me.provider.mapper.ShopOrderPackTempSnMapper">
+    <update id="genSnObj" databaseId="ms-sql">
+        update p_shop_order_pack_sn_temp set sn=#{sn},create_time=#{now}
+        where id=(
+            SELECT
+                top 1
+                b.id
+            from
+                p_shop_order_pack_temp a
+                    left join p_shop_order_pack_sn_temp b
+                              on b.pack_no = a.pack_no
+            where a.shop_order_bo=#{shopOrderBo}
+              and a.station_bo=#{stationBo}
+              and b.pack_no is not NULL
+              and b.sn is  null
+            order by b.pack_no)
+    </update>
+</mapper>

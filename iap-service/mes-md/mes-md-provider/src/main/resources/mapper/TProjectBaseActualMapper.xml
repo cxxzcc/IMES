@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.TProjectBaseActualMapper">
+
+    <select id="pageList" resultType="com.itl.mes.core.api.vo.TProjectBaseActualVO">
+        SELECT
+            d.code AS baseCode,
+            d.name AS baseName,
+            a.code AS projectCode,
+            a.name AS projectName,
+            b.use_date AS useDate,
+            b.standard,
+            b.actual,
+            b.range,
+            b.createBy,
+            b.createTime
+        FROM
+            t_project_base_actual b
+            LEFT JOIN t_project a ON b.project_code = a.code
+            LEFT JOIN t_base d ON d.code = b.base_code
+            ${ew.customSqlSegment}
+    </select>
+</mapper>

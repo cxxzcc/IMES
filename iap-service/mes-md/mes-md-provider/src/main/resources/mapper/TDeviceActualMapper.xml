@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.core.provider.mapper.TDeviceActualMapper">
+
+
+    <select id="pageList" resultType="com.itl.mes.core.api.vo.TDeviceActualVO">
+        SELECT
+            a.device_bo as deviceBo,
+            b.device,
+            b.device_name as deviceName,
+            b.BASE_LOCATION as baseLocation,
+            b.BASE_ID as baseId,
+            b.IS_STANDARD as isStandard,
+            a.use_date as useDate,
+            a.standard,
+            a.actual1,
+            a.range,
+            a.result,
+            a.actual2,
+            a.actual3,
+            a.actual4,
+            a.actual5,
+            a.actual6,
+            a.actual7,
+            a.actual8,
+            a.actual9,
+            a.actual10
+        from
+            t_device_actual a
+            INNER JOIN m_device b
+            on b.bo = a.device_bo
+            ${ew.customSqlSegment}
+    </select>
+</mapper>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.system.provider.mapper.IapSysParamTypeMapper">
+
+    <sql id="FIELD">
+        t.id AS id,t.type AS type,t.remark AS remark,t.state AS state,t.site AS site,t.create_date AS createDate,t.create_user AS createUser,t.update_date AS updateDate,t.update_user AS updateUser
+    </sql>
+    <sql id="WHERE_FIELD">
+        <where>
+            AND t.site = #{iapSysParamType.site}
+            <if test="iapSysParamType.type != null and iapSysParamType.type!=''">
+                AND  t.type  LIKE '${iapSysParamType.type}%'
+            </if>
+            <if test="iapSysParamType.state != null">
+                AND  t.state = #{iapSysParamType.state}
+            </if>
+
+        </where>
+    </sql>
+    <select id="findList" parameterType="com.itl.iap.system.api.entity.IapSysParamType" resultType="com.itl.iap.system.api.entity.IapSysParamType">
+        SELECT <include refid="FIELD"/>
+        FROM iap_sys_param_type t
+        <include refid="WHERE_FIELD"/>
+        order by t.CREATE_DATE desc
+    </select>
+
+    <select id="findListByState" parameterType="com.itl.iap.system.api.entity.IapSysParamType" resultType="com.itl.iap.system.api.entity.IapSysParamType">
+        SELECT <include refid="FIELD"/>
+        FROM iap_sys_param_type t
+        <include refid="WHERE_FIELD"/>
+        AND t.STATE = '0'
+        order by t.CREATE_DATE desc
+    </select>
+</mapper>

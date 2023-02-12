@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.me.provider.mapper.SnLogMapper">
+
+
+    <resultMap type="com.itl.mes.me.api.entity.SnLog" id="SnLogMap">
+        <result property="bo" column="BO"/>
+        <result property="site" column="SITE"/>
+        <result property="item" column="ITEM"/>
+        <result property="materialType" column="MATERIAL_TYPE"/>
+        <result property="shopOrder" column="SHOP_ORDER"/>
+        <result property="createQuantity" column="CREATE_QUANTITY"/>
+        <result property="startNumber" column="START_NUMBER"/>
+        <result property="endNumber" column="END_NUMBER"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="itemDesc" column="ITEM_DESC"/>
+        <result property="orderQty" column="ORDER_QTY"/>
+    </resultMap>
+    <select id="getAll" resultMap="SnLogMap" databaseId="ms-sql">
+        select zsl.BO,
+            zsl.SITE,
+            zsl.ITEM,
+            MATERIAL_TYPE,
+            zsl.SHOP_ORDER,
+            CREATE_QUANTITY,
+            START_NUMBER,
+            END_NUMBER,
+            zsl.CREATE_USER,
+            zsl.CREATE_DATE,
+            mi.ITEM_DESC as ITEM_DESC,
+            mso.ORDER_QTY as ORDER_QTY
+        from mes_dev.dbo.z_sn_log zsl
+        join mes_dev.dbo.m_item mi on mi.ITEM=zsl.ITEM
+        join mes_dev.dbo.m_shop_order mso on mso.SHOP_ORDER = zsl.SHOP_ORDER
+        where zsl.SITE = #{site}
+            <if test="snLogDto.item!=null and snLogDto.item!=''">
+                and zsl.ITEM = #{snLogDto.item}
+            </if>
+            <if test="snLogDto.startNumber!=null and snLogDto.startNumber!=''">
+                and zsl.START_NUMBER like  '%${snLogDto.startNumber}%'
+            </if>
+            <if test="snLogDto.endNumber!=null and snLogDto.endNumber!=''">
+               and zsl.END_NUMBER like  '%${snLogDto.endNumber}%'
+            </if>
+            <if test="snLogDto.startTime != null and snLogDto.endTime !=null">
+               and zsl.CREATE_DATE BETWEEN #{snLogDto.startTime} and #{snLogDto.endTime}
+            </if>
+    </select>
+
+    <select id="getAll" resultMap="SnLogMap" databaseId="oracle">
+        select zsl.BO,
+        zsl.SITE,
+        zsl.ITEM,
+        MATERIAL_TYPE,
+        zsl.SHOP_ORDER,
+        CREATE_QUANTITY,
+        START_NUMBER,
+        END_NUMBER,
+        zsl.CREATE_USER,
+        zsl.CREATE_DATE,
+        mi.ITEM_DESC as ITEM_DESC,
+        mso.ORDER_QTY as ORDER_QTY
+        from z_sn_log zsl
+        join m_item mi on mi.ITEM=zsl.ITEM
+        join m_shop_order mso on mso.SHOP_ORDER = zsl.SHOP_ORDER
+        where zsl.SITE = #{site}
+        <if test="snLogDto.item!=null and snLogDto.item!=''">
+            and zsl.ITEM = #{snLogDto.item}
+        </if>
+        <if test="snLogDto.startNumber!=null and snLogDto.startNumber!=''">
+            and zsl.START_NUMBER like  '%${snLogDto.startNumber}%'
+        </if>
+        <if test="snLogDto.endNumber!=null and snLogDto.endNumber!=''">
+            and zsl.END_NUMBER like  '%${snLogDto.endNumber}%'
+        </if>
+        <if test="snLogDto.startTime != null and snLogDto.endTime !=null">
+            and zsl.CREATE_DATE BETWEEN #{snLogDto.startTime} and #{snLogDto.endTime}
+        </if>
+    </select>
+</mapper>

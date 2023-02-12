@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.me.provider.mapper.ShopOrderPackTempMapper">
+
+
+    <select id="getPackTempSn" resultType="com.itl.mes.me.api.vo.ShopOrderPackTempVO">
+        SELECT b.bo     shopOrderBo,
+               b.SHOP_ORDER     shopOrder,
+               c.ITEM_NAME      itemName,
+               a.pack_parent_no packParentNo,
+               a.PACK_NO        packNo,
+               d.PACK_NAME      packName,
+               a.PACK_LEVEL,
+               a.max
+        from p_shop_order_pack_temp a
+                 LEFT JOIN m_shop_order b ON b.bo = a.shop_order_bo
+                 LEFT JOIN M_ITEM c ON c.BO = b.item_bo
+                 LEFT JOIN p_shop_order_pack_rule_detail d ON d.bo = a.pack_bo
+        where 1 = 1
+          and a.station_bo = #{bo}
+        order by a.pack_level asc, a.pack_no asc
+    </select>
+</mapper>

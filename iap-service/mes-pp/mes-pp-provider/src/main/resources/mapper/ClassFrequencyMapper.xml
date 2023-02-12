@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.pp.provider.mapper.ClassFrequencyMapper">
+
+    <select id="findMergeList" resultType="com.itl.mes.pp.api.dto.scheduleplan.ClassSystemFrequencyMergeDTO">
+        SELECT
+        cs.id as classSystemId,
+        cs.code as classSystemCode,
+        cs.name as classSystemName,
+        cs.is_default as classSystemIsDefault,
+        cf.id as classFrequencyID,
+        cf.code as classFrequencyCode,
+        cf.name as classFrequencyName,
+        cf.start_date_str as startDateStr,
+        cf.end_date_str as endDateStr,
+        cf.is_next_day as classFrequencyIsNextDay
+        FROM
+        p_class_system cs
+        RIGHT JOIN p_class_frequency cf ON cs.id = cf.class_system_id
+        <where>
+            <if test="dto.classSystemId != null and dto.classSystemId != ''">
+                and cs.id = #{dto.classSystemId}
+            </if>
+            <if test="dto.classSystemCode != null and dto.classSystemCode != ''">
+                and cs.code = #{dto.classSystemCode}
+            </if>
+            <if test="dto.classSystemName != null and dto.classSystemName != ''">
+                and cs.name = #{dto.classSystemName}
+            </if>
+            <if test="dto.classSystemIsDefault != null">
+                and cs.is_default = #{dto.classSystemIsDefault}
+            </if>
+            <if test="dto.classFrequencyID != null and dto.classFrequencyID != ''">
+                and cf.id = #{dto.classFrequencyID}
+            </if>
+            <if test="dto.classFrequencyCode != null and dto.classFrequencyCode != ''">
+                and cf.code = #{dto.classFrequencyCode}
+            </if>
+            <if test="dto.classFrequencyName != null and dto.classFrequencyName != ''">
+                and cf.name = #{dto.classFrequencyName}
+            </if>
+            <if test="dto.startDateStr != null and dto.startDateStr != ''">
+                and cf.start_date_str = #{dto.startDateStr}
+            </if>
+            <if test="dto.endDateStr != null and dto.endDateStr != ''">
+                and cf.end_date_str = #{dto.endDateStr}
+            </if>
+            <if test="dto.classFrequencyIsNextDay != null">
+                and cf.is_next_day = #{dto.classFrequencyIsNextDay}
+            </if>
+        </where>
+        ORDER BY cs.code,cf.code DESC
+    </select>
+
+
+
+</mapper>

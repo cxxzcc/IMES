@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ShopOrderMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.itl.mes.core.api.entity.ShopOrder">
+        <id column="BO" property="bo"/>
+        <result column="SITE" property="site"/>
+        <result column="SHOP_ORDER" property="shopOrder"/>
+        <result column="CUSTOMER_ORDER_BO" property="customerOrderBo"/>
+        <result column="ORDER_DESC" property="orderDesc"/>
+        <result column="STATE_BO" property="stateBo"/>
+        <result column="IS_OVERFULFILL" property="isOverfulfill"/>
+        <result column="OVERFULFILL_QTY" property="overfulfillQty"/>
+        <result column="SCHEDUL_QTY" property="schedulQty"/>
+        <result column="COMPLETE_QTY" property="completeQty"/>
+        <result column="ORDER_QTY" property="orderQty"/>
+        <result column="RELEASE_QTY" property="releaseQty"/>
+        <result column="SCRAP_QTY" property="scrapQty"/>
+        <result column="ITEM_BO" property="itemBo"/>
+        <result column="PRODUCT_LINE_BO" property="productLineBo"/>
+        <result column="ROUTER_BO" property="routerBo"/>
+        <result column="BOM_BO" property="bomBo"/>
+        <result column="PLAN_END_DATE" property="planEndDate"/>
+        <result column="PLAN_START_DATE" property="planStartDate"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="MODIFY_USER" property="modifyUser"/>
+        <result column="MODIFY_DATE" property="modifyDate"/>
+        <result column="EMERGENCY_STATE" property="emergencyState"/>
+        <result column="EMERGENCY_BZ" property="emergencyBz"/>
+
+        <result column="NEGOTIATION_TIME" property="negotiationTime"/>
+        <result column="FIXED_TIME" property="fixedTime"/>
+        <result column="ITEM_DESC" property="itemDesc"/>
+        <result column="ORDER_DELIVERY_TIME" property="orderDeliveryTime"/>
+
+
+        <result column="PROCESS_CHARACTERISTICS" property="processChar"/>
+        <result column="SCREW_COMBINATION" property="screwCombination"/>
+        <result column="VALS" property="colourSys"/>
+
+
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        BO
+        , SITE, SHOP_ORDER, CUSTOMER_ORDER_BO, ORDER_DESC, STATE_BO, IS_OVERFULFILL, OVERFULFILL_QTY, SCHEDUL_QTY, COMPLETE_QTY, ORDER_QTY, RELEASE_QTY, SCRAP_QTY, ITEM_BO, PRODUCT_LINE_BO, ROUTER_BO, BOM_BO, PLAN_END_DATE, PLAN_START_DATE, CREATE_DATE, CREATE_USER, MODIFY_USER, MODIFY_DATE,NEGOTIATION_TIME,FIXED_TIME,EMERGENCY_STATE,EMERGENCY_BZ
+    </sql>
+
+    <select id="getIdsByVals" parameterType="map" resultType="string" databaseId="ms-sql">
+        select B.BO
+        FROM m_shop_order A
+                 LEFT join m_custom_data_val B ON A.BO = B.BO
+        WHERE A.SITE = #{site}
+          AND B.ATTRIBUTE = #{key}
+          AND B.VALS = #{value}
+    </select>
+
+    <select id="getIdsByVals" parameterType="map" resultType="string" databaseId="oracle">
+        select B.BO
+        FROM m_shop_order A
+                 LEFT join m_custom_data_val B ON A.BO = B.BO
+        WHERE A.SITE = #{site}
+          AND B.ATTRIBUTE = #{key}
+          AND to_char(b.VALS) = #{value}
+    </select>
+    <select id="getList" parameterType="map" resultMap="BaseResultMap">
+        SELECT
+        T.BO,T.SITE, T.SHOP_ORDER, T.CUSTOMER_ORDER_BO, T.ORDER_DESC, T.STATE_BO, T.IS_OVERFULFILL, T.OVERFULFILL_QTY,
+        T.SCHEDUL_QTY, T.COMPLETE_QTY, T.ORDER_QTY, T.RELEASE_QTY, T.SCRAP_QTY, T.ITEM_BO, T.PRODUCT_LINE_BO,
+        T.ROUTER_BO,
+        T.BOM_BO, T.PLAN_END_DATE, T.PLAN_START_DATE, T.CREATE_DATE, T.CREATE_USER, T.MODIFY_USER,
+        T.MODIFY_DATE,T.NEGOTIATION_TIME,
+        T.FIXED_TIME,T.EMERGENCY_STATE,T.EMERGENCY_BZ,M.ITEM_DESC,T.ORDER_DELIVERY_TIME,mb.PROCESS_CHARACTERISTICS,
+        (SELECT CDV.VALS FROM M_CUSTOM_DATA CD left join M_CUSTOM_DATA_VAL CDV on CDV.CUSTOM_DATA_BO = CD.BO
+        WHERE CD.CUSTOM_DATA_TYPE='ITEM' AND CDV.BO = M.BO and cd.CD_FIELD = 'COLOUR_SYS'
+        ) AS VALS
+        FROM M_SHOP_ORDER T LEFT JOIN M_ITEM M
+        ON T.ITEM_BO = M.BO
+
+        <!-- left join M_CUSTOM_DATA_VAL cdv on cdv.BO = M.BO
+        left join M_CUSTOM_DATA cd on cdv.CUSTOM_DATA_BO = cd.BO and cd.CUSTOM_DATA_TYPE='TEAM' and cd.CD_FIELD = 'COLOUR_SYS'-->
+
+
+        LEFT JOIN m_bom mb on T.BOM_BO = mb.BO
+
+        <!-- left join m_process_parameters mp on mp.PROCESS_CHARACTERISTICS = mb.PROCESS_CHARACTERISTICS -->
+
+        WHERE (T.PRODUCT_LINE_BO IS NULL OR T.PRODUCT_LINE_BO = '')
+        AND T.STATE_BO in
+        <foreach item="item" collection="params.stateBo" separator="," open="(" close=")" index="index">
+            #{item}
+        </foreach>
+
+        AND T.SITE = #{params.site}
+        <if test="params.boList != null">
+            AND T.BO in
+            <foreach item="item" collection="params.boList" separator="," open="(" close=")" index="index">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="params.bindings != null">
+            AND T.SHOP_ORDER NOT in
+            <foreach item="item" collection="params.bindings" separator="," open="(" close=")" index="index">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="params.shopOrder != null and params.shopOrder != ''">
+            AND T.SHOP_ORDER = #{params.shopOrder}
+        </if>
+
+        <if test="params.startTime != null and params.endTime != null">
+            AND T.PLAN_START_DATE BETWEEN #{params.startTime} AND #{params.endTime}
+        </if>
+    </select>
+
+    <select id="getBindingBySite" parameterType="string" resultType="map" databaseId="oracle">
+        SELECT t.bo AS "bo", t.sort AS "sort", t.no AS "no"
+        FROM m_work_order_binding t
+        WHERE t.site = #{site}
+    </select>
+
+    <select id="getBindingBySite" parameterType="string" resultType="map" databaseId="ms-sql">
+        SELECT t.bo AS bo, t.sort AS sort, t.no AS no
+        FROM m_work_order_binding t
+        WHERE t.site = #{site}
+    </select>
+
+    <!--工单保存更新调用方法-->
+    <update id="updateShopOrder" parameterType="com.itl.mes.core.api.entity.ShopOrder" databaseId="ms-sql">
+        UPDATE M_SHOP_ORDER
+        SET ORDER_DESC=#{shopOrder.orderDesc},
+            STATE_BO=#{shopOrder.stateBo},
+            IS_OVERFULFILL=#{shopOrder.isOverfulfill},
+            ORDER_QTY=#{shopOrder.orderQty},
+            OVERFULFILL_QTY=#{shopOrder.overfulfillQty},
+            MODIFY_USER=#{shopOrder.modifyUser},
+            MODIFY_DATE=#{shopOrder.modifyDate},
+            PLAN_END_DATE=#{shopOrder.planEndDate,jdbcType=VARCHAR},
+            PLAN_START_DATE=#{shopOrder.planStartDate,jdbcType=VARCHAR},
+            ITEM_BO=#{shopOrder.itemBo},
+            CUSTOMER_ORDER_BO=#{shopOrder.customerOrderBo},
+            PRODUCT_LINE_BO=#{shopOrder.productLineBo},
+            SHOP_ORDER_TYPE=#{shopOrder.shopOrderType},
+            ROUTER_BO=#{shopOrder.routerBo},
+            BOM_BO=#{shopOrder.bomBo},
+            NEGOTIATION_TIME = #{shopOrder.negotiationTime},
+            FIXED_TIME=#{shopOrder.fixedTime},
+            ORDER_DELIVERY_TIME=#{shopOrder.orderDeliveryTime}
+        WHERE BO = #{shopOrder.bo}
+          AND MODIFY_DATE = #{changeDate}
+    </update>
+
+    <!--工单保存更新调用方法-->
+    <update id="updateShopOrder" parameterType="com.itl.mes.core.api.entity.ShopOrder" databaseId="oracle">
+
+        UPDATE M_SHOP_ORDER SET
+        <if test="shopOrder.orderDesc != null and shopOrder.orderDesc != ''">
+            ORDER_DESC = #{shopOrder.orderDesc,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.stateBo != null and shopOrder.stateBo != ''">
+            STATE_BO = #{shopOrder.stateBo,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.isOverfulfill != null and shopOrder.isOverfulfill != ''">
+            IS_OVERFULFILL = #{shopOrder.isOverfulfill,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.orderQty != null and shopOrder.orderQty != ''">
+            ORDER_QTY = #{shopOrder.orderQty,jdbcType=VARBINARY},
+        </if>
+        <if test="shopOrder.shopOrder != null and shopOrder.shopOrder != ''">
+            OVERFULFILL_QTY = #{shopOrder.shopOrder,jdbcType=VARBINARY},
+        </if>
+        <if test="shopOrder.modifyUser != null and shopOrder.modifyUser != ''">
+            MODIFY_USER = #{shopOrder.modifyUser,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.modifyDate != null and shopOrder.modifyDate != ''">
+            MODIFY_DATE =TO_TIMESTAMP(#{shopOrder.modifyDate,jdbcType=TIMESTAMP}, 'YYYY-MM-DD HH24:MI:SS.FF6') ,
+        </if>
+        <if test="shopOrder.planEndDate != null and shopOrder.planEndDate != ''">
+            PLAN_END_DATE = TO_TIMESTAMP(#{shopOrder.planEndDate,jdbcType=TIMESTAMP}, 'YYYY-MM-DD HH24:MI:SS.FF6') ,
+        </if>
+        <if test="shopOrder.planStartDate != null and shopOrder.planStartDate != ''">
+            PLAN_START_DATE = TO_TIMESTAMP(#{shopOrder.planStartDate,jdbcType=TIMESTAMP}, 'YYYY-MM-DD HH24:MI:SS.FF6') ,
+        </if>
+        <if test="shopOrder.itemBo != null and shopOrder.itemBo != ''">
+            ITEM_BO = #{shopOrder.itemBo,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.customerOrderBo != null and shopOrder.customerOrderBo != ''">
+            CUSTOMER_ORDER_BO = #{shopOrder.customerOrderBo,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.productLineBo != null and shopOrder.productLineBo != ''">
+            PRODUCT_LINE_BO = #{shopOrder.productLineBo,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.routerBo != null and shopOrder.routerBo != ''">
+            ROUTER_BO = #{shopOrder.routerBo,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.bomBo != null and shopOrder.bomBo != ''">
+            BOM_BO = #{shopOrder.bomBo,jdbcType=VARCHAR},
+        </if>
+        <if test="shopOrder.negotiationTime != null and shopOrder.negotiationTime != ''">
+            NEGOTIATION_TIME = TO_TIMESTAMP(#{shopOrder.negotiationTime,jdbcType=TIMESTAMP}, 'YYYY-MM-DD
+            HH24:MI:SS.FF6') ,
+        </if>
+        <if test="shopOrder.fixedTime != null and shopOrder.fixedTime != ''">
+            FIXED_TIME = TO_TIMESTAMP(#{shopOrder.fixedTime,jdbcType=TIMESTAMP}, 'YYYY-MM-DD HH24:MI:SS.FF6') ,
+        </if>
+        <if test="shopOrder.orderDeliveryTime != null and shopOrder.orderDeliveryTime != ''">
+            ORDER_DELIVERY_TIME =TO_TIMESTAMP(#{shopOrder.orderDeliveryTime,jdbcType=TIMESTAMP}, 'YYYY-MM-DD
+            HH24:MI:SS.FF6') ,
+        </if>
+        WHERE BO=#{shopOrder.bo,jdbcType=VARCHAR} AND MODIFY_DATE=
+        TO_TIMESTAMP(#{shopOrder.changeDate,jdbcType=TIMESTAMP}, 'YYYY-MM-DD HH24:MI:SS.FF6')
+    </update>
+
+    <select id="getScheduleShopOrder" resultType="string">
+        SELECT SHOP_ORDER_BO
+        FROM p_schedule_shop_order
+    </select>
+
+    <select id="getBomComponents" resultType="com.itl.mes.core.api.dto.MboMitemDTO">
+        select
+        a.BO AS bo,
+        a.SITE AS site,
+        a.ITEM AS item,
+        a.VERSION AS version,
+        a.IS_CURRENT_VERSION AS isCurrentVersion,
+        a.ITEM_NAME AS itemName,
+        a.ITEM_DESC AS itemDesc,
+        a.ITEM_UNIT AS itemUnit,
+        <!--        b.BO as uomBo,-->
+        <!--        b.UOM_CODE as uomCode,-->
+        <!--        b.UOM_NAME as uomName,-->
+        a.ITEM_STATE_BO AS itemStateBo,
+        a.ITEM_TYPE AS itemType
+        FROM
+        m_item a
+        where a.BO in
+        <foreach collection="itemBos" open="(" close=")" separator="," item="value">
+            #{value}
+        </foreach>
+    </select>
+
+
+    <!--有限超产更新工单下达数量-->
+    <update id="updateLimitQtyShopOrderReleaseQtyByBO">
+
+        UPDATE M_SHOP_ORDER
+        SET RELEASE_QTY = ISNULL(RELEASE_QTY, 0) + #{qty}
+        WHERE BO = #{bo}
+          AND ISNULL(RELEASE_QTY, 0) + #{qty} &lt;= ORDER_QTY + #{overfullQty}
+
+    </update>
+
+
+    <!--无限超产更新工单下达数量-->
+    <update id="updateOverfullQtyShopOrderReleaseQtyByBO">
+
+        UPDATE M_SHOP_ORDER
+        SET RELEASE_QTY = ISNULL(RELEASE_QTY, 0) + #{qty}
+        WHERE BO = #{bo}
+
+    </update>
+
+    <!--更新工单下达数量-->
+    <update id="updateShopOrderReleaseQtyByBO">
+
+        UPDATE M_SHOP_ORDER
+        SET RELEASE_QTY = ISNULL(RELEASE_QTY, 0) + #{qty}
+        WHERE BO = #{bo}
+          AND ISNULL(RELEASE_QTY, 0) + #{qty} &lt;= ORDER_QTY
+
+    </update>
+
+
+    <!--更新工单完成数量-->
+    <update id="updateShopOrderCompleteQtyByBO">
+
+        UPDATE M_SHOP_ORDER
+        SET COMPLETE_QTY=ISNULL(COMPLETE_QTY, 0) + #{completeQty}
+        WHERE BO = #{bo}
+
+    </update>
+
+
+    <!--更新工单报废数量-->
+    <update id="updateShopOrderScrapQtyByBO">
+
+        UPDATE M_SHOP_ORDER
+        SET SCRAP_QTY=ISNULL(SCRAP_QTY, 0) + #{scrapTty}
+        WHERE BO = #{bo}
+
+    </update>
+
+    <!--更新工单标签数量-->
+    <update id="updateShopOrderLabelQtyByBO">
+        UPDATE M_SHOP_ORDER
+        SET LABEL_QTY=ISNULL(LABEL_QTY, 0) + (#{labelQty})
+        WHERE BO = #{bo}
+    </update>
+    <!--更新工单排产数量-->
+    <update id="updateShopOrderScheduleQtyByBO">
+        UPDATE M_SHOP_ORDER
+        SET SCHEDUL_QTY=ISNULL(SCHEDUL_QTY, 0) + #{scheduleQty}
+        WHERE BO = #{bo}
+    </update>
+
+    <!--更新工单排产数量-->
+    <update id="updateShopOrderScheduleQtyAndOrderQtyByBO">
+        UPDATE M_SHOP_ORDER
+        SET SCHEDUL_QTY= #{scheduleQty},
+        ORDER_QTY= #{orderQty}
+        WHERE BO = #{bo}
+    </update>
+
+    <update id="updateEmergenc" parameterType="map">
+        UPDATE M_SHOP_ORDER
+        SET EMERGENCY_STATE = #{emergencyState},
+            EMERGENCY_BZ    = #{emergencyBz}
+        WHERE SHOP_ORDER = #{shopOrder}
+    </update>
+    <update id="updateProductState">
+        UPDATE M_SHOP_ORDER
+        set STATE_BO =#{s}
+        where BO = #{bo}
+
+    </update>
+    <update id="updateShopOrderCompleteQtyAndState">
+        UPDATE M_SHOP_ORDER
+        SET
+            COMPLETE_QTY = ISNULL(COMPLETE_QTY, 0) + #{completeQty},
+            STATE_BO =
+                CASE
+                   WHEN ISNULL(COMPLETE_QTY, 0) + #{completeQty} = ORDER_QTY THEN
+                       #{stateBo}
+                   ELSE
+                       STATE_BO
+                END
+        WHERE
+            BO = #{shopOrderBo};
+    </update>
+
+</mapper>

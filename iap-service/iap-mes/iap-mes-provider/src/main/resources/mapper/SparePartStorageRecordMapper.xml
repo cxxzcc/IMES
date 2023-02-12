@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.SparePartStorageRecordMapper">
+
+
+    <select id="getStorageRecordBySparePart"
+            resultType="com.itl.iap.mes.api.dto.sparepart.SparePartStorageRecordDTO">
+        SELECT
+            record.ID as id,
+            detail.ID as detailId,
+            record.ORDER_NO as orderNo,
+            record.RECORD_TIME as recordTime,
+            detail.WARE_HOUSE_NAME as wareHouseName,
+            record.TYPE as type ,
+            record.AGENT as agent,
+            record.REMARK as remark,
+            record.REFERENCE_ORDER_NO as referenceOrderNo,
+            record.ORGANIZATION_ID as organizationId,
+            record.CUSTOMER as customer,
+            detail.OUT_COUNT as outCount,
+            detail.IN_COUNT as inCount,
+            detail.PRICE as price,
+            detail.TOTAL_AMOUNT as totalAmount,
+            detail.INVENTORY as inventory,
+            spare.NAME as sparePartName,
+            spare.TYPE as sparePartTypeCode
+        FROM m_spare_part_storage_record record
+        LEFT JOIN m_spare_part_storage_record_detail detail on record.ID = detail.RECORD_ID
+        LEFT JOIN m_spare_part spare on spare.ID = detail.SPARE_PART_ID
+        <where>
+            spare.SITE = #{params.site}
+          <if test="params.sparePartId != null and params.sparePartId != ''">
+            AND detail.SPARE_PART_ID = #{params.sparePartId}
+          </if>
+          <if test="params.storageType != null">
+             <if test="params.storageType == 1">
+                 AND detail.IN_COUNT > 0
+             </if>
+             <if test="params.storageType == 0">
+                 AND detail.OUT_COUNT > 0
+             </if>
+          </if>
+          <if test="params.wareHouseId != null and params.wareHouseId != ''">
+                AND record.WARE_HOUSE_ID = #{params.wareHouseId}
+          </if>
+          <if test="params.type != null and params.type != ''">
+                AND record.TYPE = #{params.type}
+          </if>
+          <if test="params.recordStartDate != null and params.recordStartDate != ''">
+              AND record.RECORD_TIME >= #{params.recordStartDate}
+          </if>
+          <if test="params.recordEndDate != null and params.recordEndDate != ''">
+              AND record.RECORD_TIME &lt;= #{params.recordEndDate}
+          </if>
+          <if test="params.agent != null and params.agent != ''">
+              AND record.AGENT like concat('%', #{params.agent}, '%')
+          </if>
+        </where>
+        ORDER BY record.CREATE_TIME DESC
+    </select>
+
+    <select id="detail" resultType="com.itl.iap.mes.api.dto.sparepart.SparePartStorageRecordDTO">
+        SELECT
+            record.ID as id,
+            detail.ID as detailId,
+            record.ORDER_NO as orderNo,
+            record.RECORD_TIME as recordTime,
+            detail.WARE_HOUSE_NAME as wareHouseName,
+            record.TYPE as type ,
+            record.AGENT as agent,
+            record.REFERENCE_ORDER_NO as referenceOrderNo,
+            record.ORGANIZATION_ID as organizationId,
+            detail.OUT_COUNT as outCount,
+            detail.IN_COUNT as inCount,
+            detail.PRICE as price,
+            detail.TOTAL_AMOUNT as totalAmount,
+            detail.INVENTORY as inventory
+        FROM m_spare_part_storage_record record
+        LEFT JOIN m_spare_part_storage_record_detail detail ON record.ID = detail.RECORD_ID
+        WHERE detail.ID = #{id}
+    </select>
+    <select id="detailListByReferenceId"
+            resultType="com.itl.iap.mes.api.dto.sparepart.SparePartStorageRecordDTO">
+        SELECT
+            record.ID as id,
+            detail.ID as detailId,
+            record.ORDER_NO as orderNo,
+            record.CREATE_TIME as createTime,
+            detail.WARE_HOUSE_NAME as wareHouseName,
+            record.TYPE as type ,
+            record.AGENT as agent,
+            record.REFERENCE_ORDER_NO as referenceOrderNo,
+            record.ORGANIZATION_ID as organizationId,
+            detail.OUT_COUNT as outCount,
+            detail.IN_COUNT as inCount,
+            detail.PRICE as price,
+            detail.TOTAL_AMOUNT as totalAmount,
+            detail.INVENTORY as inventory,
+            spare.NAME as sparePartName,
+            spare.TYPE as sparePartTypeCode,
+            spare.SPARE_PART_NO as sparePartNo
+        FROM m_spare_part_storage_record record
+        LEFT JOIN m_spare_part_storage_record_detail detail ON record.ID = detail.RECORD_ID
+        LEFT JOIN m_spare_part spare ON spare.ID = detail.SPARE_PART_ID
+        WHERE record.REFERENCE_ORDER_NO = #{referenceOrderNo}
+    </select>
+
+    <select id="storageCountStatistics"
+            resultType="com.itl.iap.mes.api.dto.sparepart.SparepartStorageCountStatisticsDTO">
+        SELECT
+            SUM (
+                CASE WHEN inventory.INVENTORY > part.INVENTORY_MAX THEN 1 ELSE 0 END
+            ) AS geCount,
+            SUM (
+                CASE WHEN inventory.INVENTORY &lt; part.INVENTORY_MIN THEN 1 ELSE 0 END
+            ) AS leCount
+        FROM
+            m_spare_part part
+        INNER JOIN (
+            SELECT
+                SPARE_PART_ID,
+                SUM (INVENTORY) AS INVENTORY
+            FROM
+                m_spare_part_inventory
+            GROUP BY
+                SPARE_PART_ID
+        ) inventory ON part.ID = inventory.SPARE_PART_ID
+        WHERE part.SITE = #{site}
+    </select>
+    <select id="sparePartChangeRecord" resultType="com.itl.iap.mes.api.dto.SparePartChangeRecordDTO">
+        SELECT
+            record.ORDER_NO as orderNo,
+            spare.NAME as name,
+            record.RECORD_TIME as recordTime,
+            record.AGENT as agent,
+            spare.SPEC as spec,
+            spare.TYPE as type,
+            detail.OUT_COUNT as count,
+            record.REFERENCE_ORDER_NO as referenceOrderNo,
+            spare.ID as sparePartId
+        FROM
+            m_spare_part_storage_record record
+        INNER JOIN m_spare_part_storage_record_detail detail ON record.ID = detail.RECORD_ID
+        INNER JOIN m_spare_part spare ON spare.ID = detail.SPARE_PART_ID
+        INNER JOIN m_repair_corrective_maintenance repair ON repair.repairNo = record.REFERENCE_ORDER_NO
+        WHERE
+            repair.code = #{params.code}
+            AND spare.SITE = #{params.site}
+    </select>
+
+</mapper>

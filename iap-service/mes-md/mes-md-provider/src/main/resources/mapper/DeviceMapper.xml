@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.DeviceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.itl.mes.core.api.entity.Device">
+        <id column="BO" property="bo"/>
+        <result column="SITE" property="site"/>
+        <result column="DEVICE" property="device"/>
+        <result column="DEVICE_NAME" property="deviceName"/>
+        <result column="DEVICE_DESC" property="deviceDesc"/>
+        <result column="DEVICE_MODEL" property="deviceModel"/>
+        <result column="STATE" property="state"/>
+        <result column="IS_PROCESS_DEVICE" property="isProcessDevice"/>
+        <result column="PRODUCT_LINE_BO" property="productLineBo"/>
+        <result column="STATION_BO" property="stationBo"/>
+        <result column="LOCATION" property="location"/>
+        <result column="ASSETS_CODE" property="assetsCode"/>
+        <result column="MANUFACTURER" property="manufacturer"/>
+        <result column="VALID_START_DATE" property="validStartDate"/>
+        <result column="VALID_END_DATE" property="validEndDate"/>
+        <result column="MEMO" property="memo"/>
+        <result column="CREATE_DATE" property="createDate"/>
+        <result column="CREATE_USER" property="createUser"/>
+        <result column="MODIFY_USER" property="modifyUser"/>
+        <result column="MODIFY_DATE" property="modifyDate"/>
+        <result column="WORK_SHOP" property="workShop"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        BO
+        , SITE, DEVICE, DEVICE_NAME, DEVICE_DESC, DEVICE_MODEL, STATE, IS_PROCESS_DEVICE, PRODUCT_LINE_BO, STATION_BO, LOCATION, ASSETS_CODE, MANUFACTURER, VALID_START_DATE, VALID_END_DATE, MEMO, CREATE_DATE, CREATE_USER, MODIFY_USER, MODIFY_DATE
+    </sql>
+    <update id="updateState">
+        update m_device
+        set STATE=#{state}
+        where BO = #{code}
+    </update>
+
+    <select id="getAvailableDeviceTypeList" parameterType="String" resultType="java.util.Map">
+        SELECT DEVICE_TYPE, DEVICE_TYPE_NAME, DEVICE_TYPE_DESC
+        FROM M_DEVICE_TYPE MDT
+        WHERE SITE = #{site}
+          AND NOT EXISTS(
+                SELECT DEVICE_TYPE_BO FROM M_DEVICE_TYPE_ITEM WHERE DEVICE_BO = #{deviceBo} AND MDT.BO = DEVICE_TYPE_BO)
+    </select>
+
+    <select id="getAssignedDeviceTypeList" parameterType="String" resultType="java.util.Map">
+        SELECT DEVICE_TYPE, DEVICE_TYPE_NAME, DEVICE_TYPE_DESC
+        FROM M_DEVICE_TYPE MDT
+        WHERE SITE = #{site}
+          AND EXISTS(
+                SELECT DEVICE_TYPE_BO FROM M_DEVICE_TYPE_ITEM WHERE DEVICE_BO = #{deviceBo} AND MDT.BO = DEVICE_TYPE_BO)
+    </select>
+
+    <select id="selectTop" resultType="com.itl.mes.core.api.entity.Device" databaseId="ms-sql">
+        SELECT TOP 500 BO, SITE,
+               DEVICE,
+               DEVICE_NAME,
+               DEVICE_DESC,
+               DEVICE_MODEL,
+               STATE,
+               IS_PROCESS_DEVICE,
+               PRODUCT_LINE_BO,
+               STATION_BO,
+               LOCATION,
+               ASSETS_CODE,
+               MANUFACTURER,
+               VALID_START_DATE,
+               VALID_END_DATE,
+               MEMO,
+               CREATE_DATE,
+               CREATE_USER,
+               MODIFY_USER,
+               MODIFY_DATE
+        FROM m_device
+        WHERE SITE = #{site}
+    </select>
+
+    <select id="selectTop" resultType="com.itl.mes.core.api.entity.Device" databaseId="oracle">
+        SELECT BO,
+               SITE,
+               DEVICE,
+               DEVICE_NAME,
+               DEVICE_DESC,
+               DEVICE_MODEL,
+               STATE,
+               IS_PROCESS_DEVICE,
+               PRODUCT_LINE_BO,
+               STATION_BO,
+               LOCATION,
+               ASSETS_CODE,
+               MANUFACTURER,
+               VALID_START_DATE,
+               VALID_END_DATE,
+               MEMO,
+               CREATE_DATE,
+               CREATE_USER,
+               MODIFY_USER,
+               MODIFY_DATE
+        FROM m_device
+        WHERE SITE = #{site}
+          AND ROWNUM <![CDATA[ <= ]]> 500
+    </select>
+
+
+    <select id="selectDeviceWorkshop" resultMap="BaseResultMap" databaseId="ms-sql">
+        select
+        DEVICE,
+        DEVICE_NAME,
+        DEVICE_DESC,
+        DEVICE_MODEL,
+        md.STATE,
+        WORK_SHOP
+        from m_device md
+        join m_product_line mpl on md.PRODUCT_LINE_BO=mpl.BO
+        join m_work_shop mws on mpl.WORK_SHOP_BO=mws.BO
+        <where>
+            md.SITE = #{device.site}
+            <if test="device.device != null and device.device != ''">
+                and md.DEVICE like CONCAT('%',#{device.device},'%')
+            </if>
+            <if test="device.deviceName != null and device.deviceName != ''">
+                and md.DEVICE_NAME like CONCAT('%',#{device.deviceName},'%')
+            </if>
+            <if test="device.workShop != null and device.workShop != ''">
+                and mws.BO = #{device.workShop}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectDeviceWorkshop" resultMap="BaseResultMap" databaseId="oracle">
+        select
+        DEVICE,
+        DEVICE_NAME,
+        DEVICE_DESC,
+        DEVICE_MODEL,
+        md.STATE,
+        WORK_SHOP
+        from m_device md
+        join m_product_line mpl on md.PRODUCT_LINE_BO=mpl.BO
+        join m_work_shop mws on mpl.WORK_SHOP_BO=mws.BO
+        <where>
+            md.SITE = #{device.site}
+            <if test="device.device != null and device.device != ''">
+                and instr (md.DEVICE,#{device.device})>0
+            </if>
+            <if test="device.deviceName != null and device.deviceName != ''">
+                and instr (md.DEVICE_NAME,#{device.deviceName})>0
+            </if>
+            <if test="device.workShop != null and device.workShop != ''">
+                and mws.BO = #{device.workShop}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getScrewByLine" parameterType="map" resultType="map">
+        SELECT SCREW_COMBINATION AS screwCombination, PROCESS_CHARACTERISTICS AS processCharacteristics
+        from m_process_parameters
+        where PRODUCT_LINE_CODE = #{params.line}
+    </select>
+    <select id="queryDeviceCountStatisticsByState"
+            resultType="com.itl.mes.core.api.dto.DeviceCountStatisticsDTO">
+        SELECT STATE,
+               COUNT(*) AS count
+        FROM
+            m_device
+        WHERE
+            site = #{site}
+        GROUP BY
+            STATE
+    </select>
+
+    <select id="getDataByCondition" resultType="com.itl.mes.core.api.vo.DevicePlusVo">
+        SELECT t.*,
+               t2.DEVICE_TYPE,
+               t2.DEVICE_TYPE_NAME
+        FROM m_device t
+                 LEFT JOIN m_device_type_item t1 ON t1.DEVICE_BO = t.bo
+                 LEFT JOIN m_device_type t2 ON t2.bo = t1.DEVICE_TYPE_BO
+            ${ew.customSqlSegment}
+    </select>
+
+</mapper>

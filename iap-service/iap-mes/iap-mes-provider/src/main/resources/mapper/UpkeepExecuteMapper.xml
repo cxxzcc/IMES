@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.UpkeepExecuteMapper">
+
+    <sql id="FIELD">
+        t
+        .
+        id
+        AS id,t.upkeepPlanId, t.upkeepNo,t.upkeepPlanName AS upkeepPlanName,t.code AS code,t.name AS name,t.type AS type,
+        t.productionLine AS productionLine,t.dataCollectionId AS dataCollectionId,t.dataCollectionName AS dataCollectionName,
+        t.upkeepUserId AS upkeepUserId,t.upkeepUserName AS upkeepUserName,t.executeTime AS executeTime,
+        t.state AS state,t.planExecuteTime AS planExecuteTime,t.startTime,t.endTime,t.createBy,t.createTime,t.updateBy,t.updateTime,
+         t.operaStartTime,t.operaEndTime
+    </sql>
+    <sql id="WHERE_FIELD">
+        <where>
+            AND t.site = #{upkeepExecute.site}
+            <if test="upkeepExecute.upkeepPlanName != null and upkeepExecute.upkeepPlanName !=''">
+                and t.upkeepPlanName like '%${upkeepExecute.upkeepPlanName}%'
+            </if>
+            <if test="upkeepExecute.diviceCode != null and upkeepExecute.diviceCode!=''">
+                and t.code = '${upkeepExecute.diviceCode}'
+            </if>
+            <if test="upkeepExecute.diviceName != null and upkeepExecute.diviceName!=''">
+                and t.name like '%${upkeepExecute.diviceName}%'
+            </if>
+            <if test="upkeepExecute.diviceCodeOrName != null and upkeepExecute.diviceCodeOrName!=''">
+                and (t.code like '%${upkeepExecute.diviceCodeOrName}%' or t.name like
+                '%${upkeepExecute.diviceCodeOrName}%')
+            </if>
+            <if test="upkeepExecute.state != null ">
+                and t.state = '${upkeepExecute.state}'
+            </if>
+            <if test="upkeepExecute.dataCollectionId != null and upkeepExecute.dataCollectionId!=''">
+                and t.dataCollectionId = '${upkeepExecute.dataCollectionId}'
+            </if>
+            <if test="upkeepExecute.dataCollectionName != null and upkeepExecute.dataCollectionName!=''">
+                and t.dataCollectionName like '%${upkeepExecute.dataCollectionName}%'
+            </if>
+            <if test="upkeepExecute.upkeepUserId != null and upkeepExecute.upkeepUserId!=''">
+                and EXISTS(
+                select 1 from m_repair_upkeep_user t1 where t1.UPKEEP_ID= t.upkeepPlanId and
+                t1.UPKEEP_USER_ID='${upkeepExecute.upkeepUserId}'
+                )
+            </if>
+            <if test="upkeepExecute.upkeepUserName != null and upkeepExecute.upkeepUserName!=''">
+                and EXISTS(
+                select 1 from m_repair_upkeep_user t1 where t1.UPKEEP_ID= t.upkeepPlanId and t1.UPKEEP_USER_NAME like
+                '%${upkeepExecute.upkeepUserName}%'
+                )
+            </if>
+            <if test="upkeepExecute.start != null and upkeepExecute.start !='' and upkeepExecute.end != null and upkeepExecute.end!=''">
+                and not (t.startTime>'${upkeepExecute.end}' or t.endTime &lt; '${upkeepExecute.start}')
+            </if>
+
+            <if test="upkeepExecute.startTime != null and upkeepExecute.endTime != null">
+                AND t.executeTime BETWEEN #{upkeepExecute.startTime} AND #{upkeepExecute.endTime}
+            </if>
+        </where>
+    </sql>
+
+    <select id="findList" parameterType="com.itl.iap.mes.api.entity.UpkeepExecute"
+            resultType="com.itl.iap.mes.api.entity.UpkeepExecute">
+        select *
+        from (
+        SELECT DISTINCT t.*,
+        t1.upkeepPlanName
+        FROM m_repair_upkeep_execute t
+        LEFT JOIN m_repair_upkeep_plan t1
+        ON t1.id = t.upkeepPlanId
+        LEFT JOIN m_repair_upkeep_user t2
+        on t2.UPKEEP_ID = t.upkeepPlanId
+        ${ew.customSqlSegment}
+        ) a
+
+        <choose>
+            <when test="sortName != null and sortName != '' ">
+                order by a.${sortName}
+            </when>
+            <otherwise>
+                order by a.updateTime
+            </otherwise>
+
+        </choose>
+        <choose>
+            <when test="sortType != null and sortType != ''">
+                ${sortType}
+            </when>
+            <otherwise>desc</otherwise>
+        </choose>
+
+
+    </select>
+
+
+    <select id="upkeepRecord" resultType="com.itl.iap.mes.api.dto.UpkeepRecordDTO">
+        SELECT t.id,
+               t.upkeepNo,
+               t.remark,
+               u.UPKEEP_USER_ID AS upkeepUserName,
+               t.endTime        AS executeTime,
+               t.startTime,
+               t.endTime,
+               t.dataCollectionId
+        FROM m_repair_upkeep_execute t
+                 LEFT JOIN m_repair_upkeep_user u ON t.id = u.UPKEEP_ID AND u.IDENTITY_TYPE = 0
+        WHERE t.site = #{params.site}
+          AND t.deviceId = #{params.deviceId}
+          AND t.state = 1
+        ORDER BY t.endTime DESC
+    </select>
+
+    <select id="getUpkeepCountByUser" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT ec.id)
+        FROM m_repair_upkeep_execute ec
+                 INNER JOIN m_repair_upkeep_plan p on p.id = ec.upkeepPlanId
+                 INNER JOIN m_repair_upkeep_user u on u.UPKEEP_ID = p.id
+        WHERE u.UPKEEP_USER_ID = #{userId}
+          AND p.site = #{site}
+          AND ec.state = 0
+        GROUP BY u.UPKEEP_USER_ID
+    </select>
+    <select id="checkExecuteStatistics" resultType="com.itl.iap.mes.api.dto.RepairExecuteCountStatisticsDTO">
+        SELECT a.startTime as date,
+            COUNT (*) AS totalCount,
+            SUM (
+                    CASE
+                        WHEN a.startTime = a.executeTime THEN
+                            1
+                        ELSE
+                            0
+                    END
+                ) AS executeCount
+        FROM
+            (
+            SELECT
+            id,
+            CONVERT (DATE, startTime, 23) AS startTime,
+            CONVERT (DATE, executeTime, 23) AS executeTime
+            FROM m_repair_upkeep_execute
+            WHERE
+            site = #{site}
+            AND startTime >= #{startTime}
+            AND startTime &lt;= #{endTime}
+            ) a
+        GROUP BY a.startTime;
+    </select>
+    <select id="findById" resultType="com.itl.iap.mes.api.entity.UpkeepExecute">
+        SELECT t.*,
+               t1.upkeepPlanName
+        FROM m_repair_upkeep_execute t
+                 LEFT JOIN m_repair_upkeep_plan t1 ON t1.id = t.upkeepPlanId
+        where t.id = #{id}
+    </select>
+</mapper>

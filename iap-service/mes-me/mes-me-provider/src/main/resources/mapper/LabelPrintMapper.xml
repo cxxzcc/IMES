@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.me.provider.mapper.LabelPrintMapper">
+
+
+    <select id="findList" resultType="com.itl.mes.me.api.vo.LabelPrintVo" databaseId="ms-sql">
+
+        select
+        a.BO as bo,
+        a.PRINT_DATE as printDate,
+        b.${labelPrintQueryDto.queryColumn} as elementCode,
+        a.BAR_CODE_AMOUNT as barCodeAmount,
+        a.START_CODE as startCode,
+        a.END_CODE as endCode,
+        a.TEMPLATE_TYPE as templateType,
+        a.LODOP_TEXT as lodopText,
+        a.IS_COMPLEMENT as isComplement,
+        a.RULE_LABEL_BO as ruleLabelBo,
+        l.LABEL AS label,
+        irl.LABEL_TYPE AS labelType,
+        irl.RULE_LABEL AS ruleLabel,
+        irl.RULE_LABEL_NAME AS ruleLabelName,
+        cr.CODE_RULE_TYPE AS codeRuleType
+        from me_label_print a left join ${labelPrintQueryDto.tableName} b on a.ELEMENT_BO = b.BO
+        left join me_rule_label irl on a.RULE_LABEL_BO = irl.BO
+        left join m_code_rule cr on cr.BO = irl.CODE_RULE_BO
+        left join label l on l.ID = irl.LABEL_BO
+        where
+        a.site = #{labelPrintQueryDto.site}
+        and a.ELEMENT_TYPE = #{labelPrintQueryDto.elementType}
+        <if test="labelPrintQueryDto.printDate!=null and labelPrintQueryDto.printDate!=''">
+            AND CONVERT(nvarchar(10),a.PRINT_DATE,121) = #{labelPrintQueryDto.printDate}
+        </if>
+        <if test="labelPrintQueryDto.elementCode!=null and labelPrintQueryDto.elementCode!=''">
+            AND b.${labelPrintQueryDto.queryColumn} like CONCAT(#{labelPrintQueryDto.elementCode},'%')
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+
+    <select id="findList" resultType="com.itl.mes.me.api.vo.LabelPrintVo" databaseId="oracle">
+
+        select
+        a.BO as bo,
+        a.PRINT_DATE as printDate,
+        b.${labelPrintQueryDto.queryColumn} as elementCode,
+        a.BAR_CODE_AMOUNT as barCodeAmount,
+        a.START_CODE as startCode,
+        a.END_CODE as endCode,
+        a.TEMPLATE_TYPE as templateType,
+        a.LODOP_TEXT as lodopText,
+        a.IS_COMPLEMENT as isComplement,
+        a.RULE_LABEL_BO as ruleLabelBo,
+        l.LABEL AS label,
+        irl.LABEL_TYPE AS labelType,
+        irl.RULE_LABEL AS ruleLabel,
+        irl.RULE_LABEL_NAME AS ruleLabelName,
+        cr.CODE_RULE_TYPE AS codeRuleType
+        from me_label_print a left join ${labelPrintQueryDto.tableName} b on a.ELEMENT_BO = b.BO
+        left join me_rule_label irl on a.RULE_LABEL_BO = irl.BO
+        left join m_code_rule cr on cr.BO = irl.CODE_RULE_BO
+        left join label l on l.ID = irl.LABEL_BO
+        where
+        a.site = #{labelPrintQueryDto.site}
+        and a.ELEMENT_TYPE = #{labelPrintQueryDto.elementType}
+        <if test="labelPrintQueryDto.printDate!=null and labelPrintQueryDto.printDate!=''">
+            AND CONVERT(nvarchar(10),a.PRINT_DATE,121) = #{labelPrintQueryDto.printDate}
+        </if>
+        <if test="labelPrintQueryDto.elementCode!=null and labelPrintQueryDto.elementCode!=''">
+            AND b.${labelPrintQueryDto.queryColumn} like CONCAT(#{labelPrintQueryDto.elementCode},'%')
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+
+    <select id="getCodeRuleBo" resultType="java.lang.String" databaseId="ms-sql">
+
+                SELECT TOP 1 BO FROM m_code_rule WHERE CODE_RULE_TYPE = #{code} AND SITE = #{site}
+
+        </select>
+
+    <select id="getCodeRuleBo" resultType="java.lang.String" databaseId="oracle">
+
+        SELECT BO FROM m_code_rule WHERE CODE_RULE_TYPE = #{code} AND SITE = #{site} and ROWNUM <![CDATA[ <= ]]> 1
+
+    </select>
+    <select id="findPackingLabelPrint" resultType="com.itl.mes.me.api.vo.LabelPrintVo" databaseId="ms-sql">
+
+        select
+        a.BO as bo,
+        a.PRINT_DATE as printDate,
+        pp.${labelPrintQueryDto.queryColumn} as elementCode,
+        a.BAR_CODE_AMOUNT as barCodeAmount,
+        a.START_CODE as startCode,
+        a.END_CODE as endCode,
+        a.TEMPLATE_TYPE as templateType,
+        a.LODOP_TEXT as lodopText,
+        a.IS_COMPLEMENT as isComplement,
+        a.RULE_LABEL_BO as ruleLabelBo,
+        l.LABEL AS label,
+        irl.LABEL_TYPE AS labelType,
+        irl.RULE_LABEL AS ruleLabel,
+        irl.RULE_LABEL_NAME AS ruleLabelName,
+        cr.CODE_RULE_TYPE AS codeRuleType,
+        pp.PACK_NAME as packingName,
+        mi.ITEM as item,
+        mso.SHOP_ORDER as shopOrder
+        from me_label_print a left join ${labelPrintQueryDto.tableName} b on a.ELEMENT_BO = b.BO
+        left join p_packing pp on b.PACKING_BO = pp.BO
+        left join m_item mi on b.OBJECT_BO = mi.BO
+        left join m_shop_order mso on b.SHOP_ORDER_BO = mso.BO
+        left join me_rule_label irl on a.RULE_LABEL_BO = irl.BO
+        left join m_code_rule cr on cr.BO = irl.CODE_RULE_BO
+        left join label l on l.ID = irl.LABEL_BO
+        where
+        a.site = #{labelPrintQueryDto.site}
+        and a.ELEMENT_TYPE = #{labelPrintQueryDto.elementType}
+        <if test="labelPrintQueryDto.printDate!=null and labelPrintQueryDto.printDate!=''">
+            AND a.PRINT_DATE = #{labelPrintQueryDto.printDate}
+        </if>
+        <if test="labelPrintQueryDto.elementCode!=null and labelPrintQueryDto.elementCode!=''">
+            AND pp.${labelPrintQueryDto.queryColumn} like CONCAT(#{labelPrintQueryDto.elementCode},'%')
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+
+    <select id="findPackingLabelPrint" resultType="com.itl.mes.me.api.vo.LabelPrintVo" databaseId="oracle">
+
+        select
+        a.BO as bo,
+        a.PRINT_DATE as printDate,
+        pp.${labelPrintQueryDto.queryColumn} as elementCode,
+        a.BAR_CODE_AMOUNT as barCodeAmount,
+        a.START_CODE as startCode,
+        a.END_CODE as endCode,
+        a.TEMPLATE_TYPE as templateType,
+        a.LODOP_TEXT as lodopText,
+        a.IS_COMPLEMENT as isComplement,
+        a.RULE_LABEL_BO as ruleLabelBo,
+        l.LABEL AS label,
+        irl.LABEL_TYPE AS labelType,
+        irl.RULE_LABEL AS ruleLabel,
+        irl.RULE_LABEL_NAME AS ruleLabelName,
+        cr.CODE_RULE_TYPE AS codeRuleType,
+        pp.PACK_NAME as packingName,
+        mi.ITEM as item,
+        mso.SHOP_ORDER as shopOrder
+        from me_label_print a left join ${labelPrintQueryDto.tableName} b on a.ELEMENT_BO = b.BO
+        left join p_packing pp on b.PACKING_BO = pp.BO
+        left join m_item mi on b.OBJECT_BO = mi.BO
+        left join m_shop_order mso on b.SHOP_ORDER_BO = mso.BO
+        left join me_rule_label irl on a.RULE_LABEL_BO = irl.BO
+        left join m_code_rule cr on cr.BO = irl.CODE_RULE_BO
+        left join label l on l.ID = irl.LABEL_BO
+        where
+        a.site = #{labelPrintQueryDto.site}
+        and a.ELEMENT_TYPE = #{labelPrintQueryDto.elementType}
+        <if test="labelPrintQueryDto.printDate!=null and labelPrintQueryDto.printDate!=''">
+            AND a.PRINT_DATE = #{labelPrintQueryDto.printDate}
+        </if>
+        <if test="labelPrintQueryDto.elementCode!=null and labelPrintQueryDto.elementCode!=''">
+            AND pp.${labelPrintQueryDto.queryColumn} like CONCAT(#{labelPrintQueryDto.elementCode},'%')
+        </if>
+        ORDER BY a.CREATE_DATE DESC
+    </select>
+</mapper>

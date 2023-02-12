@@ -1,0 +1,37 @@
+group-id: iap
+
+
+logging:
+  level:
+    com.alibaba.nacos.client.naming: warn
+
+spring:
+  application:
+    name: ureport
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost:8848} #Nacos服务接口(不能加http前缀)，直接访问localhost:8848/nacos可以进入管理页面
+        namespace: ${NAME_SPACE:mesdev}
+        service: ureport
+      config:
+        server-addr: ${NACOS_HOST:localhost:8848}
+        file-extension: yml # 配置文件的格式，默认为properties
+        namespace: ${NAME_SPACE:mesdev}
+        group: ${group-id}
+
+
+# mybatis 配置
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+server:
+  port: 9002
+
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+

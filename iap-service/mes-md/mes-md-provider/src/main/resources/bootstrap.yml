@@ -1,0 +1,32 @@
+server:
+  port: 19004
+group-id: iap
+
+spring:
+  jackson:
+    time-zone: GMT+8
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  aop:
+    proxy-target-class: true # 使用CGLIB
+  application:
+    name: mes-md-provider #设置项目名称
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost:8848} #Nacos服务接口(不能加http前缀)，直接访问localhost:8848/nacos可以进入管理页面
+        namespace: ${NAME_SPACE:mesdev}
+#        ip: yxnat.softdev.top
+#        port: 19005
+#        metadata:
+#          cyg: yxnat.softdev.top
+      config:
+        server-addr: ${NACOS_HOST:localhost:8848}
+        file-extension: yml # 配置文件的格式，默认为properties
+        namespace: ${NAME_SPACE:mesdev}
+        group: ${group-id}

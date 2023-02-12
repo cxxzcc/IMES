@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.core.provider.mapper.MeProductInspectionItemsOrderNcCodeMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.itl.mes.core.api.entity.NcCode" id="ncCodeMap">
+        <result property="bo" column="bo"/>
+        <result property="site" column="site"/>
+        <result property="ncCode" column="NC_CODE"/>
+        <result property="ncName" column="NC_NAME"/>
+        <result property="ncDesc" column="NC_DESC"/>
+        <result property="state" column="state"/>
+        <result property="ncType" column="NC_TYPE"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="maxNcLimit" column="MAX_NC_LIMIT"/>
+        <result property="severity" column="SEVERITY"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="createUser" column="create_user"/>
+        <result property="modifyDate" column="MODIFY_DATE"/>
+        <result property="modifyUser" column="modify_user"/>
+    </resultMap>
+
+    <select id="selectByNcCode" resultMap="ncCodeMap">
+        SELECT
+            nc.bo,
+            nc.site,
+            nc.nc_code,
+            nc.nc_name,
+            nc.nc_desc,
+            nc.state,
+            nc.nc_type,
+            nc.priority,
+            nc.MAX_NC_LIMIT,
+            nc.severity,
+            nc.create_date,
+            nc.create_user,
+            nc.modify_date,
+            nc.modify_user
+        FROM
+            m_nc_code nc
+        WHERE
+            site = #{ncCode.site}
+        <if test="ncCode.bo != null and ncCode.bo != ''">
+            and nc.bo = #{ncCode.bo}
+        </if>
+        <if test="ncCode.ncCode != null and ncCode.ncCode != ''">
+            and nc.NC_CODE = #{ncCode.ncCode}
+        </if>
+        <if test="ncCode.state != null and ncCode.state != ''">
+            and nc.state = #{ncCode.state}
+        </if>
+    </select>
+
+</mapper>

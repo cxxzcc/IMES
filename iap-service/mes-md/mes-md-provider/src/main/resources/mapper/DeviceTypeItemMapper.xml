@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.DeviceTypeItemMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.itl.mes.core.api.entity.DeviceTypeItem">
+        <result column="DEVICE_TYPE_BO" property="deviceTypeBo" />
+        <result column="DEVICE_BO" property="deviceBo" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        DEVICE_TYPE_BO, DEVICE_BO
+    </sql>
+
+    <select id="getByDevice" resultType="com.itl.mes.core.api.entity.DeviceType">
+        SELECT
+            dt.DEVICE_TYPE as deviceType,
+            dt.DEVICE_TYPE_NAME as deviceTypeName,
+            dt.DEVICE_TYPE_DESC as deviceTypeDesc
+        FROM m_device_type  dt
+                 LEFT JOIN m_device_type_item as dti on dt.BO = dti.DEVICE_TYPE_BO
+        WHERE
+            dti.DEVICE_BO = #{deviceBo}
+    </select>
+
+</mapper>

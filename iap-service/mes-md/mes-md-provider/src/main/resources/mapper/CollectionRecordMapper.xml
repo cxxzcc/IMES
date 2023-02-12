@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.CollectionRecordMapper">
+    <update id="updateBySnAndSite">
+        update m_collection_record
+        set complete =1
+        where bar_code = #{sn}
+          and site = #{site}
+    </update>
+
+    <select id="getPage" resultType="com.itl.mes.core.api.entity.CollectionRecord">
+        select
+        *
+        from m_collection_record
+        <where>
+            site = #{params.site}
+            <if test="params.barCode != null and params.barCode != ''">
+                and bar_code like #{params.barCode}
+            </if>
+            <if test="params.workOrderNumber != null and params.workOrderNumber != ''">
+                and work_order_number like #{params.workOrderNumber}
+            </if>
+            <if test="params.hold != null and params.hold != ''">
+                and hold = #{params.hold}
+            </if>
+            <if test="params.workshop != null and params.workshop != ''">
+                and workshop like #{params.workshop}
+            </if>
+            <if test="params.productionLine != null and params.productionLine != ''">
+                and production_line like #{params.productionLine}
+            </if>
+            <if test="params.productCode != null and params.productCode != ''">
+                and product_code like #{params.productCode}
+            </if>
+            <if test="params.productName != null and params.productName != ''">
+                and product_name like #{params.productName}
+            </if>
+            <if test="params.currentProcess != null and params.currentProcess != ''">
+                and current_process like #{params.currentProcess}
+            </if>
+            <if test="params.nextProcess != null and params.nextProcess != ''">
+                and next_process like #{params.nextProcess}
+            </if>
+            <if test="params.complete != null and params.complete != ''">
+                and complete = #{params.complete}
+            </if>
+        </where>
+        ORDER BY create_time desc;
+    </select>
+    <select id="getProductCheckoutList" resultType="com.itl.mes.core.api.vo.ProductCheckoutVO">
+        SELECT
+            a.work_order_number as workOrderNumber,
+            a.production_line as productionLine,
+            b.project_id as projectId,
+            b.project_name as projectName,
+            a.site,
+            count(case when b.result='OK' then 1 END) 'ok',
+            count(case when b.result='NG' then 1 END) 'ng'
+        FROM
+            m_collection_record a
+            LEFT JOIN m_record_of_product_test b ON b.collection_record_id = a.id
+          ${ew.customSqlSegment}
+        group by a.work_order_number,a.workshop,a.production_line,b.project_id,b.project_name,a.site
+    </select>
+    <select id="getProductCheckoutDetailList" resultType="com.itl.mes.core.api.vo.ProductCheckoutDetailVO">
+        SELECT
+            a.bar_code as barCode,
+            a.work_order_number as workOrderNumber,
+            a.hold,
+            a.work_order_type as workOrderType,
+            a.work_count as workCount,
+            a.process_name as processName,
+            a.workshop,
+            a.production_line as productionLine,
+            a.product_code as productCode,
+            a.product_name as productName,
+            b.project_id,
+            b.project_name as projectName,
+            b.uppper_limit as uppperLimit,
+            b.lower_limit as lowerLimit,
+            b.test,
+            b.result,
+            b.process,
+            b.station,
+            b.surveyor,
+            b.create_time as createTime,
+            c.classes,
+            c.state
+        FROM
+            m_collection_record a
+            LEFT JOIN m_record_of_product_test b ON b.collection_record_id = a.id
+            LEFT JOIN m_production_collection_record c on c.id =b.production_collection_record_id
+            ${ew.customSqlSegment}
+    </select>
+</mapper>

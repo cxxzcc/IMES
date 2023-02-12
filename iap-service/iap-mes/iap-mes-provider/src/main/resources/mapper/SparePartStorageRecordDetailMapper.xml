@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.SparePartStorageRecordDetailMapper">
+
+    <select id="listByRecordId" resultType="com.itl.iap.mes.api.entity.sparepart.SparePartStorageRecordDetail">
+        SELECT
+            detail.*, spare.SPARE_PART_NO AS sparePartNo,
+            spare.NAME AS sparePartName,
+            spare.SPEC AS spec,
+            spare.UNIT AS unit
+        FROM
+            m_spare_part_storage_record_detail detail
+                INNER JOIN m_spare_part spare ON spare.ID = detail.SPARE_PART_ID
+        WHERE
+            detail.RECORD_ID = #{params.recordId}
+    </select>
+</mapper>

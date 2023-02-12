@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mom.label.provider.mapper.MeProductStatusMapper">
+    <update id="updateProductState">
+        update me_product_status
+        set on_line               = #{meProductStatus.online},
+            current_d            = #{meProductStatus.currentD},
+            current_operation    =#{meProductStatus.currentOperation},
+            current_pl_station   = #{meProductStatus.currentPlStation},
+            current_operation_id = #{meProductStatus.currentOperationId},
+            current_person       = #{meProductStatus.currentPerson}
+        where id = #{meProductStatus.id}
+
+    </update>
+    <update id="updateProductStatusDoneByBo">
+        update me_product_status
+        set done = #{done}
+        where id = #{productStateBo}
+
+    </update>
+
+
+    <select id="findProductStatusBySnAndStatus" resultType="com.itl.mom.label.api.vo.MeProductStatusQueryVo">
+        select a.SN as sn,
+        p.SHOP_ORDER as elementCode,
+        a.STATE as state,
+        p.current_operation as currentOperation,
+        next_operation as nextOperation,
+        next_operation_id as nextOperationId,
+        current_pl_station as currentPlStation,
+        product_name as productName,
+        current_person as currentPerson,
+        current_d as currentD,
+        done as done,
+        on_line as onLine,
+        hold as hold,
+        a.ITEM_BO as item,
+        p.state as snState,
+        p.id as productStateBo,
+        c.bo as shopOrderBo,
+        b.bo as labelPrintBo,
+        a.bo as snBo
+        from M_SHOP_ORDER c
+        left join label_label_print b on b.ELEMENT_BO = c.BO
+        LEFT JOIN z_sn a ON b.BO = a.LABEL_PRINT_BO
+        inner join me_product_status p on a.BO = p.sn_bo
+        <where>
+            <if test="sn !=null  and sn !=''">
+                and a.SN =#{sn}
+            </if>
+            <if test="state !=null and state !=''">
+                and p.state =#{state}
+            </if>
+        </where>
+
+    </select>
+    <select id="getBySnBos" resultType="com.itl.mom.label.api.entity.MeProductStatus">
+        SELECT
+            p.*, sn.STATE AS snState,
+            pt.ELEMENT_BO AS shopOrder,
+            pt.ELEMENT_TYPE
+        FROM
+            me_product_status p
+        INNER JOIN z_sn sn ON p.sn_bo = sn.BO
+        INNER JOIN label_label_print pt ON pt.bo = sn.LABEL_PRINT_BO AND pt.ELEMENT_TYPE = 'SHOP_ORDER'
+        <where>
+            p.sn_bo in <foreach collection="snBos" item="item" open="(" separator="," close=")">#{item}</foreach>
+            AND p.state = 1
+        </where>
+
+    </select>
+    <select id="getShopOrderBySnBoList" resultType="com.itl.mom.label.api.entity.MeProductStatus">
+        SELECT
+        p.id,
+        p.sn_bo,
+        sn.STATE AS snState,
+        pt.ELEMENT_BO AS shopOrder
+        FROM
+        me_product_status p
+        INNER JOIN z_sn sn ON p.sn_bo = sn.BO
+        INNER JOIN label_label_print pt ON pt.bo = sn.LABEL_PRINT_BO AND pt.ELEMENT_TYPE = 'SHOP_ORDER'
+        <where>
+            p.sn_bo in <foreach collection="snBos" item="item" open="(" separator="," close=")">#{item}</foreach>
+            AND p.state = 1
+        </where>
+    </select>
+</mapper>

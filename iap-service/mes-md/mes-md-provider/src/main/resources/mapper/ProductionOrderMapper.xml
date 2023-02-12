@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ProductionOrderMapper">
+
+
+    <select id="getPage" resultType="com.itl.mes.core.api.entity.ProductionOrder">
+        SELECT
+            *
+        FROM production_order
+        <where>
+            SITE = #{params.site}
+            <if test="params.orderNo != null and params.orderNo != ''">
+                AND ORDER_NO like #{params.orderNo}
+            </if>
+            <if test="params.itemNo != null and params.itemNo != ''">
+                AND ITEM_NO like #{params.itemNo}
+            </if>
+            <if test="params.itemName != null and params.itemName != ''">
+                AND ITEM_NAME like #{params.itemName}
+            </if>
+            <if test="params.status != null and params.status != ''">
+                AND STATUS = #{params.status}
+            </if>
+            <if test="params.type != null and params.type != ''">
+                AND TYPE = #{params.type}
+            </if>
+            <if test="params.sellOrderNo != null and params.sellOrderNo != ''">
+                AND SELL_ORDER_NO like #{params.sellOrderNo}
+            </if>
+            <if test="params.sellOrderLine != null and params.sellOrderLine != ''">
+                AND SELL_ORDER_LINE like #{params.sellOrderLine}
+            </if>
+            <if test="params.source != null and params.source != ''">
+                AND SOURCE = #{params.source}
+            </if>
+        </where>
+        ORDER BY CREATE_DATE desc
+    </select>
+</mapper>

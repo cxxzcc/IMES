@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ProductionDefectRecordMapper">
+
+
+    <select id="getListBySn" resultType="com.itl.mes.core.api.entity.ProductionDefectRecord">
+        select a.*
+        from m_production_defect_record a
+        inner join m_collection_record b on a.collection_record_id = b.id
+        where b.bar_code = #{sn} and a.is_handle_flag = 'N'
+    </select>
+
+    <update id="updateHandleFlag">
+        update m_production_defect_record
+        set is_handle_flag = 'Y'
+        where id in <foreach collection="ids" item="item" open="(" separator="," close=")">#{item}</foreach>
+    </update>
+</mapper>

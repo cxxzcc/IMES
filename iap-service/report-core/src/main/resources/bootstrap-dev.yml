@@ -1,0 +1,53 @@
+server:
+  port: 9095
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+spring:
+  application:
+    name: aj-report
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_HOST:localhost:8848}
+        namespace: ${NAME_SPACE:mesdev}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+  messages:
+    basename: i18n/messages
+  datasource:
+    url: jdbc:sqlserver://120.24.161.71:1433;DatabaseName=aj_report
+    username: sa
+    password: Sap12345
+  main:
+    allow-bean-definition-overriding: true
+  redis:
+    port: 6379
+    host: localhost
+#    password: itl123
+generator:
+  enabled: true
+  workspace: /workspace/gaea
+  templatePath: template
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: true
+  mapperLocations:
+    - classpath*:/mapper/**/*.xml
+    - classpath*:/modeler-mybatis-mappings/**/*.xml
+
+management:
+  endpoints:
+    web:
+      base-path: /
+file:
+  dist-path: /app/disk/upload/
+  white-list: .png|.jpg|.gif|.icon|.pdf|.xlsx|.xls|.csv|.mp4|.avi
+  excelSuffix: .xlsx|.xls|.csv
+  downloadPath: http://47.107.158.3:19000/api/aj-report/file/download

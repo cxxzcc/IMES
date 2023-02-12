@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.core.provider.mapper.ConfigItemMapper">
+
+    <select id="queryByItem" resultType="com.itl.mes.core.api.dto.ConfigItemDto">
+        select
+        mci.bo as bo,
+        mci.site as site,
+        mci.item_code as itemCode,
+        mci.item_name as itemName,
+        mci.item_desc as itemDesc,
+        mci.CONFIG_ITEM_KEY as configItemKey,
+        mci.CONFIG_ITEM_VALUE as configItemValue,
+        mci.CONFIG_ITEM_TYPE as configItemType,
+        mci.STATE as state,
+        mci.CREATE_DATE as createDate,
+        mci.CREATE_USER as createUser,
+        mci.MODIFY_DATE as modifyDate,
+        mci.MODIFY_USER as modifyUser
+        from m_config_item mci
+        <where> mci.SITE = #{dto.site}
+            <if test="dto.bo != null and dto.bo != ''">
+                and mci.bo = #{dto.bo}
+            </if>
+            <if test="dto.itemCode != null and dto.itemCode != ''">
+                and mci.item_code = #{dto.itemCode}
+            </if>
+            <if test="dto.itemName != null and dto.itemName != ''">
+                and mci.item_name = #{dto.itemName}
+            </if>
+            <if test="dto.itemDesc != null and dto.itemDesc != ''">
+                and mci.item_desc = #{dto.itemDesc}
+            </if>
+            <if test="dto.configItemKey != null and dto.configItemKey != ''">
+                and mci.CONFIG_ITEM_KEY = #{dto.configItemKey}
+            </if>
+            <if test="dto.configItemValue != null and dto.configItemValue != ''">
+                and mci.CONFIG_ITEM_VALUE = #{dto.configItemValue}
+            </if>
+            <if test="dto.configItemType != null and dto.configItemType != ''">
+                and mci.CONFIG_ITEM_TYPE = #{dto.configItemType}
+            </if>
+            <if test="dto.state != null and dto.state != ''">
+                and mci.STATE = #{dto.state}
+            </if>
+        </where>
+        ORDER BY mci.site,mci.item_code,mci.CREATE_DATE desc
+    </select>
+
+
+    <select id="queryByItemCode" resultType="com.itl.mes.core.api.dto.ConfigItemDto">
+        select
+        mci.bo as bo,
+        mci.site as site,
+        mci.item_code as itemCode,
+        mci.item_name as itemName,
+        mci.item_desc as itemDesc,
+        mci.CONFIG_ITEM_KEY as configItemKey,
+        mci.CONFIG_ITEM_VALUE as configItemValue,
+        mci.CONFIG_ITEM_TYPE as configItemType,
+        mci.STATE as state,
+        mci.CREATE_DATE as createDate,
+        mci.CREATE_USER as createUser,
+        mci.MODIFY_DATE as modifyDate,
+        mci.MODIFY_USER as modifyUser
+        from m_config_item mci
+        <where> mci.SITE = #{site}
+            and mci.item_code = #{itemCode}
+            <if test="bo != null and bo != ''">
+                and mci.bo = #{bo}
+            </if>
+            <if test="itemName != null and itemName != ''">
+                and mci.item_name = #{itemName}
+            </if>
+            <if test="itemDesc != null and itemDesc != ''">
+                and mci.item_desc = #{itemDesc}
+            </if>
+            <if test="configItemKey != null and configItemKey != ''">
+                and mci.CONFIG_ITEM_KEY = #{configItemKey}
+            </if>
+            <if test="configItemValue != null and configItemValue != ''">
+                and mci.CONFIG_ITEM_VALUE = #{configItemValue}
+            </if>
+            <if test="configItemType != null and configItemType != ''">
+                and mci.CONFIG_ITEM_TYPE = #{configItemType}
+            </if>
+            <if test="state != null and state != ''">
+                and mci.STATE = #{state}
+            </if>
+        </where>
+        ORDER BY mci.site,mci.item_code,mci.CREATE_DATE desc
+    </select>
+
+</mapper>

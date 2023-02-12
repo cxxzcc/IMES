@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ProductionCollectionRecordKeyMapper">
+
+
+    <select id="getListByCollectionRecordId"
+            resultType="com.itl.mes.core.api.entity.ProductionCollectionRecordKey">
+
+        SELECT
+            rk.*, r.station,
+            r.process
+        FROM
+            m_production_collection_record_key rk
+        INNER JOIN m_production_collection_record r ON r.id = rk.production_collection_record_id
+        WHERE r.id = #{id}
+    </select>
+</mapper>

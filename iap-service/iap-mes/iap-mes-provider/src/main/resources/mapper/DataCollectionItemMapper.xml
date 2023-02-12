@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.DataCollectionItemMapper">
+
+    <sql id="FIELD">
+        t.imgSrc as imgSrc,t.id AS id,t.itemNo AS itemNo,t.itemName AS itemName,t.remark AS remark,t.itemType AS itemType,t.maxNum AS maxNum,t.minNum AS minNum,t.dataCollectionId AS dataCollectionId
+    </sql>
+
+    <select id="pageQuery" parameterType="string" resultType="com.itl.iap.mes.api.entity.DataCollectionItem">
+        SELECT <include refid="FIELD"/>
+        FROM m_data_collection_item t
+        WHERE t.dataCollectionId = #{dataCollectionId}
+    </select>
+    <select id="getList" resultType="java.lang.String">
+        select
+            e.id
+        from m_operation a
+            left join me_action b on a.ACTION_ID = b.id
+            left join me_action_operation c on b.id = c.action_id
+            join m_data_collection d on c.Data_collection_group_id = d.id
+            join m_data_collection_item e on d.id= e.dataCollectionId
+        where a.BO = #{id}
+    </select>
+</mapper>

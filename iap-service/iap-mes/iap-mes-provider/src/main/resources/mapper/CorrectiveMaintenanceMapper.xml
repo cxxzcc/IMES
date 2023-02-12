@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.CorrectiveMaintenanceMapper">
+
+    <sql id="FIELD">t.id AS id,t.type AS type,t.code AS code,t.faultCode AS faultCode,t.state AS state,t.remark AS remark,t.productionLine AS productionLine,t.station AS station,t.happenTime AS happenTime,t.repairStartTime AS repairStartTime,t.repairEndTime AS repairEndTime,t.siteId AS siteId,
+t.faultLevel AS faultLevel,t.repairNo AS repairNo
+    </sql>
+    <sql id="WHERE_FIELD_O">
+        <where>
+            AND t.siteId = #{correctiveMaintenance.siteId}
+            <if test="correctiveMaintenance.type != null">
+                AND t.type like '%#{correctiveMaintenance.type}%'
+            </if>
+            <if test="correctiveMaintenance.code != null and correctiveMaintenance.code !=''">
+                AND t.code like '%${correctiveMaintenance.code}%'
+            </if>
+            <if test="correctiveMaintenance.state != null">
+                AND t.state = #{correctiveMaintenance.state}
+            </if>
+            <if test="correctiveMaintenance.faultCode != null and correctiveMaintenance.faultCode !=''">
+                AND t.faultCode LIKE '%${correctiveMaintenance.faultCode}%'
+            </if>
+            <if test="correctiveMaintenance.repairUserId != null">
+                AND t.repairUserId = #{correctiveMaintenance.repairUserId}
+            </if>
+            <if test="correctiveMaintenance.repairUserName != null">
+                AND t.repairUserName = '%#{correctiveMaintenance.repairUserName}%'
+            </if>
+            <if test="correctiveMaintenance.startTime != null and correctiveMaintenance.endTime!=null ">
+                AND t.happenTime between #{correctiveMaintenance.startTime} and #{correctiveMaintenance.endTime}
+            </if>
+            <if test="correctiveMaintenance.deviceType != null and correctiveMaintenance.deviceType != '' ">
+                AND mdt.DEVICE_TYPE like '%${correctiveMaintenance.deviceType}%'
+            </if>
+        </where>
+    </sql>
+
+    <sql id="WHERE_FIELD">
+        <where>
+            AND t.siteId = #{correctiveMaintenance.siteId}
+            <if test="correctiveMaintenance.type != null and correctiveMaintenance.type !=''">
+                AND t.type = #{correctiveMaintenance.type}
+            </if>
+            <if test="correctiveMaintenance.code != null and correctiveMaintenance.code !=''">
+                AND t.code LIKE '${correctiveMaintenance.code}%'
+            </if>
+            <if test="correctiveMaintenance.repairNo != null and correctiveMaintenance.repairNo !=''">
+                AND t.repairNo LIKE '${correctiveMaintenance.repairNo}%'
+            </if>
+            <if test="correctiveMaintenance.state != null">
+                AND t.state = #{correctiveMaintenance.state}
+            </if>
+            <if test="correctiveMaintenance.faultCode != null and correctiveMaintenance.faultCode !=''">
+                AND t.faultCode LIKE '${correctiveMaintenance.faultCode}%'
+            </if>
+            <if test="correctiveMaintenance.repairUserId != null and correctiveMaintenance.repairUserId !=''">
+                AND t.repairUserId = #{correctiveMaintenance.repairUserId}
+            </if>
+            <if test="correctiveMaintenance.repairUserName != null and correctiveMaintenance.repairUserName !=''">
+                AND t.repairUserName = #{correctiveMaintenance.repairUserName}
+            </if>
+            <if test="correctiveMaintenance.startTime != null and correctiveMaintenance.startTime !='' and correctiveMaintenance.endTime!=null and correctiveMaintenance.endTime !='' ">
+                AND t.happenTime between #{correctiveMaintenance.startTime} and #{correctiveMaintenance.endTime}
+            </if>
+            <if test="correctiveMaintenance.deviceType != null and correctiveMaintenance.deviceType != '' ">
+                AND mdt.DEVICE_TYPE LIKE '${correctiveMaintenance.deviceType}%'
+            </if>
+        </where>
+    </sql>
+    <sql id="WHERE_FIELD_1">
+        <where>
+            AND t.siteId = #{correctiveMaintenance.siteId}
+            AND t.planRepairUserId = #{correctiveMaintenance.planRepairUserId}
+            <if test="correctiveMaintenance.type != null">
+                AND t.type = #{correctiveMaintenance.type}
+            </if>
+            <if test="correctiveMaintenance.code != null and correctiveMaintenance.code !=''">
+                AND t.code like '${correctiveMaintenance.code}%'
+            </if>
+            <if test="correctiveMaintenance.state != null">
+                AND t.state = #{correctiveMaintenance.state}
+            </if>
+            <if test="correctiveMaintenance.repairUserId != null">
+                AND t.repairUserId = #{correctiveMaintenance.repairUserId}
+            </if>
+            <if test="correctiveMaintenance.repairUserName != null">
+                AND t.repairUserName = #{correctiveMaintenance.repairUserName}
+            </if>
+            <if test="correctiveMaintenance.faultCode != null and correctiveMaintenance.faultCode !=''">
+                AND t.faultCode LIKE '${correctiveMaintenance.faultCode}%'
+            </if>
+            <if test="correctiveMaintenance.startTime != null and correctiveMaintenance.endTime!=null ">
+                AND t.happenTime between #{correctiveMaintenance.startTime} and #{correctiveMaintenance.endTime}
+            </if>
+            <if test="correctiveMaintenance.deviceType != null and correctiveMaintenance.deviceType != '' ">
+                AND md.DEVICE_TYPE like '${correctiveMaintenance.deviceType}%'
+            </if>
+        </where>
+    </sql>
+
+    <select id="findList" parameterType="com.itl.iap.mes.api.entity.CorrectiveMaintenance"
+            resultType="com.itl.iap.mes.api.entity.CorrectiveMaintenance" databaseId="oracle">
+        select t.id as id,
+        t.repairNo as repairNo,
+        t.state as state,
+        t.code as code,
+        t.repairUserId as repairUserId,
+        t.repairUserName as repairUserName,
+        t.maintenanceCost as maintenanceCost,
+        t.repairApplicant as repairApplicant,
+        md.DEVICE_NAME as deviceName,
+        t.faultCode as faultCode,
+        mrf.remark as faultDesc,
+        t.repairMethod    as repairMethod,
+        t.createTime as createTime,
+        t.productionLine as productionLine,
+        t.station as station,
+        t.happenTime as happenTime,
+        t.repairStartTime as repairStartTime,
+        t.repairEndTime as repairEndTime,
+        t.urgencyLevel as urgencyLevel,
+        t.siteId as siteId,
+        md.COVER_IMG as coverImg
+        from m_repair_corrective_maintenance t
+        left join m_device md on t.code = md.DEVICE and t.siteId = md.SITE
+        left join m_repair_fault mrf on t.faultCode = mrf.faultCode and t.siteId = mrf.siteId
+        <if test="correctiveMaintenance.rlatedToMe != null and correctiveMaintenance.rlatedToMe != ''">
+            inner join m_repair_corrective_user u on u.REPAIR_ID = t.id and u.REPAIR_USER_ID =
+            #{correctiveMaintenance.rlatedToMe}
+        </if>
+        <if test="correctiveMaintenance.repairUserId != null and correctiveMaintenance.repairUserId != ''">
+            inner join m_repair_corrective_user u on u.REPAIR_ID = t.id and u.REPAIR_USER_ID =
+            #{correctiveMaintenance.repairUserId}
+        </if>
+
+        <include refid="WHERE_FIELD_O"/>
+        order by t.state asc, t.urgencyLevel asc, t.createTime desc
+    </select>
+
+    <select id="findList" parameterType="com.itl.iap.mes.api.entity.CorrectiveMaintenance"
+            resultType="com.itl.iap.mes.api.entity.CorrectiveMaintenance" databaseId="ms-sql">
+        select t.id as id,
+        t.repairNo as repairNo,
+        t.state as state,
+        t.code as code,
+        t.repairUserId as repairUserId,
+        t.repairUserName as repairUserName,
+        t.maintenanceCost as maintenanceCost,
+        t.repairApplicant as repairApplicant,
+        md.DEVICE_NAME as deviceName,
+        t.faultCode as faultCode,
+        mrf.remark as faultDesc,
+        t.repairMethod as repairMethod,
+        t.createTime as createTime,
+        t.urgencyLevel as urgencyLevel,
+        t.productionLine as productionLine,
+        t.station as station,
+        t.happenTime as happenTime,
+        t.repairStartTime as repairStartTime,
+        t.repairEndTime as repairEndTime,
+        t.siteId as siteId
+        from m_repair_corrective_maintenance t
+        left join m_device md on t.code = md.DEVICE and t.siteId = md.SITE
+        left join m_repair_fault mrf on t.faultCode = mrf.faultCode and t.siteId = mrf.siteId
+        <if test="correctiveMaintenance.rlatedToMe != null and correctiveMaintenance.rlatedToMe != ''">
+            inner join m_repair_corrective_user u on u.REPAIR_ID = t.id and u.REPAIR_USER_ID =
+            #{correctiveMaintenance.rlatedToMe}
+        </if>
+        <if test="correctiveMaintenance.repairUserId != null and correctiveMaintenance.repairUserId != ''">
+            inner join m_repair_corrective_user u on u.REPAIR_ID = t.id and u.REPAIR_USER_ID =
+            #{correctiveMaintenance.repairUserId}
+        </if>
+        <include refid="WHERE_FIELD"/>
+        order by t.state asc,t.urgencyLevel asc
+    </select>
+
+    <select id="getDevice" parameterType="string" resultType="map">
+        SELECT DEVICE_NAME     AS deviceName,
+               DEVICE_MODEL    AS deviceModel,
+               PRODUCT_LINE_BO AS productLineBo,
+               STATION_BO      AS stationBo,
+               STATE           AS state
+        FROM M_DEVICE
+        WHERE DEVICE = #{code}
+    </select>
+    <delete id="deleteAndon">
+        delete
+        from andon_record
+        where DEVICE_BO = #{id}
+    </delete>
+
+    <!--维修执行-->
+    <update id="updateAndonExecute" databaseId="ms-sql">
+        update
+        andon_record
+        set STATE = #{state},
+        REPAIR_MAN = #{user},
+        REPAIR_TIME = #{date},
+        REPAIR_REMARK = #{repairMethod},
+        CLOSE_TIME = #{date},
+        CLOSE_MAN = #{user}
+        where
+        SITE = #{site}
+        and REPAIR_NO = #{repairNo}
+    </update>
+
+    <!--接收-->
+    <update id="updateAndonReceive" databaseId="ms-sql">
+        update
+        andon_record
+        set STATE = #{state},
+        RECEIVE_MAN = #{user},
+        RECEIVE_TIME = #{date}
+        where
+        SITE = #{site}
+        and REPAIR_NO = #{repairNo}
+    </update>
+
+    <select id="findListForPlanRepairUser" parameterType="com.itl.iap.mes.api.entity.CorrectiveMaintenance"
+            resultType="com.itl.iap.mes.api.entity.CorrectiveMaintenance" databaseId="ms-sql">
+        select t.id as id,
+        t.repairNo as repairNo,
+        t.state as state,
+        t.code as code,
+        md.DEVICE_NAME as deviceName,
+        t.faultCode as faultCode,
+        mrf.remark as faultDesc,
+        t.createTime as createTime,
+        t.productionLine as productionLine,
+        t.station as station,
+        t.happenTime as happenTime,
+        t.repairStartTime as repairStartTime,
+        t.repairEndTime as repairEndTime,
+        t.siteId as siteId
+        from m_repair_corrective_maintenance t
+        left join m_device md on t.code = md.DEVICE and t.siteId = md.SITE
+        left join m_repair_fault mrf on t.faultCode = mrf.faultCode and t.siteId = mrf.siteId
+        left join mm_repair_corrective_user mrcu on t.planRepairUserId = mrcu.REPAIR_USER_ID
+        <include refid="WHERE_FIELD_1"/>
+        order by t.createTime DESC
+    </select>
+
+
+    <select id="repairRecord" resultType="com.itl.iap.mes.api.dto.RepairRecordDTO" databaseId="ms-sql">
+        SELECT m.id,
+               m.repairNo,
+               m.faultDesc      as remark,
+               m.repairUserName as planRepairUserName,
+               m.repairMethod   as repairProcrssDesc,
+               m.faultCode,
+               m.happenTime,
+               m.repairStartTime,
+               m.repairEndTime
+        FROM m_repair_corrective_maintenance m
+        WHERE m.code = #{params.code}
+          AND m.siteId = #{params.site}
+          AND m.state = 2
+        ORDER BY m.createTime DESC
+    </select>
+    <select id="getProductLineByBo" resultType="com.itl.mes.core.api.vo.ProductLineVo" databaseId="ms-sql">
+        SELECT *
+        FROM m_product_line
+        WHERE BO = #{productionLine}
+          AND state = 1
+    </select>
+
+    <select id="getStationByBo" resultType="com.itl.mes.core.api.vo.StationVo" databaseId="ms-sql">
+        SELECT *
+        FROM m_station
+        WHERE BO = #{station}
+          AND state = 1
+    </select>
+
+    <select id="getAllRepairCount" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM m_repair_corrective_maintenance
+        WHERE siteId = #{site}
+          AND state = 0
+    </select>
+
+    <select id="getRepairCountByUser" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM m_repair_corrective_maintenance repair
+                 INNER JOIN m_repair_corrective_user u on u.REPAIR_ID = repair.id
+        WHERE repair.state = 0
+          AND repair.siteId = #{site}
+          AND u.REPAIR_USER_ID = #{userId}
+        GROUP BY u.REPAIR_USER_ID
+    </select>
+    <select id="queryRepairCountStatisticsByState"
+            resultType="com.itl.mes.core.api.dto.AbnormalCountStatisticsDTO">
+        SELECT
+        STATE,
+        COUNT (*) AS count
+        FROM
+        m_repair_corrective_maintenance
+        WHERE
+        AND site = #{site}
+        <if test="correctiveMaintenance.startTime != null and correctiveMaintenance.endTime!=null ">
+            AND t.happenTime between #{correctiveMaintenance.startTime} and #{correctiveMaintenance.endTime}
+        </if>
+        GROUP BY
+        STATE
+    </select>
+</mapper>

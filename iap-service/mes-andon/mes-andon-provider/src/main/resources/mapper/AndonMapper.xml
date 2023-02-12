@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.andon.provider.mapper.AndonMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.itl.mes.andon.api.entity.Andon" id="andonMap">
+        <result property="bo" column="BO"/>
+        <result property="andon" column="ANDON"/>
+        <result property="andonName" column="ANDON_NAME"/>
+        <result property="andonDesc" column="ANDON_DESC"/>
+        <result property="andonBoxBo" column="ANDON_BOX_BO"/>
+        <result property="andonTypeBo" column="ANDON_TYPE_BO"/>
+        <result property="andonPushBo" column="ANDON_PUSH_BO"/>
+        <result property="site" column="SITE"/>
+        <result property="resourceType" column="RESOURCE_TYPE"/>
+        <result property="workShopBo" column="WORK_SHOP_BO"/>
+        <result property="productLineBo" column="PRODUCT_LINE_BO"/>
+        <result property="stationBo" column="STATION_BO"/>
+        <result property="deviceBo" column="DEVICE_BO"/>
+        <result property="state" column="STATE"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="createUser" column="CREATE_USER"/>
+        <result property="modifyDate" column="MODIFY_DATE"/>
+        <result property="modifyUser" column="MODIFY_USER"/>
+    </resultMap>
+
+    <select id="findPage" resultType="com.itl.mes.andon.api.entity.Record">
+        select PID as pid,
+        andon_record.SITE as site,
+        ANDON_BO as andonBo,
+        andon_record.REPAIR_NO as repairNo,
+        andon_record.RESOURCE_TYPE as resourceType,
+        andon_record.WORK_SHOP_BO as workShopBo,
+        andon_record.PRODUCT_LINE_BO as productLineBo,
+        andon_record.STATION_BO as stationBo,
+        andon_record.DEVICE_BO as deviceBo,
+        ABNORMAL_TIME as abnormalTime, -- 异常时间
+        FAULT_CODE_BO as faultCodeBo,
+        FAULT_CODE as faultCode, -- 故障代码
+        CALL_QUANTITY as callQuantity,
+        ABNORMAL_IMG as abnormalImg,
+        ABNORMAL_REMARK as abnormalRemark,
+        REPAIR_TIME as repairTime, -- 维修时间
+        REPAIR_MAN as repairMan, -- 维修人
+        REPAIR_IMG as repairImg,
+        REPAIR_REMARK as repairRemark,
+        andon_record.STATE as state,
+        andon_record.ITEM_BO as itemBo,
+        TRIGGER_TIME as triggerTime, -- 触发时间
+        TRIGGER_MAN as triggerMan, -- 触发人
+        RECEIVE_TIME as receiveTime, -- 受理时间
+        andon_record.RECEIVE_MAN as receiveMan, -- 受理人
+        CLOSE_TIME as closeTime,
+        CLOSE_MAN as closeMan,
+        andon_record.CALL_MAN as callMan,
+        PLAN_REPAIR_TIME as planRepairTime,
+        ABNORMAL_WORK_HOUR as abnormalWorkHour,
+        AFFECT_SHOP_ORDER as affectShopOrder,
+        ANDON as andon,
+        ANDON_NAME as andonName,
+        ANDON_DESC as andonDesc,
+        ANDON_TYPE_BO as andonType,
+        andon_record.URGENCY_LEVEL as urgencyLevel -- 安灯紧急程度(保障等级)
+        from andon_record
+        left join andon_andon aa on aa.BO = andon_record.ANDON_BO
+        <where>
+            andon_record.SITE = #{record.site}
+            <if test="record.andonType != null and record.andonType !=''">
+                and ANDON_TYPE_BO like concat('%',#{record.andonType} )
+            </if>
+            <if test="record.andon != null and record.andon !=''">
+                and ANDON like concat('%',#{record.andon} )
+            </if>
+            <if test="record.andonName != null and record.andonName !=''">
+                and ANDON_NAME like concat('%',#{record.andonName} )
+            </if>
+            <if test="record.faultCodeBo != null and record.faultCodeBo !=''">
+                and FAULT_CODE_BO like concat('%',#{record.faultCodeBo} )
+            </if>
+            <if test="record.state != null and record.state !=''">
+                and andon_record.STATE like concat('%',#{record.state} )
+            </if>
+            order by andon_record.TRIGGER_TIME desc
+        </where>
+    </select>
+
+    <select id="findList" resultType="com.itl.mes.andon.api.vo.AndonVo" databaseId="ms-sql">
+        SELECT
+        a.BO AS bo,
+        a.ANDON AS andon,
+        a.ANDON_NAME AS andonName,
+        a.ANDON_DESC AS andonDesc,
+        c.BOX_NAME AS boxName,
+        d.ANDON_PUSH_NAME AS andonPushName,
+        e.ANDON_TYPE_NAME AS andonTypeName,
+        ag.BO as andonGradeId,
+        ag.ANDON_GRADE as andonGrade,
+        CASE
+        WHEN a.RESOURCE_TYPE = '0' THEN ''
+        WHEN a.RESOURCE_TYPE = '4' THEN f.DEVICE_NAME
+        WHEN a.RESOURCE_TYPE = '6' THEN b.ITEM_NAME
+        ELSE '' END AS relatedObjectName,
+        a.STATE AS state,
+        a.CREATE_USER AS createUser,
+        a.CREATE_DATE AS createDate,
+        a.MODIFY_USER AS modifyUser,
+        a.MODIFY_DATE AS modifyDate,
+        a.RESOURCE_TYPE AS resourceType
+        FROM
+        andon_andon a
+        left join andon_grade ag on a.ANDON_GRADE_ID = ag.BO
+        LEFT JOIN m_item b ON a.ITEM_BO = b.BO
+        LEFT JOIN andon_box c ON a.ANDON_BOX_BO = c.BO
+        LEFT JOIN andon_push d ON a.ANDON_PUSH_BO = d.BO
+        LEFT JOIN andon_type e ON a.ANDON_TYPE_BO = e.BO
+        LEFT JOIN m_device f ON a.DEVICE_BO = f.BO
+        where 1 =1
+        AND a.SITE = #{andonQueryDTO.site}
+        <if test="andonQueryDTO.andon != null and andonQueryDTO.andon !=''">
+            AND a.andon LIKE '${andonQueryDTO.andon}%'
+        </if>
+        <if test="andonQueryDTO.andonName != null and andonQueryDTO.andonName!=''">
+            AND a.andon_name like '${andonQueryDTO.andonName}%'
+        </if>
+        <if test="andonQueryDTO.isEnable != null ">
+            <choose>
+                <when test="andonQueryDTO.isEnable == true">
+                    AND a.state = '1'
+                </when>
+                <otherwise>
+                    AND a.state = '0'
+                </otherwise>
+            </choose>
+        </if>
+        ORDER BY a.create_date DESC
+    </select>
+
+    <select id="findList" resultType="com.itl.mes.andon.api.vo.AndonVo" databaseId="oracle">
+        SELECT
+        a.BO AS bo,
+        a.ANDON AS andon,
+        a.ANDON_NAME AS andonName,
+        a.ANDON_DESC AS andonDesc,
+        c.BOX_NAME AS boxName,
+        d.ANDON_PUSH_NAME AS andonPushName,
+        e.ANDON_TYPE_NAME AS andonTypeName,
+        CASE
+        WHEN a.RESOURCE_TYPE = '0' THEN ''
+        WHEN a.RESOURCE_TYPE = '4' THEN f.DEVICE_NAME
+        WHEN a.RESOURCE_TYPE = '6' THEN b.ITEM_NAME
+        ELSE '' END AS relatedObjectName,
+        a.STATE AS state,
+        a.CREATE_USER AS createUser,
+        a.CREATE_DATE AS createDate,
+        a.MODIFY_USER AS modifyUser,
+        a.MODIFY_DATE AS modifyDate,
+        a.RESOURCE_TYPE AS resourceType
+        FROM
+        andon_andon a
+        LEFT JOIN m_item b ON a.ITEM_BO = b.BO
+        LEFT JOIN andon_box c ON a.ANDON_BOX_BO = c.BO
+        LEFT JOIN andon_push d ON a.ANDON_PUSH_BO = d.BO
+        LEFT JOIN andon_type e ON a.ANDON_TYPE_BO = e.BO
+        LEFT JOIN m_device f ON a.DEVICE_BO = f.BO
+        where 1 =1
+        AND a.SITE = #{andonQueryDTO.site}
+        <if test="andonQueryDTO.andon != null and andonQueryDTO.andon !=''">
+            AND instr(a.andon,#{andonQueryDTO.andon})>0
+        </if>
+        <if test="andonQueryDTO.andonName != null and andonQueryDTO.andonName!=''">
+            AND instr(a.andon_name,#{andonQueryDTO.andonName})>0
+        </if>
+        <if test="andonQueryDTO.isEnable != null ">
+            <choose>
+                <when test="andonQueryDTO.isEnable == true">
+                    AND a.state = '1'
+                </when>
+                <otherwise>
+                    AND a.state = '0'
+                </otherwise>
+            </choose>
+        </if>
+        ORDER BY a.create_date DESC
+    </select>
+
+    <select id="findAndonById" resultType="com.itl.mes.andon.api.vo.AndonVo" databaseId="ms-sql">
+
+        SELECT a.BO              AS bo,
+               a.ANDON           AS andon,
+               a.ANDON_NAME      AS andonName,
+               a.ANDON_DESC      AS andonDesc,
+               a.ANDON_BOX_BO    AS andonBoxBo,
+               a.ANDON_TYPE_BO   AS andonTypeBo,
+               a.ANDON_PUSH_BO   AS andonPushBo,
+               a.DEVICE_BO       AS relatedObjectBo,
+               a.STATE           AS state,
+               c.BOX_NAME        AS boxName,
+               d.ANDON_PUSH_NAME AS andonPushName,
+               e.ANDON_TYPE_NAME AS andonTypeName,
+               ag.BO as andonGradeId,
+               ag.ANDON_GRADE as andonGrade,
+               e.ANDON_TYPE_TAG  AS andonTypeTag,
+               CASE
+
+                   WHEN a.RESOURCE_TYPE = '0' THEN
+                       ''
+                   WHEN a.RESOURCE_TYPE = '4' THEN
+                       f.DEVICE_NAME
+                   WHEN a.RESOURCE_TYPE = '6' THEN
+                       b.ITEM_NAME
+                   ELSE ''
+                   END           AS relatedObjectName
+        FROM andon_andon a
+                 left join andon_grade ag on a.ANDON_GRADE_ID = ag.BO
+                 LEFT JOIN m_item b ON a.ITEM_BO = b.BO
+                 LEFT JOIN andon_box c ON a.ANDON_BOX_BO = c.BO
+                 LEFT JOIN andon_push d ON a.ANDON_PUSH_BO = d.BO
+                 LEFT JOIN andon_type e ON a.ANDON_TYPE_BO = e.BO
+                 LEFT JOIN m_device f ON a.DEVICE_BO = f.BO
+        WHERE 1 = 1
+          AND a.bo = #{id}
+    </select>
+
+    <select id="findAndonById" resultType="com.itl.mes.andon.api.vo.AndonVo" databaseId="oracle">
+
+        SELECT a.BO              AS bo,
+               a.ANDON           AS andon,
+               a.ANDON_NAME      AS andonName,
+               a.ANDON_DESC      AS andonDesc,
+               a.ANDON_BOX_BO    AS andonBoxBo,
+               a.ANDON_TYPE_BO   AS andonTypeBo,
+               a.ANDON_PUSH_BO   AS andonPushBo,
+               a.DEVICE_BO       AS relatedObjectBo,
+               a.STATE           AS state,
+               c.BOX_NAME        AS boxName,
+               d.ANDON_PUSH_NAME AS andonPushName,
+               e.ANDON_TYPE_NAME AS andonTypeName,
+               CASE
+
+                   WHEN a.RESOURCE_TYPE = '0' THEN
+                       ''
+                   WHEN a.RESOURCE_TYPE = '4' THEN
+                       f.DEVICE_NAME
+                   WHEN a.RESOURCE_TYPE = '6' THEN
+                       b.ITEM_NAME
+                   ELSE ''
+                   END           AS relatedObjectName
+        FROM andon_andon a
+                 LEFT JOIN m_item b ON a.ITEM_BO = b.BO
+                 LEFT JOIN andon_box c ON a.ANDON_BOX_BO = c.BO
+                 LEFT JOIN andon_push d ON a.ANDON_PUSH_BO = d.BO
+                 LEFT JOIN andon_type e ON a.ANDON_TYPE_BO = e.BO
+                 LEFT JOIN m_device f ON a.DEVICE_BO = f.BO
+        WHERE 1 = 1
+          AND a.bo = #{id}
+    </select>
+
+
+</mapper>

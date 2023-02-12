@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.StationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.itl.mes.core.api.entity.Station">
+        <id column="BO" property="bo" />
+        <result column="SITE" property="site" />
+        <result column="STATION" property="station" />
+        <result column="STATION_NAME" property="stationName" />
+        <result column="STATION_DESC" property="stationDesc" />
+        <result column="OPERATION_BO" property="operationBo" />
+        <result column="STATE" property="state" />
+        <result column="CREATE_DATE" property="createDate" />
+        <result column="CREATE_USER" property="createUser" />
+        <result column="MODIFY_DATE" property="modifyDate" />
+        <result column="MODIFY_USER" property="modifyUser" />
+        <result column="STATION_TYPE_BO" property="stationTypeBo" />
+        <result column="PRODUCT_LINE_BO" property="productLineBo" />
+    </resultMap>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMapNew" type="com.itl.mes.core.api.vo.IapSysUserStationVO">
+        <id column="BO" property="bo" />
+        <result column="SITE" property="site" />
+        <result column="STATION" property="station" />
+        <result column="STATION_NAME" property="stationName" />
+        <result column="STATION_DESC" property="stationDesc" />
+        <result column="IS_DEFAULT" property="isDefault" />
+        <result column="SERIAL_NUM" property="serialNum" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        BO, SITE, STATION, STATION_NAME, STATION_DESC, OPERATION_BO, STATE, CREATE_DATE, CREATE_USER, MODIFY_DATE, MODIFY_USER, STATION_TYPE_BO, PRODUCT_LINE_BO
+    </sql>
+
+    <select id="findUserStations" resultMap="BaseResultMapNew">
+        SELECT
+            a.BO,
+            a.STATION,
+            a.STATION_NAME,
+            a.STATION_DESC,
+            b.IS_DEFAULT,
+            b.SERIAL_NUM
+        FROM
+            m_station a,
+            iap_sys_user_station_t b
+        WHERE
+            a.BO = b.STATION_BO
+            AND a.SITE = #{userStationQueryDTO.site}
+            AND b.user_id = #{userStationQueryDTO.userId}
+            AND a.state = '1'
+        <if test='userStationQueryDTO.station !="" and userStationQueryDTO.station !=null'>
+            AND a.station LIKE CONCAT(#{userStationQueryDTO.station},'%')
+        </if>
+        order by b.IS_DEFAULT desc,b.SERIAL_NUM asc
+    </select>
+    <select id="getByStation" resultType="java.util.Map">
+        select mpl.PRODUCT_LINE,mws.WORK_SHOP
+        from m_station ms
+                     left join m_product_line mpl on mpl.bo=ms.PRODUCT_LINE_BO
+                     left join m_work_shop mws on mws.BO=mpl.WORK_SHOP_BO
+        where ms.STATION=#{station}
+          and ms.SITE=#{site}
+    </select>
+    <select id="findUncorrelatedUserStations" resultMap="BaseResultMap">
+
+        SELECT
+            BO,
+            STATION,
+            STATION_NAME,
+            STATION_DESC
+        FROM
+            m_station
+        WHERE
+            NOT EXISTS (
+            select 1 from iap_sys_user_station_t where m_station.BO = station_bo
+            and user_id = #{userStationQueryDTO.userId}
+            )
+            and site = #{userStationQueryDTO.site}
+            and state = '1'
+        <if test='userStationQueryDTO.station !="" and userStationQueryDTO.station !=null'>
+            AND station LIKE CONCAT(#{userStationQueryDTO.station},'%')
+        </if>
+    </select>
+</mapper>

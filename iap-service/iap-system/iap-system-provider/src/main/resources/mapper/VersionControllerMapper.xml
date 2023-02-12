@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.iap.system.provider.mapper.VersionControllerMapper">
+
+
+    <!-- 设置所有版本记录不为最新版本 -->
+    <update id="setAllRecordNotUpToDate">
+        update sys_version_controller
+        set isUpToDate = 0 where isUpToDate = 1;
+    </update>
+
+
+    <select id="selectPageVersionForTable" parameterType="java.util.Map" resultType="java.util.Map" databaseId="ms-sql">
+        SELECT
+        v.versionId,
+        v.versionNo,
+        v.downLoadLink,
+        v.isUpToDate,
+        v.remark,
+        v.newContentLog,
+        v.fixedContentLog,
+        v.codeUrl,
+        v.lastUpdateDate,
+        v.creationDate,
+        v.createdBy,
+        v.lastUpdatedBy
+        FROM sys_version_control v
+        WHERE v.site =#{params.site}
+        <if test="params.versionNo != null and params.versionNo !='' ">
+            AND v.versionNo LIKE '${params.versionNo}%'
+        </if>
+        <if test=" params.isUpToDate!= null and  v.isUpToDate!='' ">
+            AND  v.isUpToDate LIKE '${params.isUpToDate}%'
+        </if>
+        <if test="params.remark != null and v.remark != '' ">
+            AND v.remark LIKE '${params.remark}%'
+        </if>
+        <if test="params.newContentLog != null and params.newContentLog != '' ">
+            AND v.newContentLog LIKE '${params.newContentLog}%'
+        </if>
+        <if test="params.fixedContentLog != null and params.fixedContentLog !='' ">
+            AND v.fixedContentLog = '${params.fixedContentLog}'
+        </if>
+        <if test="params.creationDate != null and params.creationDate !='' ">
+            AND v.creationDate = '${params.creationDate}'
+        </if>
+        order by v.creationDate
+    </select>
+
+
+</mapper>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxl.job.admin.mapper.IapXxlJobLogGlueDao">
+
+    <resultMap id="IapXxlJobLogGlue" type="com.xxl.job.admin.core.model.IapXxlJobLogGlue">
+        <result column="id" property="id"/>
+        <result column="job_id" property="jobId"/>
+        <result column="glue_type" property="glueType"/>
+        <result column="glue_source" property="glueSource"/>
+        <result column="glue_remark" property="glueRemark"/>
+        <result column="add_time" property="addTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+		t.id,
+		t.job_id,
+		t.glue_type,
+		t.glue_source,
+		t.glue_remark,
+		t.add_time,
+		t.update_time
+	</sql>
+
+    <!-- 保存 -->
+    <insert id="save" parameterType="com.xxl.job.admin.core.model.IapXxlJobLogGlue" useGeneratedKeys="true"
+            keyProperty="id" databaseId="ms-sql">
+        INSERT INTO xxl_job_logglue (
+        job_id,
+        glue_type,
+        glue_source,
+        glue_remark,
+        add_time,
+        update_time
+        ) VALUES (
+        #{jobId},
+        #{glueType},
+        #{glueSource},
+        #{glueRemark},
+        #{addTime},
+        #{updateTime}
+        );
+    </insert>
+    <!-- 保存 -->
+    <insert id="save" parameterType="com.xxl.job.admin.core.model.IapXxlJobLogGlue" useGeneratedKeys="true"
+            keyProperty="id" databaseId="oracle">
+        INSERT INTO xxl_job_logglue (
+        job_id,
+        glue_type,
+        glue_source,
+        glue_remark,
+        add_time,
+        update_time
+        ) VALUES (
+        #{jobId,jdbcType=INTEGER},
+        #{glueType,jdbcType=VARCHAR},
+        #{glueSource,jdbcType=VARCHAR},
+        #{glueRemark,jdbcType=VARCHAR},
+        #{addTime,jdbcType=TIMESTAMP},
+        #{updateTime,jdbcType=TIMESTAMP}
+        );
+    </insert>
+    <!-- 根据 jobId 查找 XxlJobLogGlue列表 -->
+    <select id="findByJobId" parameterType="java.lang.Integer" resultMap="IapXxlJobLogGlue">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM xxl_job_logglue  t
+        WHERE t.job_id = #{jobId}
+        ORDER BY id DESC
+    </select>
+
+    <!-- 清除limit次之前的备份记录 -->
+    <delete id="removeOld">
+		DELETE FROM xxl_job_logglue
+		WHERE id NOT in(
+			SELECT id FROM(
+				SELECT  id FROM iap_xxl_job_logglue
+				WHERE job_id = #{jobId}
+				AND ROWNUM <![CDATA[ <= ]]> ${limit}
+				ORDER BY update_time desc
+
+
+			) t1
+		) AND job_id = #{jobId}
+	</delete>
+
+    <!-- 根据 jobId 删除 xxl_job_logglue表记录 -->
+    <delete id="deleteByJobId" parameterType="java.lang.Integer">
+		DELETE FROM xxl_job_logglue
+		WHERE job_id = #{jobId}
+	</delete>
+
+</mapper>

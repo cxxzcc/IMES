@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.me.provider.mapper.LabelPrintLogMapper">
+
+    <select id="findList" resultType="com.itl.mes.me.api.vo.LabelPrintLogVo">
+
+            SELECT
+                PRINT_USER printUser,
+                PRINT_DATE printDate,
+                COUNT ( 1 ) printCount
+            FROM
+                me_label_print_log
+            WHERE
+                LABEL_PRINT_BO = #{labelPrintBo}
+            GROUP BY
+                PRINT_USER,
+                PRINT_DATE
+
+    </select>
+
+    <select id="findDetailList" resultType="com.itl.mes.me.api.vo.LabelPrintLogVo">
+
+            SELECT
+                PRINT_USER printUser,
+                PRINT_DATE printDate
+            FROM
+                me_label_print_log
+            WHERE
+                LABEL_PRINT_DETAIL_BO = #{labelPrintDetailBo}
+
+    </select>
+</mapper>

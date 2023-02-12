@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.me.provider.mapper.RuleLabelMapper">
+    <resultMap type="com.itl.mes.me.api.dto.ruleLabel.RuleLabelShowDto" id="baseMap">
+        <id property="bo" column="bo"/>
+        <result property="ruleLabel" column="ruleLabel"/>
+        <result property="ruleLabelName" column="ruleLabelName"/>
+        <result property="elementType" column="elementType"/>
+        <result property="codeRuleBo" column="codeRuleBo"/>
+        <result property="codeRuleType" column="codeRuleType"/>
+        <result property="labelBo" column="labelBo"/>
+        <result property="label" column="label"/>
+        <result property="labelType" column="labelType"/>
+        <result property="templateType" column="templateType"/>
+        <result property="lodopText" column="lodopText"/>
+
+        <collection property="details" ofType="com.itl.mes.me.api.entity.RuleLabelDetail">
+            <result property="ruleVar" column="ruleVar"/>
+            <result property="ruleVal" column="ruleVal"/>
+            <result property="templateArg" column="templateArg"/>
+            <result property="type" column="type"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="getCustoms" resultType="java.lang.String">
+        SELECT
+        CD_FIELD
+        FROM m_custom_data
+        WHERE CUSTOM_DATA_TYPE IN
+        <foreach collection="list" open="(" close=")" separator="," item="value">
+            #{value}
+        </foreach>
+        AND SITE = #{site}
+    </select>
+
+    <select id="queryList" resultMap="baseMap">
+        SELECT
+        irl.BO AS bo,
+        irl.ELEMENT_Type AS elementType,
+        irl.RULE_LABEL AS ruleLabel,
+        irl.RULE_LABEL_NAME AS ruleLabelName,
+        irl.CODE_RULE_BO AS codeRuleBo,
+        cr.CODE_RULE_TYPE AS codeRuleType,
+        irl.LABEL_BO AS labelBo,
+        l.LABEL AS label,
+        irl.LABEL_TYPE AS labelType
+        FROM me_rule_label  irl
+        LEFT JOIN m_code_rule  cr ON cr.BO = irl.CODE_RULE_BO
+        LEFT JOIN label  l ON l.ID = irl.LABEL_BO
+        WHERE irl.SITE = #{queryDto.site} AND irl.ELEMENT_TYPE = #{queryDto.elementType}
+        <if test="queryDto.bo != null and queryDto.bo !=''">
+            AND irl.BO = #{queryDto.bo}
+        </if>
+        <if test="queryDto.ruleLabel != null and queryDto.ruleLabel !=''">
+            AND irl.RULE_LABEL like '%${queryDto.ruleLabel}%'
+        </if>
+        <if test="queryDto.ruleLabelName != null and queryDto.ruleLabelName !=''">
+            AND irl.RULE_LABEL_NAME like '%${queryDto.ruleLabelName}%'
+        </if>
+    </select>
+
+    <select id="getColumns" resultType="com.itl.mes.me.api.dto.ruleLabel.ItemColumns">
+        (SELECT c.name AS columnName,
+        e.value AS columnLabel
+        FROM sys.tables t
+        INNER JOIN sys.columns c ON c.object_id = t.object_id
+        LEFT JOIN sys.extended_properties e ON e.major_id = c.object_id AND e.minor_id = c.column_id
+        WHERE t.name = #{tableName}
+        AND c.name NOT IN ('CREATE_DATE', 'MODIFY_DATE', 'CREATE_USER', 'MODIFY_USER')
+        AND c.name NOT LIKE '%BO'
+        )
+        <if test="customDataType != null and customDataType !=''">
+            UNION
+            (SELECT CD_FIELD AS columnName,
+            CD_LABEL AS columnLabel
+            FROM m_custom_data
+            WHERE CUSTOM_DATA_TYPE = #{customDataType}
+            AND SITE = #{site}
+            )
+        </if>
+    </select>
+
+    <select id="getColumnsP" resultType="com.itl.mes.me.api.dto.ruleLabel.ItemColumns">
+        (SELECT concat(t.name, '.', c.name) AS columnName,
+        e.value AS columnLabel
+        FROM sys.tables t
+        INNER JOIN sys.columns c ON c.object_id = t.object_id
+        LEFT JOIN sys.extended_properties e ON e.major_id = c.object_id AND e.minor_id = c.column_id
+        WHERE t.name = 'p_pack_level' OR t.name = 'p_packing'
+        AND c.name NOT IN ('CREATE_DATE', 'MODIFY_DATE', 'CREATE_USER', 'MODIFY_USER')
+        AND c.name NOT LIKE '%BO'
+        )
+        <if test="customDataType != null and customDataType !=''">
+            UNION
+            (SELECT CD_FIELD AS columnName,
+            CD_LABEL AS columnLabel
+            FROM m_custom_data
+            WHERE CUSTOM_DATA_TYPE = #{customDataType}
+            AND SITE = #{site}
+            )
+        </if>
+    </select>
+
+    <select id="getLabelEntityParams" resultType="com.itl.iap.mes.api.entity.label.LabelEntityParams">
+        SELECT a.name,
+               a.code
+        FROM label_params a
+                 JOIN label b ON a.LABEL_ID = b.id
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="getByBo" resultMap="baseMap">
+        SELECT irl.BO              AS bo,
+               irl.RULE_LABEL      AS ruleLabel,
+               irl.RULE_LABEL_NAME AS ruleLabelName,
+               irl.ELEMENT_TYPE    AS elementType,
+               irl.CODE_RULE_BO    AS codeRuleBo,
+               cr.CODE_RULE_TYPE   AS codeRuleType,
+               irl.LABEL_BO        AS labelBo,
+               l.LABEL             AS label,
+               irl.LABEL_TYPE      AS labelType,
+               irld.RULE_VAR       AS ruleVar,
+               irld.RULE_VAL       AS ruleVal,
+               irld.TEMPLATE_ARG   AS templateArg,
+               irld.TYPE           AS type,
+               l.TEMPLATE_TYPE     AS templateType,
+               l.LODOP_TEXT        AS lodopText
+        FROM me_rule_label AS irl
+                 LEFT JOIN m_code_rule AS cr ON cr.BO = irl.CODE_RULE_BO
+                 LEFT JOIN label AS l ON l.ID = irl.LABEL_BO
+                 LEFt JOIN me_rule_label_detail AS irld ON irld.IRL_BO = irl.BO
+        WHERE irl.BO = #{bo}
+    </select>
+
+</mapper>
+

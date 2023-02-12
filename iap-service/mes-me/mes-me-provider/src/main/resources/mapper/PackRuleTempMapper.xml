@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.me.provider.mapper.PackRuleTempMapper">
+
+    <select id="listByOperationBo" resultType="com.itl.mes.me.api.entity.PackRuleTemp">
+        select mprt.BO             as bo,
+               mprt.OPERATION_BO   as operationBo,
+               mprt.SN             as sn,
+               mprt.PACK_LEVEL     as packLevel,
+               mprt.PACK_NAME      as packName,
+               mprt.MIN_QTY        as minQty,
+               mprt.MAX_QTY        as maxQty,
+               mprt.RULE_LABEL_BO  as ruleLabelBo,
+               lrl.RULE_LABEL_NAME as ruleLabelName
+        from me_pack_rule_temp mprt
+                 left join label_rule_label lrl on mprt.RULE_LABEL_BO = lrl.BO
+        where mprt.OPERATION_BO = #{operationBo}
+    </select>
+    <select id="findOrderAndPackCodeRuleInfo" resultType="com.itl.mes.me.api.bo.OrderAndCodeRuleBO">
+        SELECT a.sn,
+               c.bo           shopOrderBo,
+               c.shop_order   shopOrder,
+               e.bo           itemBo,
+               e.item,
+               e.item_name    itemName,
+               d.BO           packBo,
+               d.pack_name    packName,
+               d.pack_level   packLevel,
+               d.min_qty      minQty,
+               d.max_qty      maxQty,
+               g.completeCount,
+               f.code_rule_bo codeRuleBo
+        from z_sn a
+                 LEFT JOIN label_label_print b ON a.LABEL_PRINT_BO = b.BO
+                 LEFT JOIN M_SHOP_ORDER c ON b.ELEMENT_BO = c.BO
+                 LEFT JOIN p_shop_order_pack_rule_detail d on d.SHOP_ORDER_BO = c.BO
+                 LEFT JOIN M_ITEM e ON c.ITEM_BO = e.BO
+                 LEFT JOIN label_rule_label f on f.BO = d.RULE_MOULD_BO
+                 left join (
+            SELECT shop_order_bo, pack_bo, count(1) completeCount
+            from p_shop_order_pack_temp
+            group by shop_order_bo, pack_bo
+        ) g on g.shop_order_bo = c.BO and g.pack_bo = d.bo
+        where a.sn = #{sn}
+        order by d.PACK_LEVEL asc
+    </select>
+</mapper>

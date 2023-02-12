@@ -1,0 +1,39 @@
+group-id: iap
+#NACOS_HOST: 8.129.102.185:8848
+NACOS_HOST: localhost:8848
+
+spring:
+  aop:
+    proxy-target-class: true # 使用CGLIB
+  application:
+    name: mes-andon-provider #设置项目名称
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+#        server-addr: ${NACOS_HOST:8.129.102.185:8848} #Nacos服务接口(不能加http前缀)
+        server-addr: ${NACOS_HOST:localhost:8848}
+        namespace: ${NAME_SPACE:mesdev}
+      config:
+#        server-addr: ${NACOS_HOST:8.129.102.185:8848}
+        server-addr: ${NACOS_HOST:localhost:8848}
+        file-extension: yml # 配置文件的格式，默认为properties
+        namespace: ${NAME_SPACE:mesdev}
+        group: ${group-id}
+    sentinel:
+      transport:
+        port: 9901
+#        dashboard: ${SENTINEL_HOST:8.129.102.185:9901}
+        dashboard: ${SENTINEL_HOST:localhost:9901}
+      # 服务启动直接建立心跳连接
+      eager: true
+      datasource:
+        ds:
+          nacos:
+#            server-addr: ${NACOS_HOST:8.129.102.185:8848}
+            server-addr: ${NACOS_HOST:localhost:8848}
+            dataId: ${spring.application.name}-sentinel
+            groupId: ${group-id}
+            data-type: json
+            rule-type: flow

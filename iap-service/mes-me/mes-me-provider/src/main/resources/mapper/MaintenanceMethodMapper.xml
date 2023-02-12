@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.me.provider.mapper.MaintenanceMethodMapper">
+    <select id="getPage" resultType="com.itl.mes.me.api.dto.MaintenanceMethodDto">
+        SELECT
+        m.*,
+        e.ERROR_CODE AS errorTypeCode,
+        e.ERROR_NAME AS errorTypeName,
+        e.ERROR_DESC AS errorTypeDesc
+        FROM
+        me_maintenance_method m
+        LEFT JOIN me_error_type e ON m.error_type_id = e.id
+        <where>
+            m.site = #{params.site}
+            <if test="params.errorTypeCode != null and params.errorTypeCode != ''">
+                AND e.ERROR_CODE like #{params.errorTypeCode}
+            </if>
+            <if test="params.errorTypeName != null and params.errorTypeName != ''">
+                AND e.ERROR_NAME like #{params.errorTypeName}
+            </if>
+            <if test="params.errorTypeDesc != null and params.errorTypeDesc != ''">
+                AND e.ERROR_DESC like #{params.errorTypeDesc}
+            </if>
+            <if test="params.code != null and params.code != ''">
+                AND m.code like #{params.code}
+            </if>
+            <if test="params.title != null and params.title != ''">
+                AND m.title like #{params.title}
+            </if>
+            <if test="params.description != null and params.description != ''">
+                AND m.description like #{params.description}
+            </if>
+            <if test="params.method != null and params.method != ''">
+                AND m.method like #{params.method}
+            </if>
+            <if test="params.isDisableFlag != null and params.isDisableFlag != ''">
+                AND m.is_disable_flag = #{params.isDisableFlag}
+            </if>
+        </where>
+        ORDER BY m.create_time DESC
+    </select>
+
+    <select id="getDetailById" resultType="com.itl.mes.me.api.dto.MaintenanceMethodDto">
+        SELECT m.*,
+               e.ERROR_CODE,
+               e.ERROR_NAME,
+               e.ERROR_DESC
+        FROM me_maintenance_method m
+                 LEFT JOIN me_error_type e ON m.error_type_id = e.id
+        WHERE m.id = #{id}
+    </select>
+
+
+    <select id="queryList" resultType="com.itl.mes.me.api.vo.CorrectiveMaintenanceVo">
+        SELECT
+        m.*,
+        e.ERROR_CODE AS errorTypeCode,
+        e.ERROR_NAME AS errorTypeName,
+        e.ERROR_DESC AS errorTypeDesc
+        FROM
+        me_maintenance_method m
+        LEFT JOIN me_error_type e ON m.error_type_id = e.id
+        <where>
+            <if test="site != null and site != ''">
+                and m.site = #{site}
+            </if>
+        </where>
+        ORDER BY m.create_time DESC
+    </select>
+    <select id="queryListByIds" resultType="com.itl.mes.me.api.vo.CorrectiveMaintenanceVo">
+        SELECT
+        m.*,
+        e.ERROR_CODE AS errorTypeCode,
+        e.ERROR_NAME AS errorTypeName,
+        e.ERROR_DESC AS errorTypeDesc
+        FROM
+        me_maintenance_method m
+        LEFT JOIN me_error_type e ON m.error_type_id = e.id
+
+        where m.site = #{site} and m.id
+
+        <foreach collection="list" item="item" open=" IN (" separator="," close=")">
+            #{item}
+        </foreach>
+
+        ORDER BY m.create_time DESC
+
+
+    </select>
+</mapper>

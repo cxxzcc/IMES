@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.me.provider.mapper.ActionMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.itl.mes.me.api.entity.Action" id="actionMap">
+        <result property="action" column="action"/>
+        <result property="actionDesc" column="action_desc"/>
+        <result property="isDefault" column="is_default"/>
+        <result property="state" column="state"/>
+        <result property="createDate" column="create_date"/>
+        <result property="id" column="id"/>
+        <result property="modifyDate" column="modify_date"/>
+        <result property="createUser" column="create_user"/>
+        <result property="site" column="site"/>
+        <result property="modifyUser" column="modify_user"/>
+    </resultMap>
+
+    <select id="find" resultType="java.util.HashMap" databaseId="ms-sql">
+        select
+                me_operation.OPERATION as operation,
+                me_action_operation.operation_id as operationId,
+                me_action_operation.ao_desc as [desc],
+                me_action_operation.ao_order as [order],
+                m_data_collection.name as dataCollectionGroupName,
+                m_data_collection.id as dataCollectionGroupId,
+                me_action_operation.action_id as actionId
+        from me_action_operation
+                     LEFT join m_data_collection on m_data_collection.id=me_action_operation.Data_collection_group_id
+                     LEFT join me_operation ON me_operation.id = me_action_operation.operation_id
+        where me_action_operation.action_id=#{id}
+    </select>
+
+    <select id="find" resultType="java.util.HashMap" databaseId="oracle">
+        select
+                me_operation.OPERATION as  "operation" ,
+                me_action_operation.operation_id as  "operationId" ,
+                me_action_operation.ao_desc as "[desc]"  ,
+                me_action_operation.ao_order as   "[order]"  ,
+                m_data_collection.name as  "dataCollectionGroupName",
+                m_data_collection.id as "dataCollectionGroupId",
+                me_action_operation.action_id as  "actionId"
+        from me_action_operation
+                     LEFT join m_data_collection on m_data_collection.id=me_action_operation.Data_collection_group_id
+                     LEFT join me_operation ON me_operation.id = me_action_operation.operation_id
+        where me_action_operation.action_id=#{id}
+    </select>
+
+    <select id="infoByOperationID" resultType="java.util.HashMap" databaseId="ms-sql">
+        select
+                me_operation.OPERATION as operation,
+                me_action_operation.operation_id as operationId,
+                me_action_operation.ao_desc as [desc],
+                me_action_operation.ao_order as [order],
+                m_data_collection.name as dataCollectionGroupName,
+                m_data_collection.id as dataCollectionGroupId,
+                me_operation.SCAN_SN as scanSn,
+                me_operation.CODE as code,
+                me_action_operation.action_id as actionId
+        from me_action_operation
+                     LEFT join m_data_collection on m_data_collection.id=me_action_operation.Data_collection_group_id
+                     LEFT join me_operation ON me_operation.id = me_action_operation.operation_id
+                     LEFT join m_operation ON m_operation.ACTION_ID = me_action_operation.action_id
+
+        where m_operation.BO=#{id}
+    </select>
+
+    <select id="infoByOperationID" resultType="java.util.HashMap" databaseId="oracle">
+        select
+                me_operation.OPERATION as  "operation",
+                me_action_operation.operation_id as  "operationId",
+                me_action_operation.ao_desc as  "[desc]"  ,
+                me_action_operation.ao_order as "[order]"  ,
+                m_data_collection.name as  "dataCollectionGroupName",
+                m_data_collection.id as  "dataCollectionGroupId",
+                me_operation.SCAN_SN as  "scanSn",
+                me_operation.CODE as  "code",
+                me_action_operation.action_id as  "actionId"
+        from me_action_operation
+                     LEFT join m_data_collection on m_data_collection.id=me_action_operation.Data_collection_group_id
+                     LEFT join me_operation ON me_operation.id = me_action_operation.operation_id
+                     LEFT join m_operation ON m_operation.ACTION_ID = me_action_operation.action_id
+
+        where m_operation.BO=#{id}
+    </select>
+</mapper>

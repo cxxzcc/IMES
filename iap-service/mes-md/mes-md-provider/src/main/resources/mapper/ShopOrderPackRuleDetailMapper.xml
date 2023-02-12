@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ShopOrderPackRuleDetailMapper">
+
+    <select id="findListByRuleBo" resultType="com.itl.mes.core.api.vo.ShopOrderPackRuleDetailVo">
+
+        select
+        pcrdi.PACK_LEVEL as packLevel,
+        pcrdi.PACK_NAME as packName,
+        pcrdi.MIN_QTY as minQty,
+        pcrdi.MAX_QTY as maxQty,
+        pcrdi.RULE_MOULD_BO as ruleMouldBo,
+        lrl.RULE_LABEL_NAME as ruleMould,
+		ppr.BO as packRuleBo,
+		ppr.PACK_RULE as packRule
+        from p_pack_rule_detail_item pcrdi
+		left join label_rule_label lrl on pcrdi.RULE_MOULD_BO = lrl.BO
+		left join p_pack_rule ppr on pcrdi.PACK_RULE_BO = ppr.BO
+        where
+        <choose>
+            <when test="shopOrderPackRuleQueryDto.itemBo != null and  shopOrderPackRuleQueryDto.itemBo != '' ">
+                pcrdi.ITEM_BO =#{shopOrderPackRuleQueryDto.itemBo}
+            </when>
+            <otherwise>
+                pcrdi.ITEM_BO = null
+            </otherwise>
+        </choose>
+
+
+    </select>
+
+    <select
+    id="findListByShopOrderBo" resultType="com.itl.mes.core.api.vo.ShopOrderPackRuleDetailVo">
+
+
+        SELECT
+            psoprd.BO AS bo,
+            psoprd.PACK_LEVEL AS packLevel,
+            psoprd.PACK_NAME AS packName,
+            psoprd.MIN_QTY AS minQty,
+            psoprd.MAX_QTY AS maxQty,
+            psoprd.RULE_MOULD_BO AS ruleMouldBo,
+            lrl.RULE_LABEL_NAME AS ruleMould,
+            ppr.BO AS packRuleBo,
+            ppr.PACK_RULE AS packRule
+        FROM
+            p_shop_order_pack_rule_detail psoprd
+            LEFT JOIN label_rule_label lrl ON psoprd.RULE_MOULD_BO = lrl.BO
+            LEFT JOIN p_pack_rule ppr ON psoprd.PACK_RULE_BO = ppr.BO
+        WHERE
+        <choose>
+            <when test="shopOrderPackRuleQueryDto.shopOrderBo != null and  shopOrderPackRuleQueryDto.shopOrderBo != '' ">
+                psoprd.SHOP_ORDER_BO = #{ shopOrderPackRuleQueryDto.shopOrderBo}
+            </when>
+            <otherwise>
+                psoprd.SHOP_ORDER_BO = null
+            </otherwise>
+        </choose>
+        ORDER BY psoprd.SHOP_ORDER_BO,ppr.BO,psoprd.PACK_LEVEL ASC
+
+
+    </select>
+</mapper>

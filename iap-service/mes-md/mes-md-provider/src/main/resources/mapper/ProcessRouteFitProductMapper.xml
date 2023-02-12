@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.core.provider.mapper.ProcessRouteFitProductMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.itl.mes.core.api.entity.ProcessRouteFitProduct">
+        <id column="id" property="id"/>
+        <result column="route_code" property="routeCode"/>
+        <result column="item_code" property="itemCode"/>
+        <result column="order_type" property="orderType"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+
+    <select id="getProductRoute" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+        route.ROUTER as routeCode,
+        route.ROUTER_NAME as routerName,
+        item.ITEM as itemCode,
+        item.ITEM_NAME as itemName,
+        fit.id as id,
+        fit.order_type as orderType,
+        fit.create_by as createBy,
+        fit.create_date as createDate
+        from process_route_fit_product fit
+        join m_router route on route.ROUTER=fit.route_code
+        join m_item item on fit.item_code=item.ITEM
+        <where>
+            <if test="map.routeCode!=null and map.routeCode!=''">
+                and route.ROUTER like '%'+#{map.routeCode}+'%'
+            </if>
+            <if test="map.routerName!=null and map.routerName!=''">
+                and route.ROUTER_NAME like '%'+#{map.routerName}+'%'
+            </if>
+            <if test="map.site!=null and map.site!=''">
+                and route.SITE = #{map.site}
+            </if>
+            <if test="map.itemCode!=null and map.itemCode!=''">
+                and item.ITEM like '%'+#{map.itemCode}+'%'
+            </if>
+            <if test="map.itemName!=null and map.itemName!=''">
+                and item.ITEM_NAME like '%'+#{map.itemName}+'%'
+            </if>
+            <if test="map.site!=null and map.site!=''">
+                and item.SITE = #{map.site}
+            </if>
+            <if test="map.orderType!=null and map.orderType!=''">
+                and fit.order_type = #{map.orderType}
+            </if>
+        </where>
+    </select>
+
+</mapper>

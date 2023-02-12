@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mom.label.provider.mapper.label.SnItemMapper">
+    <update id="updateSysl">
+        update z_sn_item
+        set sysl = #{sysl}
+        where sn_bo = #{id}
+    </update>
+    <update id="updateSyslByBoList">
+        update z_sn_item
+        set sysl =0
+        where sn_bo
+        IN
+        <foreach collection="list" open="(" separator="," close=")" item="item">#{item}</foreach>
+
+    </update>
+
+
+    <select id="findList" resultType="com.itl.mom.label.api.vo.SnVo">
+
+    </select>
+</mapper>

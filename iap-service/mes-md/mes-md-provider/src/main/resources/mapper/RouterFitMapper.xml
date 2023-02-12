@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.mes.core.provider.mapper.RouterFitMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.itl.mes.core.api.entity.RouterFit" id="routerFitMap">
+        <result property="bo" column="BO"/>
+        <result property="shopOrderType" column="SHOP_ORDER_TYPE"/>
+        <result property="elementBo" column="ELEMENT_BO"/>
+        <result property="routerBo" column="ROUTER_BO"/>
+        <result property="bomBo" column="BOM_BO"/>
+    </resultMap>
+
+    <select id="queryByItem" resultType="com.itl.mes.core.api.dto.RouterFitDto">
+        SELECT
+            mrf.BO  as bo,
+            mrf.SHOP_ORDER_TYPE as shopOrderType,
+            mi.BO  as elementBo,
+            mi.ITEM as element,
+            mi.ITEM_NAME as elementName,
+            mr.BO as routerBo,
+            mr.ROUTER_NAME as router,
+            mr.VERSION as routerVersion,
+            mb.BO as bomBo,
+            mb.BOM as bom,
+            mb.VERSION as bomVersion
+        FROM m_router_fit mrf
+        INNER JOIN m_item mi ON mi.BO=mrf.ELEMENT_BO
+        LEFT JOIN m_router mr ON mr.BO=mrf.ROUTER_BO
+        LEFT JOIN m_bom mb ON mb.BO=mrf.BOM_BO
+        <where> mrf.SITE=#{routerFitDto.site}
+            <if test="routerFitDto.shopOrderType!= null and routerFitDto.shopOrderType != ''">
+                and mrf.SHOP_ORDER_TYPE  = #{routerFitDto.shopOrderType}
+            </if>
+            <if test="routerFitDto.elementBo!= null and routerFitDto.elementBo != ''">
+                and mi.BO  = #{routerFitDto.elementBo}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryByItemGroup" resultType="com.itl.mes.core.api.dto.RouterFitDto">
+        SELECT
+        mrf.BO  as bo,
+        mrf.SHOP_ORDER_TYPE as shopOrderType,
+        mig.BO  as elementBo,
+        mig.ITEM_GROUP as element,
+        mig.GROUP_NAME as elementName,
+        mr.BO as routerBo,
+        mr.ROUTER_NAME as router,
+        mr.VERSION as routerVersion,
+        mb.BO as bomBo,
+        mb.BOM as bom,
+        mb.VERSION as bomVersion
+        FROM m_router_fit mrf
+        INNER JOIN m_item_group mig ON mig.BO=mrf.ELEMENT_BO
+        LEFT JOIN m_router mr ON mr.BO=mrf.ROUTER_BO
+        LEFT JOIN m_bom mb ON mb.BO=mrf.BOM_BO
+        <where> mrf.SITE=#{routerFitDto.site}
+            <if test="routerFitDto.shopOrderType!= null and routerFitDto.shopOrderType != ''">
+                and mrf.SHOP_ORDER_TYPE  = #{routerFitDto.shopOrderType}
+            </if>
+            <if test="routerFitDto.elementBo!= null and routerFitDto.elementBo != ''">
+                and mig.BO  = #{routerFitDto.elementBo}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryByProductLine" resultType="com.itl.mes.core.api.dto.RouterFitDto">
+        SELECT
+        mrf.BO  as bo,
+        mrf.SHOP_ORDER_TYPE as shopOrderType,
+        mpl.BO  as elementBo,
+        mpl.PRODUCT_LINE as element,
+        mpl.PRODUCT_LINE_DESC as elementName,
+        mr.BO as routerBo,
+        mr.ROUTER_NAME as router,
+        mr.VERSION as routerVersion,
+        mb.BO as bomBo,
+        mb.BOM as bom,
+        mb.VERSION as bomVersion
+        FROM m_router_fit mrf
+        LEFT JOIN m_product_line mpl ON mpl.BO=mrf.ELEMENT_BO
+        LEFT JOIN m_router mr ON mr.BO=mrf.ROUTER_BO
+        LEFT JOIN m_bom mb ON mb.BO=mrf.BOM_BO
+        <where> mrf.SITE=#{routerFitDto.site}
+            <if test="routerFitDto.shopOrderType!= null and routerFitDto.shopOrderType != ''">
+                and mrf.SHOP_ORDER_TYPE  = #{routerFitDto.shopOrderType}
+            </if>
+            <if test="routerFitDto.elementBo!= null and routerFitDto.elementBo != ''">
+                and mpl.BO  = #{routerFitDto.elementBo}
+            </if>
+        </where>
+    </select>
+
+    <select id="getItemGroup" resultType="java.util.Map">
+        select
+            ITEM_GROUP_BO
+        from m_item_group_member
+        where ITEM_BO=#{itemBo}
+    </select>
+</mapper>

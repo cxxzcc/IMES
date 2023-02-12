@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.itl.mes.me.provider.mapper.OperationMapper">
+    <insert id="saveSnRouter" databaseId="ms-sql">
+        insert into me_sn_router(sn, json, [current], site)
+        values (#{sn}, #{json}, #{nodeId}, #{site})
+    </insert>
+    <insert id="saveSnRouter" databaseId="oracle">
+        insert into me_sn_router(sn, json, "current", site)
+        values (#{sn,jdbcType=VARCHAR}, #{json,jdbcType=VARCHAR}, #{nodeId,jdbcType=VARCHAR}, #{site})
+    </insert>
+
+    <update id="changeSnRouterCurrentNode" databaseId="ms-sql">
+        update me_sn_router
+        set [current] = #{nextNodeId}
+        where sn = #{sn}
+    </update>
+    <update id="changeSnRouterCurrentNode" databaseId="oracle">
+        update me_sn_router
+        set "current"= #{nextNodeId,jdbcType=VARCHAR}
+        where sn = #{sn,jdbcType=VARCHAR}
+    </update>
+
+    <select id="getSnRouter" resultType="java.util.Map" databaseId="ms-sql">
+        select sn, json, [current]
+        from me_sn_router
+        where sn = #{sn}
+    </select>
+    <select id="getSnRouter" resultType="java.util.Map" databaseId="oracle">
+        select sn as "sn", json as "json", "current" as "current"
+        from me_sn_router
+        where sn = #{sn}
+    </select>
+
+    <select id="getShopOrderBoBySn" resultType="java.lang.String" databaseId="ms-sql">
+        select llp.ELEMENT_BO
+        from label_label_print llp,
+             z_sn zs,
+             me_product_status p
+        where zs.SN = #{sn} and p.state = 1
+        and p.sn_bo = zs.bo
+        and llp.BO = zs.LABEL_PRINT_BO
+    </select>
+    <select id="getShopOrderBoBySn" resultType="java.lang.String" databaseId="oracle">
+        select llp.ELEMENT_BO as  "elementBo"
+        from label_label_print llp,
+             z_sn zs,
+             me_product_status p
+        where zs.SN = #{sn} and p.state = 1
+        and p.sn_bo = zs.bo
+          and llp.BO = zs.LABEL_PRINT_BO
+    </select>
+
+    <select id="selectPageVo" resultType="com.itl.mes.me.api.entity.Operation" databaseId="oracle">
+      SELECT id,
+       SITE,
+       OPERATION,
+       "DESC",
+       SCAN_SN,
+       CODE,
+       CREATE_DATE,
+       CREATE_USER,
+       MODIFY_DATE,
+       MODIFY_USER
+      FROM me_operation
+      WHERE SITE =  #{siteId}
+        <if test="page.operation!=null and page.operation!=''">
+            and OPERATION = #{page.operation}
+        </if>
+        <if test="page.desc!=null and page.desc!=''">
+            and "DESC" = #{page.desc}
+        </if>
+    </select>
+
+    <select id="findLableTypeBySn" resultType="java.lang.String">
+        select r.label_type from z_sn z
+        left join label_label_print p on z.label_print_bo = p.bo
+        left join label_rule_label r on p.rule_label_bo = r.bo
+        where
+        z.sn = #{sn}
+    </select>
+
+    <select id="getIdBySnAndState" resultType="java.lang.String">
+        SELECT * FROM
+        z_sn s LEFT JOIN me_product_status p
+        ON s.bo = p.sn_bo
+        WHERE s.sn = #{sn} AND p.state = 1
+    </select>
+</mapper>

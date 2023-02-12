@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.ErrorTypeMapper">
+
+
+    <select id="pageList" resultType="com.itl.iap.mes.api.dto.ErrorTypeDto" parameterType="com.itl.iap.mes.api.dto.ErrorTypeDto" databaseId="ms-sql">
+        select
+               id,site,error_code as errorCode,error_name as errorName,error_desc as errorDesc,parent_id as parentId
+        from m_error_type
+        <where>
+            site = #{errorTypeDto.site}
+            <if test="errorTypeDto.errorCode != null and errorTypeDto.errorCode != ''">
+                and error_code like '${errorTypeDto.errorCode}%'
+            </if>
+            <if test="errorTypeDto.errorName != null and errorTypeDto.errorName != ''">
+                and error_name like '${errorTypeDto.errorName}%'
+            </if>
+            <if test="(errorTypeDto.errorCode == null or errorTypeDto.errorCode == '') and (errorTypeDto.errorName == null or errorTypeDto.errorName == '')">
+                and (parent_id is null or parent_id = '')
+            </if>
+        </where>
+    </select>
+
+    <select id="pageList" resultType="com.itl.iap.mes.api.dto.ErrorTypeDto" parameterType="com.itl.iap.mes.api.dto.ErrorTypeDto" databaseId="oracle">
+        select
+               id,site,error_code as errorCode,error_name as errorName,error_desc as errorDesc,parent_id as parentId
+        from m_error_type
+        <where>
+            site = #{errorTypeDto.site}
+            <if test="errorTypeDto.errorCode != null and errorTypeDto.errorCode != ''">
+                and error_code  LIKE '${errorTypeDto.errorCode}%'
+            </if>
+            <if test="errorTypeDto.errorName != null and errorTypeDto.errorName != ''">
+                and error_name  LIKE '${errorTypeDto.errorName}%'
+            </if>
+            <if test="(errorTypeDto.errorCode == null or errorTypeDto.errorCode == '') and (errorTypeDto.errorName == null or errorTypeDto.errorName == '')">
+                and (parent_id is null or parent_id = '')
+            </if>
+        </where>
+    </select>
+</mapper>

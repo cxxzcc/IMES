@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itl.iap.mes.provider.mapper.UpkeepPlanMapper">
+
+    <sql id="FIELD">
+        t.id AS id,t.planNo,t.upkeepPlanName AS upkeepPlanName,t.dataCollectionId AS dataCollectionId,t.dataCollectionName AS dataCollectionName,
+        t.startTime AS startTime,t.endTime AS endTime,t.state AS state,t.cycle AS cycle,t.ytd AS ytd,t.remark AS remark,t.jobIds AS jobIds,t.runState AS runState,
+        t.createBy,t.createTime,t.updateBy,t.updateTime
+    </sql>
+    <sql id="WHERE_FIELD_O">
+        <where>
+            AND t.site = #{upkeepPlan.site}
+            <if test="upkeepPlan.upkeepPlanName != null and upkeepPlan.upkeepPlanName !=''">
+                and t.upkeepPlanName like '%${upkeepPlan.upkeepPlanName}%'
+            </if>
+            <if test="upkeepPlan.dataCollectionId != null and upkeepPlan.dataCollectionId!=''">
+                and t.dataCollectionId = '${upkeepPlan.dataCollectionId}'
+            </if>
+            <if test="upkeepPlan.dataCollectionName != null and upkeepPlan.dataCollectionName!=''">
+                and t.dataCollectionName like '%${upkeepPlan.dataCollectionName}%'
+            </if>
+            <if test="upkeepPlan.diviceCode != null and upkeepPlan.diviceCode!=''">
+                and EXISTS(
+                SELECT 1 from m_upkeep_device t1 where t1.UPKEEP_ID = t.id and t1.code='${upkeepPlan.diviceCode}'
+                )
+            </if>
+            <if test="upkeepPlan.diviceName != null and upkeepPlan.diviceName!=''">
+                and EXISTS(
+                SELECT 1 from m_upkeep_device t1 where t1.UPKEEP_ID = t.id and t1.name like '%${upkeepPlan.diviceName}%'
+                )
+            </if>
+            <if test="upkeepPlan.diviceCodeOrName != null and upkeepPlan.diviceCodeOrName!=''">
+                and EXISTS(
+                SELECT 1 from m_upkeep_device t1 where t1.UPKEEP_ID = t.id and (t1.code='${upkeepPlan.diviceCode}'
+                 or t1.name like '%${upkeepPlan.diviceName}%')
+                )
+            </if>
+            <if test="upkeepPlan.upkeepUserCode != null and upkeepPlan.upkeepUserCode!=''">
+                and EXISTS(
+                select 1 from m_repair_upkeep_user t1 where t1.UPKEEP_ID= t.id and t1.UPKEEP_USER_ID='${upkeepPlan.upkeepUserCode}'
+                )
+            </if>
+            <if test="upkeepPlan.upkeepUserName != null and upkeepPlan.upkeepUserName!=''">
+                and EXISTS(
+                select 1 from m_repair_upkeep_user t1 where t1.UPKEEP_ID= t.id and t1.UPKEEP_USER_NAME like '%${upkeepPlan.upkeepUserName}%'
+                )
+            </if>
+            <if test="upkeepPlan.upkeepUserCodeOrName != null and upkeepPlan.upkeepUserCodeOrName!=''">
+                and EXISTS(
+                select 1 from m_repair_upkeep_user t1 where t1.UPKEEP_ID= t.id and (t1.UPKEEP_USER_ID='${upkeepPlan.upkeepUserCodeOrName}'
+                 or t1.UPKEEP_USER_NAME like '%${upkeepPlan.upkeepUserCodeOrName}%')
+                )
+            </if>
+            <if test="upkeepPlan.state != null">
+                and t.state = '${upkeepPlan.state}'
+            </if>
+            <if test="upkeepPlan.start != null and upkeepPlan.start !='' and upkeepPlan.end != null and upkeepPlan.end!=''">
+                and not (t.startTime>'${upkeepPlan.end}' or t.endTime &lt; '${upkeepPlan.start}')
+            </if>
+        </where>
+    </sql>
+    <sql id="WHERE_FIELD">
+        <where>
+            AND t.site = #{upkeepPlan.site}
+            <if test="upkeepPlan.upkeepPlanName != null and upkeepPlan.upkeepPlanName !=''">
+                and t.upkeepPlanName like '%${upkeepPlan.upkeepPlanName}%'
+            </if>
+            <if test="upkeepPlan.dataCollectionId != null and upkeepPlan.dataCollectionId!=''">
+                and t.dataCollectionId = '${upkeepPlan.dataCollectionId}'
+            </if>
+            <if test="upkeepPlan.dataCollectionName != null and upkeepPlan.dataCollectionName!=''">
+                and t.dataCollectionName like '%${upkeepPlan.dataCollectionName}%'
+            </if>
+            <if test="upkeepPlan.diviceCode != null and upkeepPlan.diviceCode!=''">
+                and EXISTS(
+                SELECT 1 from m_upkeep_device t1 where t1.UPKEEP_ID = t.id and t1.code='${upkeepPlan.diviceCode}'
+                )
+            </if>
+            <if test="upkeepPlan.diviceName != null and upkeepPlan.diviceName!=''">
+                and EXISTS(
+                SELECT 1 from m_upkeep_device t1 where t1.UPKEEP_ID = t.id and t1.name like '%${upkeepPlan.diviceName}%'
+                )
+            </if>
+            <if test="upkeepPlan.diviceCodeOrName != null and upkeepPlan.diviceCodeOrName!=''">
+                and EXISTS(
+                SELECT 1 from m_upkeep_device t1 where t1.UPKEEP_ID = t.id and (t1.code='${upkeepPlan.diviceCode}'
+                or t1.name like '%${upkeepPlan.diviceName}%')
+                )
+            </if>
+            <if test="upkeepPlan.upkeepUserCode != null and upkeepPlan.upkeepUserCode!=''">
+                and EXISTS(
+                select 1 from m_repair_upkeep_user t1 where t1.UPKEEP_ID= t.id and t1.UPKEEP_USER_ID='${upkeepPlan.upkeepUserCode}'
+                )
+            </if>
+            <if test="upkeepPlan.upkeepUserName != null and upkeepPlan.upkeepUserName!=''">
+                and EXISTS(
+                select 1 from m_repair_upkeep_user t1 where t1.UPKEEP_ID= t.id and t1.UPKEEP_USER_NAME like '%${upkeepPlan.upkeepUserName}%'
+                )
+            </if>
+            <if test="upkeepPlan.upkeepUserCodeOrName != null and upkeepPlan.upkeepUserCodeOrName!=''">
+                and EXISTS(
+                select 1 from m_repair_upkeep_user t1 where t1.UPKEEP_ID= t.id and (t1.UPKEEP_USER_ID='${upkeepPlan.upkeepUserCodeOrName}'
+                or t1.UPKEEP_USER_NAME like '%${upkeepPlan.upkeepUserCodeOrName}%')
+                )
+            </if>
+            <if test="upkeepPlan.state != null">
+                and t.state = '${upkeepPlan.state}'
+            </if>
+            <if test="upkeepPlan.start != null and upkeepPlan.start !='' and upkeepPlan.end != null and upkeepPlan.end!=''">
+                and not (t.startTime>'${upkeepPlan.end}' or t.endTime &lt; '${upkeepPlan.start}')
+            </if>
+        </where>
+    </sql>
+
+    <select id="findList" parameterType="com.itl.iap.mes.api.entity.UpkeepPlan"
+            resultType="com.itl.iap.mes.api.entity.UpkeepPlan">
+        select *
+        from (
+        SELECT distinct t.*
+        FROM m_repair_upkeep_plan t
+        LEFT JOIN m_upkeep_device t1 ON t1.UPKEEP_ID = t.id
+        LEFT JOIN m_repair_upkeep_user t2 ON t2.UPKEEP_ID = t.id ${ew.customSqlSegment}
+        )a
+        order by a.updateTime desc
+    </select>
+
+
+
+    <select id="findAllList" parameterType="com.itl.iap.mes.api.entity.UpkeepPlan"
+            resultType="com.itl.iap.mes.api.entity.UpkeepPlan">
+        select *
+        from (
+                 SELECT distinct t.*
+                 FROM m_repair_upkeep_plan t
+                          LEFT JOIN m_upkeep_device t1 ON t1.UPKEEP_ID = t.id
+                          LEFT JOIN m_repair_upkeep_user t2 ON t2.UPKEEP_ID = t.id ${ew.customSqlSegment}
+             )a
+        order by a.updateTime desc
+    </select>
+
+
+    <select id="findListByState" parameterType="com.itl.iap.mes.api.entity.UpkeepPlan"
+            resultType="com.itl.iap.mes.api.entity.UpkeepPlan" databaseId="oracle">
+        SELECT
+        <include refid="FIELD"/>
+        FROM m_repair_upkeep_plan t
+        <where>
+            <if test="upkeepPlan.upkeepPlanName != null and upkeepPlan.upkeepPlanName !=''">
+                and t.upkeepPlanName like '${upkeepPlan.upkeepPlanName}%'
+            </if>
+            <if test="upkeepPlan.dataCollectionName != null and upkeepPlan.dataCollectionName!=''">
+                and t.dataCollectionName like '${upkeepPlan.dataCollectionName}%'
+            </if>
+            AND t.state='1'
+        </where>
+
+        order by t.createTime Desc
+    </select>
+
+    <select id="findListByState" parameterType="com.itl.iap.mes.api.entity.UpkeepPlan"
+            resultType="com.itl.iap.mes.api.entity.UpkeepPlan" databaseId="ms-sql">
+        SELECT
+        <include refid="FIELD"/>
+        FROM m_repair_upkeep_plan t
+        <where>
+            <if test="upkeepPlan.upkeepPlanName != null and upkeepPlan.upkeepPlanName !=''">
+                and t.upkeepPlanName like '%${upkeepPlan.upkeepPlanName}%'
+            </if>
+            <if test="upkeepPlan.dataCollectionName != null and upkeepPlan.dataCollectionName!=''">
+                and t.dataCollectionName like '%${upkeepPlan.dataCollectionName}%'
+            </if>
+            AND t.state='1'
+        </where>
+
+        order by t.createTime Desc
+    </select>
+</mapper>
